@@ -1,6 +1,13 @@
 import { ArrowRight, Play, CheckCircle2, Star } from "lucide-react";
 
-const reviews = [
+interface Review {
+  name: string;
+  location: string;
+  rating: number;
+  thumbnail: string;
+}
+
+const reviews: Review[] = [
   {
     name: "Name Here",
     location: "Location Here",
@@ -38,21 +45,48 @@ const reviews = [
   },
 ];
 
-function StarRating({ rating }) {
+interface StarRatingProps {
+  rating: number;
+}
+
+function StarRating({ rating }: StarRatingProps) {
   return (
-    <div className="flex items-center gap-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className="h-4 w-4 fill-amber-400 text-amber-400"
-          strokeWidth={0}
-        />
-      ))}
+    <div
+      className="flex items-center gap-1"
+      aria-label={`${rating} out of 5 stars`}
+    >
+      {Array.from({ length: 5 }).map((_, i) => {
+        const isFilled = i < rating;
+
+        return (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${
+              isFilled
+                ? "fill-amber-400 text-amber-400"
+                : "fill-transparent text-neutral-300"
+            }`}
+            strokeWidth={isFilled ? 0 : 2}
+          />
+        );
+      })}
     </div>
   );
 }
 
-function ReviewCard({ name, location, rating, thumbnail }) {
+interface ReviewCardProps {
+  name: string;
+  location: string;
+  rating: number;
+  thumbnail: string;
+}
+
+function ReviewCard({
+  name,
+  location,
+  rating,
+  thumbnail,
+}: ReviewCardProps) {
   return (
     <div className="flex flex-col rounded-2xl bg-neutral-50 p-3">
       {/* Video thumbnail */}
@@ -62,6 +96,7 @@ function ReviewCard({ name, location, rating, thumbnail }) {
           alt={`Video review from ${name}`}
           className="h-full w-full object-cover"
         />
+
         <div className="absolute inset-0 flex items-center justify-center">
           <button
             type="button"
@@ -76,8 +111,13 @@ function ReviewCard({ name, location, rating, thumbnail }) {
       {/* Details */}
       <div className="flex flex-col gap-2 px-1 pt-4">
         <div>
-          <p className="text-lg font-semibold text-neutral-900">{name}</p>
-          <p className="text-sm text-neutral-500">{location}</p>
+          <p className="text-lg font-semibold text-neutral-900">
+            {name}
+          </p>
+
+          <p className="text-sm text-neutral-500">
+            {location}
+          </p>
         </div>
 
         <StarRating rating={rating} />
@@ -88,6 +128,7 @@ function ReviewCard({ name, location, rating, thumbnail }) {
             strokeWidth={2}
             fill="none"
           />
+
           <span>Verified Customer</span>
         </div>
       </div>
@@ -105,9 +146,11 @@ export default function ReviewsSection() {
             <p className="mb-2 text-sm font-bold tracking-wide text-blue-600">
               WHAT OUR CUSTOMERS SAY
             </p>
+
             <h2 className="text-3xl font-bold text-neutral-900 sm:text-4xl">
               Real People. Real Experiences.
             </h2>
+
             <p className="mt-2 text-neutral-600">
               Video Review from happy Neapure Customers
             </p>
@@ -125,7 +168,13 @@ export default function ReviewsSection() {
         {/* Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {reviews.map((review) => (
-            <ReviewCard key={review.name} {...review} />
+            <ReviewCard
+              key={review.name}
+              name={review.name}
+              location={review.location}
+              rating={review.rating}
+              thumbnail={review.thumbnail}
+            />
           ))}
         </div>
       </div>
