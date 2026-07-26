@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "../components/Navbar/Navbar";
-
+import Footer from "../components/Footer/Footer";
 
 export default function LayoutWrapper({
   children,
@@ -11,9 +11,8 @@ export default function LayoutWrapper({
 }) {
   const pathname = usePathname();
 
-  // If it is /admin or /login, only render the children (no nav, footer, or bottom bar)
   const isHiddenLayoutRoute =
-    pathname?.startsWith("/admin") || pathname === "/login";
+    pathname.startsWith("/admin") || pathname === "/login";
 
   if (isHiddenLayoutRoute) {
     return <>{children}</>;
@@ -23,7 +22,7 @@ export default function LayoutWrapper({
     <>
       <Navbar />
       {children}
-      
+      <Footer/>
     </>
   );
 }
