@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Phone, ShoppingCart, Droplet, Menu, X } from "lucide-react";
+import { Phone, ShoppingCart, Droplet, Menu, X, LogIn} from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { label: "Technology", href: "/technology" },
   { label: "About Us", href: "/about-us" },
   { label: "Support", href: "/support" },
+  { label: "Login", href: "/login" },
 ];
 
 export default function Navbar() {
@@ -61,6 +62,13 @@ export default function Navbar() {
 
         {/* Right side actions */}
         <div className="hidden items-center gap-4 lg:flex">
+          <Link
+            href="/login"
+            className="flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-sky-600"
+          >
+            <LogIn className="h-4 w-4" />
+            Login
+          </Link>
           <a
             href="tel:09613123123"
             className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-sky-400/60"
@@ -117,6 +125,14 @@ export default function Navbar() {
           </ul>
 
           <div className="mt-5 flex items-center gap-4">
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-white"
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
             <a
               href="tel:09613123123"
               className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white"
