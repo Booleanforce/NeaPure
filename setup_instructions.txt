@@ -1,0 +1,38 @@
+FRONTEND SETUP & BACKEND INTEGRATION GUIDE
+==========================================
+
+Since you are moving this Next.js frontend to its own repository, here is everything you and your team need to know to make sure it talks to the Django backend properly:
+
+1. ENVIRONMENT VARIABLES
+------------------------
+When another developer clones this frontend repo, they need to tell it where the backend API lives. 
+Create a file named `.env.local` in the root of this frontend folder and add:
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
+
+2. STARTING THE PROJECT
+-----------------------
+Make sure to install the Node packages first:
+  npm install
+Then start the server:
+  npm run dev
+The admin dashboard is available at: http://localhost:3000/admin/customers
+
+3. BACKEND CORS REQUIREMENT
+---------------------------
+The Django backend MUST have `django-cors-headers` installed and configured. 
+(We already set this up in the backend repo! `CORS_ALLOW_ALL_ORIGINS = True` is in settings.py). 
+If a developer runs the frontend but the backend throws CORS errors, tell them to check their backend `settings.py`.
+
+4. AUTHENTICATION (IMPORTANT NOTE)
+----------------------------------
+Right now, to bypass the lack of a Login page, there is a hardcoded SUPER_ADMIN JWT token injected into the API Client.
+File: `src/services/apiClient.ts` (Around line 27)
+Before pushing to production, you will need to:
+- Build a Login screen
+- Save the real user's JWT token to localStorage
+- Remove the hardcoded token from apiClient.ts so it pulls from localStorage instead.
+
+5. API WRAPPERS
+---------------
+The `apiClient.ts` is configured to automatically unwrap the Django backend's custom JSON responses. 
+If the backend sends `{"success": true, "data": {...}}`, the frontend will automatically extract the `data` portion. If the backend ever changes this format, update `src/services/apiClient.ts`.
