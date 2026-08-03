@@ -7,7 +7,7 @@ import GenuineFilters from "./components/GenuineFilters/GenuineFilters";
 import AskQuestion from "./components/AskQustion/AskQustion";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
-
+import DashboardPage from "./components/dashboard-refactor/page";
 export default function Home() {
   return (
     <>
@@ -20,6 +20,8 @@ export default function Home() {
       <AskQuestion />
       <Login />
       <Register />
+
+      <DashboardPage />
 
     </>
   );
