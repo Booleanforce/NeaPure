@@ -8,9 +8,7 @@ const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
   { label: "Smart Water Care", href: "/smart-water-care" },
-  { label: "Technology", href: "/technology" },
   { label: "About Us", href: "/about-us" },
-  { label: "Support", href: "/support" },
   { label: "Login", href: "/login" },
 ];
 

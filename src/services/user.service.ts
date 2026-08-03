@@ -1,9 +1,9 @@
-import { getToken } from "./auth.service";
+import { getAccessToken } from "./auth.service";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function getCurrentUser() {
-  const token = getToken();
+  const token = getAccessToken();
 
   const response = await fetch(
     `${API_URL}/api/auth/me/`,
