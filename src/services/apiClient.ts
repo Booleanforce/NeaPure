@@ -25,7 +25,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   
   // Temporary hardcoded token to bypass missing Login screen
   if (!token) {
-    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1NjI1MDc5LCJpYXQiOjE3ODU1OTYyNzksImp0aSI6ImZhYjlhZGE0YzY0MTQ2MTFiZDBjZWY2NzBjZWI1ZGVjIiwidXNlcl9pZCI6ImI1ODRiOWY1LThhMWItNDYwMS1iOGRjLWIzYjBjOTFlY2UzYSJ9.5Xvwie377Y0So912WNYwmQSqHWmNzm7tb-irSLzf9Yw";
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1ODU0NTc2LCJpYXQiOjE3ODU4MjU3NzYsImp0aSI6IjgyYTExOWU4N2Q0MjQ3Y2ViZjY1NTM2MjcyYTNhNjk3IiwidXNlcl9pZCI6IjE2ZDExZjAyLWZhM2MtNDBmMC1hZTcyLTc0MTZhYThkMWI2ZCJ9.kkc8TZlzNuCSN66ykSPSkyLo3bRx8hlRqHDBCz_wvHk";
   }
 
   if (token) {

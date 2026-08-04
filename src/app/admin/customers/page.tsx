@@ -139,7 +139,7 @@ export default function CustomerList() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(customer.date_joined).toLocaleDateString()}
+                      {new Date(customer.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
                       <Link href={`/admin/customers/${customer.id}`}>

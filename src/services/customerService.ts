@@ -7,7 +7,7 @@ export interface Customer {
   last_name?: string;
   phone?: string;
   is_active: boolean;
-  date_joined: string;
+  created_at: string;
   profile?: {
     id: number;
     phone: string;

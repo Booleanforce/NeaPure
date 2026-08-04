@@ -157,7 +157,7 @@ export default function CustomerDetails({ params }: { params: Promise<{ id: stri
                     <div className="text-sm font-medium text-gray-900 dark:text-white">Account Created</div>
                     <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
                       <Clock className="h-3 w-3" />
-                      {new Date(customer.date_joined).toLocaleString()}
+                      {new Date(customer.created_at).toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-700 dark:text-gray-300 mt-2 bg-gray-50 dark:bg-gray-900 p-3 rounded-md">
                       Customer was onboarded into the system via Dealer #{customer.profile?.registered_by || 'Unknown'}.
