@@ -22,6 +22,10 @@ export default function CustomerList() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ email: '', full_name: '', phone: '', password: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -46,6 +50,22 @@ export default function CustomerList() {
     fetchCustomers(searchQuery);
   };
 
+  const handleAddCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await customerService.createCustomer(newCustomer);
+      setIsAddModalOpen(false);
+      setNewCustomer({ email: '', full_name: '', phone: '', password: '' });
+      fetchCustomers();
+    } catch (error) {
+      console.error("Failed to add customer:", error);
+      alert("Failed to add customer");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -58,7 +78,7 @@ export default function CustomerList() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="primary">
+          <Button variant="primary" onClick={() => setIsAddModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Customer
           </Button>
@@ -113,16 +133,14 @@ export default function CustomerList() {
                   </TableCell>
                 </TableRow>
               ) : (
-                customers.map((customer) => (
+                customers.map((customer: any) => (
                   <TableRow key={customer.id}>
                     <TableCell>
                       <div className="font-medium text-gray-900 dark:text-white">
-                        {customer.first_name || customer.last_name 
-                          ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim()
-                          : 'N/A'}
+                        {customer.full_name || 'N/A'}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        ID: #{customer.id}
+                        ID: #{customer.id?.substring(0, 8)}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -130,7 +148,7 @@ export default function CustomerList() {
                         {customer.email}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {customer.profile?.phone || customer.phone || 'No phone'}
+                        {customer.customer_profile?.alternate_phone || customer.phone || 'No phone'}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -155,6 +173,41 @@ export default function CustomerList() {
           </Table>
         </CardContent>
       </Card>
+
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Add New Customer</h2>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-500 transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleAddCustomer} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+                <Input required placeholder="John Doe" value={newCustomer.full_name} onChange={(e) => setNewCustomer({...newCustomer, full_name: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                <Input required type="email" placeholder="john@example.com" value={newCustomer.email} onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                <Input required placeholder="+1234567890" value={newCustomer.phone} onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                <Input required type="password" placeholder="••••••••" value={newCustomer.password} onChange={(e) => setNewCustomer({...newCustomer, password: e.target.value})} />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
+                <Button type="submit" variant="primary" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : 'Add Customer'}</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

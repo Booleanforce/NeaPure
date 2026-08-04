@@ -47,7 +47,7 @@ export const customerService = {
   },
 
   createCustomer: (data: any) => {
-    return apiClient.post<Customer>('/customers/register/', data);
+    return apiClient.post<Customer>('/customers/', data);
   },
 
   updateCustomer: (id: number, data: any) => {

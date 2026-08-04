@@ -20,13 +20,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers.set('Content-Type', 'application/json');
   }
 
-  // Token retrieval mock (replace with actual auth logic if implemented)
-  let token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  
-  // Temporary hardcoded token to bypass missing Login screen
-  if (!token) {
-    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1ODU0NTc2LCJpYXQiOjE3ODU4MjU3NzYsImp0aSI6IjgyYTExOWU4N2Q0MjQ3Y2ViZjY1NTM2MjcyYTNhNjk3IiwidXNlcl9pZCI6IjE2ZDExZjAyLWZhM2MtNDBmMC1hZTcyLTc0MTZhYThkMWI2ZCJ9.kkc8TZlzNuCSN66ykSPSkyLo3bRx8hlRqHDBCz_wvHk";
-  }
+  // Force hardcoded token since there is no login logic yet
+  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1ODk0NTgzLCJpYXQiOjE3ODU4NjU3ODMsImp0aSI6ImExZjI0OGYzZWQxMDRjNWM5NGYxODliMDg0ZGNmZmRmIiwidXNlcl9pZCI6IjU0M2I5NDQ5LThhMTUtNDM2ZC1iODg5LTQxMDVmYjY0MjJiNyJ9.fP2qwtU9rwY2u33nbyNpb3-qlwuxXCU0_TSA4K04l44";
 
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);

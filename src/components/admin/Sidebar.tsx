@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Home, Settings, Package, LayoutDashboard, Briefcase } from 'lucide-react';
+import { Users, Home, Settings, Package, LayoutDashboard, Briefcase, Wrench } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Customer Management', href: '/admin/customers', icon: Users },
   { name: 'Dealer Management', href: '/admin/dealers', icon: Briefcase },
+  { name: 'Technician Management', href: '/admin/technicians', icon: Wrench },
   { name: 'Products', href: '/admin/products', icon: Package },
 ];
 
