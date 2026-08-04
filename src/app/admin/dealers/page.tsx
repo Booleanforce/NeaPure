@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Briefcase, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Briefcase, ShieldAlert, CheckCircle2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -88,6 +88,18 @@ export default function DealerListPage() {
       fetchDealers();
     } catch (error) {
       console.error("Failed to update status:", error);
+    }
+  };
+
+  const handleDeleteDealer = async (dealerId: string) => {
+    if (window.confirm("Are you sure you want to delete this dealer? This action cannot be undone.")) {
+      try {
+        await dealerService.deleteDealer(dealerId);
+        fetchDealers();
+      } catch (error) {
+        console.error("Failed to delete dealer:", error);
+        alert("Failed to delete dealer. Please try again.");
+      }
     }
   };
 
@@ -198,6 +210,15 @@ export default function DealerListPage() {
                           Manage
                         </Button>
                       </Link>
+                      <Button 
+                        variant="danger" 
+                        size="sm"
+                        onClick={() => handleDeleteDealer(dealer.id)}
+                        title="Delete Dealer"
+                        className="gap-1.5"
+                      >
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </Button>
                     </div>
                   </td>
                 </tr>
