@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-,     "src/app/admin-dashboard/customers/components/CustomerModalVeiw"  ],
+,     "src/app/admin-dashboard/customers/components/CustomerModalVeiw", "src/app/about-us"  ],
   "exclude": ["node_modules"]
 }

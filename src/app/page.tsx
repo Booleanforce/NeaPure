@@ -5,6 +5,7 @@ import ProblemSection from "./components/ProblemSection/ProblemSection";
 import OurProduct from "./components/OurProduct/OurProduct";
 import GenuineFilters from "./components/GenuineFilters/GenuineFilters";
 import AskQuestion from "./components/AskQustion/AskQustion";
+import WhyChooseNeaPure from "./components/WhyChooseNeapure";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <CustomerExperience />
       <OurProduct />
       <GenuineFilters />
+      <WhyChooseNeaPure />
       <AskQuestion />
     </>
   );

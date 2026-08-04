@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Phone, ShoppingCart, Droplet, Menu, X, LogIn} from "lucide-react";
+
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -15,10 +16,41 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [active, setActive] = useState("Home");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const cartCount = 2;
+  useEffect(() => {
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
 
+    // Always show at the top
+    if (currentScrollY < 20) {
+      setShowNavbar(true);
+    }
+    // Scrolling down -> hide
+    else if (currentScrollY > lastScrollY) {
+      setShowNavbar(false);
+    }
+    // Scrolling up -> show
+    else {
+      setShowNavbar(true);
+    }
+
+    setLastScrollY(currentScrollY);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+}, [lastScrollY]);
   return (
-    <header className="w-full bg-[#0a1628] border-b border-white/10">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#0a1628] transition-transform duration-300 ${
+        showNavbar ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3 lg:px-10">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
