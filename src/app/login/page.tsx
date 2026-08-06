@@ -6,8 +6,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/services/auth.service";
 
-
-
 export default function LoginPage() {
   const router = useRouter();
 
@@ -20,31 +18,35 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const handleLogin = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
 
+    setLoading(true);
+    setError("");
 
-const handleLogin = async (
-  e: React.FormEvent<HTMLFormElement>
-) => {
-  e.preventDefault();
+    try {
+      const data = await login(email, password);
 
-  setLoading(true);
-  setError("");
+      console.log(data);
 
-  try {
-    const data = await login(
-      email,
-      password
-    );
+      // Adjust this to match whatever shape your login() actually returns.
+      // e.g. data.user.role, data.role, data.data.role
+      const role = data?.user?.role ?? data?.role;
 
-    console.log(data);
-
-    router.replace("/admin-dashboard");
-  } catch (err: any) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      if (role === "CUSTOMER") {
+        router.replace("/Customer-Dashboard");
+      } else {
+        // ADMIN / SUPER_ADMIN / anything else falls back to admin dashboard
+        router.replace("/admin-dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-aqua-navy text-white">
@@ -62,20 +64,14 @@ const handleLogin = async (
         <div className="w-full max-w-md rounded-3xl bg-white/[0.06] p-8 shadow-card ring-1 ring-white/10 backdrop-blur-xl sm:p-10">
           <h1 className="font-display text-3xl font-semibold text-white">
             Welcome to{" "}
-            <span className="text-aqua-glow">
-              Neapure
-            </span>
+            <span className="text-aqua-glow">Neapure</span>
           </h1>
 
           <p className="mt-3 text-sm text-white/60">
-            Sign in to manage your smart purification
-            system
+            Sign in to manage your smart purification system
           </p>
 
-          <form
-            className="mt-8 space-y-6"
-            onSubmit={handleLogin}
-          >
+          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
             {/* Email */}
             <label className="block">
               <div className="flex items-center gap-3 rounded-xl border border-white/15 px-4 py-3 transition focus-within:border-aqua-glow focus-within:ring-2 focus-within:ring-aqua-glow/30">
@@ -86,9 +82,7 @@ const handleLogin = async (
                   placeholder="Email"
                   autoComplete="email"
                   value={email}
-                  onChange={(e) =>
-                    setEmail(e.target.value)
-                  }
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
                 />
@@ -101,26 +95,18 @@ const handleLogin = async (
                 <LockIcon className="h-4 w-4 text-white/40" />
 
                 <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   autoComplete="current-password"
                   value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
                 />
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                   className="text-white/40 hover:text-white"
                 >
                   {showPassword ? (
@@ -145,12 +131,9 @@ const handleLogin = async (
                 <input
                   type="checkbox"
                   checked={rememberMe}
-                  onChange={() =>
-                    setRememberMe(!rememberMe)
-                  }
+                  onChange={() => setRememberMe(!rememberMe)}
                   className="accent-cyan-500"
                 />
-
                 Remember Me
               </label>
 
@@ -168,17 +151,13 @@ const handleLogin = async (
               disabled={loading}
               className="w-full rounded-xl bg-aqua-brand py-3 font-semibold transition hover:bg-aqua-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading
-                ? "Signing In..."
-                : "SIGN IN"}
+              {loading ? "Signing In..." : "SIGN IN"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-white/60">
             Don't have an account?{" "}
-            <button
-              className="text-aqua-glow hover:text-white"
-            >
+            <button className="text-aqua-glow hover:text-white">
               Create One
             </button>
           </p>
@@ -190,11 +169,7 @@ const handleLogin = async (
 
 /* ---------------- Icons ---------------- */
 
-function MailIcon({
-  className,
-}: {
-  className?: string;
-}) {
+function MailIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -203,23 +178,13 @@ function MailIcon({
       strokeWidth="1.6"
       className={className}
     >
-      <rect
-        x="3"
-        y="5"
-        width="18"
-        height="14"
-        rx="2"
-      />
+      <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="m4 7 8 6 8-6" />
     </svg>
   );
 }
 
-function LockIcon({
-  className,
-}: {
-  className?: string;
-}) {
+function LockIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -228,23 +193,13 @@ function LockIcon({
       strokeWidth="1.6"
       className={className}
     >
-      <rect
-        x="4"
-        y="10"
-        width="16"
-        height="10"
-        rx="2"
-      />
+      <rect x="4" y="10" width="16" height="10" rx="2" />
       <path d="M8 10V7a4 4 0 118 0v3" />
     </svg>
   );
 }
 
-function EyeIcon({
-  className,
-}: {
-  className?: string;
-}) {
+function EyeIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -254,20 +209,12 @@ function EyeIcon({
       className={className}
     >
       <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z" />
-      <circle
-        cx="12"
-        cy="12"
-        r="2.5"
-      />
+      <circle cx="12" cy="12" r="2.5" />
     </svg>
   );
 }
 
-function EyeOffIcon({
-  className,
-}: {
-  className?: string;
-}) {
+function EyeOffIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"

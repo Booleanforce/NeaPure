@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { label: "Products", href: "/products" },
   { label: "Smart Water Care", href: "/smart-water-care" },
   { label: "About Us", href: "/about-us" },
-  { label: "Login", href: "/login" },
+  // { label: "Login", href: "/login" },
 ];
 
 export default function Navbar() {
