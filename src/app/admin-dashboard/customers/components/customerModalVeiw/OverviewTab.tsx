@@ -22,14 +22,14 @@ function InfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-100 px-5 py-4">
-        <h3 className="font-semibold text-gray-900">
+    <div className="rounded-xl border border-blue-100 bg-white shadow-sm shadow-blue-100/50">
+      <div className="border-b border-blue-50 bg-blue-50/60 px-4 py-3 sm:px-5 sm:py-4">
+        <h3 className="font-semibold text-blue-900">
           {title}
         </h3>
       </div>
 
-      <div className="space-y-5 p-5">
+      <div className="space-y-4 p-4 sm:space-y-5 sm:p-5">
         {children}
       </div>
     </div>
@@ -48,17 +48,17 @@ function Item({
   return (
     <div className="flex gap-3">
 
-      <div className="mt-1 text-blue-600">
+      <div className="mt-1 shrink-0 text-blue-500">
         {icon}
       </div>
 
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
 
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-blue-400">
           {label}
         </p>
 
-        <p className="mt-1 break-words text-sm font-medium text-gray-900">
+        <p className="mt-1 wrap-break-word text-sm font-medium text-slate-900">
           {value || "-"}
         </p>
 
@@ -78,7 +78,7 @@ export default function OverviewTab({
     ) || customer.addresses?.[0];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
 
       {/* Contact */}
 
@@ -149,7 +149,7 @@ export default function OverviewTab({
                 value={address.full_address}
               />
 
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
 
                 <Item
                   icon={<MapPin size={18} />}
@@ -207,7 +207,7 @@ export default function OverviewTab({
 
             </>
           ) : (
-            <div className="rounded-lg border border-dashed border-gray-300 p-10 text-center text-gray-500">
+            <div className="rounded-lg border border-dashed border-blue-200 bg-blue-50/40 p-8 text-center text-sm text-blue-400 sm:p-10">
               No address available.
             </div>
           )}

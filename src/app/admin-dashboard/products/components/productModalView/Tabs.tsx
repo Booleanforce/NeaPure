@@ -20,26 +20,22 @@ export default function Tabs({
   setActiveTab,
 }: Props) {
   return (
-    <div className="border-b bg-white">
-
-      <div className="flex overflow-x-auto">
-
+    <div className="border-b border-blue-100 bg-white px-3 sm:px-6">
+      <div className="flex gap-5 overflow-x-auto scrollbar-hide sm:gap-8">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`whitespace-nowrap border-b-2 px-6 py-4 text-sm font-medium transition ${
+            className={`shrink-0 whitespace-nowrap border-b-2 py-3 text-sm font-semibold transition-all duration-200 sm:py-4 ${
               activeTab === tab
                 ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-blue-600"
+                : "border-transparent text-blue-400 hover:border-blue-200 hover:text-blue-700"
             }`}
           >
             {tab}
           </button>
         ))}
-
       </div>
-
     </div>
   );
 }

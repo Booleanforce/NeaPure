@@ -2,13 +2,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
+import { Users, UserCheck, UserX, Plus } from "lucide-react";
+
 import { useEffect, useState } from "react";
 
 import AddCustomerModal from "./components/AddCustomerModal";
-import {
-  customerService,
-  Customer,
-} from "@/services/customer.service";
+import { customerService, Customer } from "@/services/customer.service";
 
 import CustomerSearch from "./components/CustomerSearch";
 import CustomerTable from "./components/CustomerTable";
@@ -21,8 +20,7 @@ export default function CustomerList() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isAddModalOpen, setIsAddModalOpen] =
-  useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     loadCustomers();
@@ -32,22 +30,14 @@ export default function CustomerList() {
     try {
       setLoading(true);
 
-      const response = await customerService.getCustomers(
-        search,
-        page
-      );
+      const response = await customerService.getCustomers(search, page);
 
       console.log("Customer API:", response);
 
       if ("results" in response) {
         setCustomers(response.results);
 
-        setTotalPages(
-          Math.max(
-            1,
-            Math.ceil(response.count / 10)
-          )
-        );
+        setTotalPages(Math.max(1, Math.ceil(response.count / 10)));
       } else if (Array.isArray(response)) {
         setCustomers(response);
         setTotalPages(1);
@@ -62,117 +52,133 @@ export default function CustomerList() {
   };
 
   const activeCustomers = customers.filter(
-    (customer) =>
-      customer.customer_profile?.status === "ACTIVE"
+    (customer) => customer.customer_profile?.status === "ACTIVE",
   ).length;
 
-  const inactiveCustomers =
-    customers.length - activeCustomers;
+  const inactiveCustomers = customers.length - activeCustomers;
 
   return (
-  <div className="w-full max-w-full overflow-x-hidden space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            Customers
+          </h1>
 
-    {/* Header */}
+          <p className="mt-1 text-sm text-slate-500">
+            Manage all registered customers from one place.
+          </p>
+        </div>
 
-    <div className="flex flex-wrap items-center justify-between gap-4">
-
-      <div>
-
-        <h1 className="text-3xl font-bold text-gray-900">
-          Customers
-        </h1>
-
-        <p className="mt-1 text-gray-500">
-          Manage all registered customers
-        </p>
-
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-blue-700 hover:shadow-lg active:scale-95"
+        >
+          <Plus size={18} />
+          Add Customer
+        </button>
       </div>
 
-      <button
-        onClick={() => setIsAddModalOpen(true)}
-        className="rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white transition hover:bg-blue-700"
-      >
-        + Add Customer
-      </button>
+      {/* Statistics */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {/* Total */}
+        <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Total Customers
+              </p>
 
-    </div>
+              <h2 className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
+                {customers.length}
+              </h2>
+            </div>
 
-    {/* Statistics */}
+            <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
+              <Users size={28} />
+            </div>
+          </div>
+        </div>
 
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {/* Active */}
+        <div className="group rounded-2xl border border-green-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-green-600">
+                Active Customers
+              </p>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p className="text-sm text-gray-500">
-          Total Customers
-        </p>
+              <h2 className="mt-2 text-4xl font-bold tracking-tight text-green-700">
+                {activeCustomers}
+              </h2>
+            </div>
 
-        <h2 className="mt-2 text-3xl font-bold">
-          {customers.length}
-        </h2>
+            <div className="rounded-xl bg-green-100 p-3 text-green-600">
+              <UserCheck size={28} />
+            </div>
+          </div>
+        </div>
+
+        {/* Inactive */}
+        <div className="group rounded-2xl border border-red-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 xl:col-span-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-red-600">
+                Inactive Customers
+              </p>
+
+              <h2 className="mt-2 text-4xl font-bold tracking-tight text-red-700">
+                {inactiveCustomers}
+              </h2>
+            </div>
+
+            <div className="rounded-xl bg-red-100 p-3 text-red-600">
+              <UserX size={28} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p className="text-sm text-gray-500">
-          Active Customers
-        </p>
-
-        <h2 className="mt-2 text-3xl font-bold text-green-600">
-          {activeCustomers}
-        </h2>
+      {/* Search */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <CustomerSearch
+          value={search}
+          onChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+        />
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <p className="text-sm text-gray-500">
-          Inactive Customers
-        </p>
-
-        <h2 className="mt-2 text-3xl font-bold text-red-600">
-          {inactiveCustomers}
-        </h2>
+      {/* Table */}
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <CustomerTable
+            customers={customers}
+            loading={loading}
+            onRefresh={loadCustomers}
+          />
+        </div>
       </div>
 
-    </div>
+      {/* Pagination */}
+      <div className="flex justify-center">
+        <CustomerPagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      </div>
 
-    {/* Search */}
-
-    <CustomerSearch
-      value={search}
-      onChange={(value) => {
-        setSearch(value);
-        setPage(1);
-      }}
-    />
-
-    {/* Table */}
-
-    <div className="w-full max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <CustomerTable
-        customers={customers}
-        loading={loading}
-        onRefresh={loadCustomers}
+      <AddCustomerModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onCreated={async () => {
+          await loadCustomers();
+          setIsAddModalOpen(false);
+        }}
       />
     </div>
-
-    </div>
-
-    {/* Pagination */}
-
-    <CustomerPagination
-      page={page}
-      totalPages={totalPages}
-      onPageChange={setPage}
-    />
-    <AddCustomerModal
-      isOpen={isAddModalOpen}
-      onClose={() => setIsAddModalOpen(false)}
-      onCreated={async () => {
-        await loadCustomers();
-        setIsAddModalOpen(false);
-      }}
-    />
-
-  </div>
-);
+  );
 }
