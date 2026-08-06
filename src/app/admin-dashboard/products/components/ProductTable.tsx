@@ -25,32 +25,58 @@ export default function ProductTable({
   const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  /* -------------------------------------------------------------------------- */
+  /*                              Status Badge                                  */
+  /* -------------------------------------------------------------------------- */
+
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case "ACTIVE":
         return "bg-emerald-100 text-emerald-700";
+
       case "INACTIVE":
         return "bg-red-100 text-red-700";
+
       default:
         return "bg-blue-50 text-blue-700";
     }
   };
+
+  /* -------------------------------------------------------------------------- */
+  /*                              Product Image                                 */
+  /* -------------------------------------------------------------------------- */
+
+  const getProductImage = (product: Product) => {
+    return product.primary_image || null;
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                                Delete                                       */
+  /* -------------------------------------------------------------------------- */
 
   const handleDelete = async () => {
     if (!deleteSlug) return;
 
     try {
       setDeleting(true);
+
       await productService.deleteProduct(deleteSlug);
+
       await onRefresh();
+
       setDeleteSlug(null);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to delete product:", error);
+
       alert("Failed to delete product.");
     } finally {
       setDeleting(false);
     }
   };
+
+  /* -------------------------------------------------------------------------- */
+  /*                                Loading                                      */
+  /* -------------------------------------------------------------------------- */
 
   if (loading) {
     return (
@@ -60,6 +86,10 @@ export default function ProductTable({
     );
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                              Empty State                                    */
+  /* -------------------------------------------------------------------------- */
+
   if (products.length === 0) {
     return (
       <div className="py-16 text-center text-sm text-blue-400">
@@ -68,12 +98,22 @@ export default function ProductTable({
     );
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                  Render                                     */
+  /* -------------------------------------------------------------------------- */
+
   return (
     <>
-      {/* ---------- Mobile / tablet: stacked cards (below md) ---------- */}
+      {/* ====================================================================== */}
+      {/* Mobile / Tablet                                                       */}
+      {/* ====================================================================== */}
+
       <div className="grid grid-cols-1 gap-3 bg-blue-50/40 p-3 sm:grid-cols-2 md:hidden">
         {products.map((product) => {
-          const avatar = product.name?.charAt(0).toUpperCase() || "P";
+          const avatar =
+            product.name?.charAt(0).toUpperCase() || "P";
+
+          const productImage = getProductImage(product);
 
           return (
             <div
@@ -82,9 +122,11 @@ export default function ProductTable({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  {product.thumbnail ? (
+
+                  {/* Product Image */}
+                  {productImage ? (
                     <img
-                      src={product.thumbnail}
+                      src={productImage}
                       alt={product.name}
                       className="h-11 w-11 shrink-0 rounded-lg object-cover ring-2 ring-blue-100"
                     />
@@ -94,16 +136,19 @@ export default function ProductTable({
                     </div>
                   )}
 
+                  {/* Product Name */}
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-slate-900">
                       {product.name}
                     </p>
+
                     <p className="truncate text-xs text-blue-400">
                       {product.slug}
                     </p>
                   </div>
                 </div>
 
+                {/* Status */}
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadge(
                     product.status
@@ -113,29 +158,42 @@ export default function ProductTable({
                 </span>
               </div>
 
+              {/* Product Information */}
               <div className="mt-3 space-y-1.5 border-t border-blue-50 pt-3 text-sm">
+
+                {/* Category */}
                 <div className="flex items-center justify-between text-slate-600">
                   <span>Category</span>
+
                   <span className="font-medium text-slate-900">
-                    {product.category?.name || "-"}
+                    {product.category_name || "-"}
                   </span>
                 </div>
+
+                {/* Price */}
                 <div className="flex items-center justify-between text-slate-600">
                   <span>Price</span>
+
                   <span className="font-medium text-slate-900">
                     ৳{product.price}
                   </span>
                 </div>
+
+                {/* Stock */}
                 <div className="flex items-center justify-between text-slate-600">
                   <span>Stock</span>
+
                   <span className="font-medium text-slate-900">
-                    {product.stock}
+                    {product.stock ?? 0}
                   </span>
                 </div>
               </div>
 
+              {/* Bottom Actions */}
               <div className="mt-3 flex items-center justify-between border-t border-blue-50 pt-3">
-                {product.featured ? (
+
+                {/* Featured */}
+                {product.is_featured ? (
                   <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                     Featured
                   </span>
@@ -145,8 +203,12 @@ export default function ProductTable({
                   </span>
                 )}
 
+                {/* Actions */}
                 <div className="flex items-center gap-1">
+
+                  {/* View */}
                   <button
+                    type="button"
                     onClick={() => setViewSlug(product.slug)}
                     className="rounded-lg p-2 transition hover:bg-blue-50 active:bg-blue-100"
                     aria-label="View product"
@@ -154,7 +216,9 @@ export default function ProductTable({
                     <Eye className="h-4 w-4 text-blue-600" />
                   </button>
 
+                  {/* Edit */}
                   <button
+                    type="button"
                     onClick={() => setEditSlug(product.slug)}
                     className="rounded-lg p-2 transition hover:bg-sky-50 active:bg-sky-100"
                     aria-label="Edit product"
@@ -162,7 +226,9 @@ export default function ProductTable({
                     <Pencil className="h-4 w-4 text-sky-600" />
                   </button>
 
+                  {/* Delete */}
                   <button
+                    type="button"
                     onClick={() => setDeleteSlug(product.slug)}
                     className="rounded-lg p-2 transition hover:bg-red-50 active:bg-red-100"
                     aria-label="Delete product"
@@ -176,49 +242,80 @@ export default function ProductTable({
         })}
       </div>
 
-      {/* ---------- Desktop / laptop: table (md and up) ---------- */}
+      {/* ====================================================================== */}
+      {/* Desktop / Laptop                                                      */}
+      {/* ====================================================================== */}
+
       <div className="hidden overflow-x-auto rounded-xl border border-blue-100 md:block">
         <table className="w-full min-w-180 table-fixed">
+
+          {/* ------------------------------------------------------------------ */}
+          {/* Table Header                                                       */}
+          {/* ------------------------------------------------------------------ */}
+
           <thead className="border-b border-blue-100 bg-blue-50">
             <tr>
+
               <th className="w-[28%] px-4 py-4 text-left text-sm font-semibold text-blue-900">
                 Product
               </th>
+
               <th className="w-[18%] px-4 py-4 text-left text-sm font-semibold text-blue-900">
                 Category
               </th>
+
               <th className="w-[12%] px-4 py-4 text-center text-sm font-semibold text-blue-900">
                 Price
               </th>
+
               <th className="w-[10%] px-4 py-4 text-center text-sm font-semibold text-blue-900">
                 Stock
               </th>
+
               <th className="w-[10%] px-4 py-4 text-center text-sm font-semibold text-blue-900">
                 Featured
               </th>
+
               <th className="w-[10%] px-4 py-4 text-center text-sm font-semibold text-blue-900">
                 Status
               </th>
+
               <th className="w-[12%] px-4 py-4 text-center text-sm font-semibold text-blue-900">
                 Actions
               </th>
+
             </tr>
           </thead>
 
+          {/* ------------------------------------------------------------------ */}
+          {/* Table Body                                                         */}
+          {/* ------------------------------------------------------------------ */}
+
           <tbody className="bg-white">
             {products.map((product) => {
-              const avatar = product.name?.charAt(0).toUpperCase() || "P";
+              const avatar =
+                product.name?.charAt(0).toUpperCase() || "P";
+
+              const productImage =
+                getProductImage(product);
 
               return (
                 <tr
                   key={product.slug}
                   className="border-b border-blue-50 transition hover:bg-blue-50/60"
                 >
+
+                  {/* ========================================================== */}
+                  {/* Product                                                     */}
+                  {/* ========================================================== */}
+
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      {product.thumbnail ? (
+
+                      {/* Product Image */}
+                      {productImage ? (
                         <img
-                          src={product.thumbnail}
+                          src={productImage}
                           alt={product.name}
                           className="h-11 w-11 shrink-0 rounded-lg object-cover ring-2 ring-blue-100"
                         />
@@ -228,33 +325,52 @@ export default function ProductTable({
                         </div>
                       )}
 
+                      {/* Product Name + Slug */}
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-slate-900">
                           {product.name}
                         </p>
+
                         <p className="truncate text-xs text-blue-400">
                           {product.slug}
                         </p>
                       </div>
+
                     </div>
                   </td>
 
+                  {/* ========================================================== */}
+                  {/* Category                                                     */}
+                  {/* ========================================================== */}
+
                   <td className="px-4 py-4">
                     <p className="truncate text-slate-600">
-                      {product.category?.name || "-"}
+                      {product.category_name || "-"}
                     </p>
                   </td>
 
-                  <td className="px-4 py-4 text-center whitespace-nowrap text-slate-600">
+                  {/* ========================================================== */}
+                  {/* Price                                                        */}
+                  {/* ========================================================== */}
+
+                  <td className="whitespace-nowrap px-4 py-4 text-center text-slate-600">
                     ৳{product.price}
                   </td>
 
+                  {/* ========================================================== */}
+                  {/* Stock                                                        */}
+                  {/* ========================================================== */}
+
                   <td className="px-4 py-4 text-center text-slate-600">
-                    {product.stock}
+                    {product.stock ?? 0}
                   </td>
 
+                  {/* ========================================================== */}
+                  {/* Featured                                                     */}
+                  {/* ========================================================== */}
+
                   <td className="px-4 py-4 text-center">
-                    {product.featured ? (
+                    {product.is_featured ? (
                       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                         Yes
                       </span>
@@ -265,43 +381,66 @@ export default function ProductTable({
                     )}
                   </td>
 
+                  {/* ========================================================== */}
+                  {/* Status                                                       */}
+                  {/* ========================================================== */}
+
                   <td className="px-4 py-4 text-center">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusBadge(
                         product.status
                       )}`}
                     >
-                      {product.status}
+                      {product.status ?? "N/A"}
                     </span>
                   </td>
 
+                  {/* ========================================================== */}
+                  {/* Actions                                                      */}
+                  {/* ========================================================== */}
+
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-center gap-2">
+
+                      {/* View */}
                       <button
-                        onClick={() => setViewSlug(product.slug)}
+                        type="button"
+                        onClick={() =>
+                          setViewSlug(product.slug)
+                        }
                         className="rounded-lg p-2 transition hover:bg-blue-50"
                         aria-label="View product"
                       >
                         <Eye className="h-4 w-4 text-blue-600" />
                       </button>
 
+                      {/* Edit */}
                       <button
-                        onClick={() => setEditSlug(product.slug)}
+                        type="button"
+                        onClick={() =>
+                          setEditSlug(product.slug)
+                        }
                         className="rounded-lg p-2 transition hover:bg-sky-50"
                         aria-label="Edit product"
                       >
                         <Pencil className="h-4 w-4 text-sky-600" />
                       </button>
 
+                      {/* Delete */}
                       <button
-                        onClick={() => setDeleteSlug(product.slug)}
+                        type="button"
+                        onClick={() =>
+                          setDeleteSlug(product.slug)
+                        }
                         className="rounded-lg p-2 transition hover:bg-red-50"
                         aria-label="Delete product"
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </button>
+
                     </div>
                   </td>
+
                 </tr>
               );
             })}
@@ -309,12 +448,19 @@ export default function ProductTable({
         </table>
       </div>
 
-      {/* Modals */}
+      {/* ====================================================================== */}
+      {/* Product View Modal                                                    */}
+      {/* ====================================================================== */}
+
       <ProductViewModal
         isOpen={!!viewSlug}
         slug={viewSlug}
         onClose={() => setViewSlug(null)}
       />
+
+      {/* ====================================================================== */}
+      {/* Edit Product Modal                                                    */}
+      {/* ====================================================================== */}
 
       <EditProductModal
         isOpen={!!editSlug}
@@ -325,6 +471,10 @@ export default function ProductTable({
           setEditSlug(null);
         }}
       />
+
+      {/* ====================================================================== */}
+      {/* Delete Product Modal                                                  */}
+      {/* ====================================================================== */}
 
       <DeleteProductModal
         isOpen={!!deleteSlug}

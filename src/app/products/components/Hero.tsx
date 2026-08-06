@@ -42,7 +42,7 @@ export default function Hero() {
       {/* Background */}
       <div className="absolute inset-0">
         <Image
-          src="/images/water-bg.png"
+          src="/images/bg.png"
           alt=""
           fill
           priority
@@ -180,7 +180,7 @@ export default function Hero() {
           >
 
             <Image
-              src="/images/hero-purifier.png"
+              src="/images/hero-purifier-.png"
               alt="Purifier"
               width={650}
               height={650}

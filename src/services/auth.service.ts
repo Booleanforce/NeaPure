@@ -1,43 +1,121 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { apiClient } from "./apiClient";
 
-export async function login(email: string, password: string) {
-  const res = await fetch(`${API_URL}/api/auth/login/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+export interface LoginUser {
+  id: string;
+  email: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+  [key: string]: unknown;
+}
+
+export interface LoginResponse {
+  access: string;
+  refresh: string;
+  user: LoginUser;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Login                                    */
+/* -------------------------------------------------------------------------- */
+
+export async function login(
+  email: string,
+  password: string
+): Promise<LoginResponse> {
+  const data = await apiClient.post<LoginResponse>(
+    "/api/auth/login/",
+    {
       email,
       password,
-    }),
-  });
+    }
+  );
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Login failed");
+  if (!data?.access) {
+    throw new Error(
+      "Login succeeded but no access token was returned."
+    );
   }
 
-  localStorage.setItem("access", data.access);
-  localStorage.setItem("refresh", data.refresh);
-  localStorage.setItem("user", JSON.stringify(data.user));
+  if (typeof window !== "undefined") {
+    localStorage.setItem(
+      "access",
+      data.access
+    );
+
+    localStorage.setItem(
+      "refresh",
+      data.refresh
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data.user)
+    );
+  }
 
   return data;
 }
 
-export function getAccessToken() {
+/* -------------------------------------------------------------------------- */
+/*                              Access Token                                  */
+/* -------------------------------------------------------------------------- */
+
+export function getAccessToken(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   return localStorage.getItem("access");
 }
 
-export function getRefreshToken() {
+/* -------------------------------------------------------------------------- */
+/*                              Refresh Token                                 */
+/* -------------------------------------------------------------------------- */
+
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   return localStorage.getItem("refresh");
 }
 
-export function getCurrentUser() {
+/* -------------------------------------------------------------------------- */
+/*                              Current User                                  */
+/* -------------------------------------------------------------------------- */
+
+export function getCurrentUser(): LoginUser | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
+
+  if (!user) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(user) as LoginUser;
+  } catch {
+    return null;
+  }
 }
 
-export async function logout() {
-  localStorage.clear();
+/* -------------------------------------------------------------------------- */
+/*                                  Logout                                    */
+/* -------------------------------------------------------------------------- */
+
+export function logout(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
+  localStorage.removeItem("user");
+
+  window.location.href = "/login";
 }

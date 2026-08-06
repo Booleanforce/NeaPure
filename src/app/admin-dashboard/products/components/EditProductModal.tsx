@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/immutability */
 "use client";
 
@@ -23,51 +24,81 @@ export default function EditProductModal({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     name: "",
     slug: "",
     sku: "",
-
     category_id: "",
-
     product_type: "FILTER",
-
     price: "",
-
     perfect_for: "",
-
     short_description: "",
-
     key_features: "",
-
     technical_specs: "",
-
     package_includes: "",
-
     warranty_duration_months: "12",
-
     recommended_replacement_months: "6",
-
     status: "ACTIVE",
-
     is_featured: false,
+    image_url: "",
   });
+
+  /* -------------------------------------------------------------------------- */
+  /*                              Load Product                                  */
+  /* -------------------------------------------------------------------------- */
 
   useEffect(() => {
     if (isOpen && slug) {
+      setImageFile(null);
+      setPreview(null);
       loadProduct();
     }
   }, [isOpen, slug]);
 
+  /* -------------------------------------------------------------------------- */
+  /*                            Cleanup Preview                                 */
+  /* -------------------------------------------------------------------------- */
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
+  /* -------------------------------------------------------------------------- */
+  /*                            Get Product                                     */
+  /* -------------------------------------------------------------------------- */
+
   const loadProduct = async () => {
+    if (!slug) return;
+
     try {
       setLoading(true);
 
-      const product = await productService.getProduct(slug!);
+      const product = await productService.getProduct(slug);
+
+      /*
+       * Find primary product image
+       */
+      const primaryImage = product.images?.find(
+        (img) => img.is_primary
+      );
+
+      /*
+       * Try all possible image fields
+       */
+      const productImage =
+        primaryImage?.image_url ||
+        primaryImage?.image ||
+        product.thumbnail ||
+        product.image ||
+        "";
 
       setForm({
         name: product.name || "",
@@ -76,21 +107,31 @@ export default function EditProductModal({
 
         sku: product.sku || "",
 
-        category_id: product.category?.id || "",
+        category_id:
+          product.category?.id ||
+          product.category_id ||
+          "",
 
-        product_type: product.product_type || "FILTER",
+        product_type:
+          product.product_type || "FILTER",
 
-        price: product.price?.toString() || "",
+        price:
+          product.price?.toString() || "",
 
-        perfect_for: product.perfect_for || "",
+        perfect_for:
+          product.perfect_for || "",
 
-        short_description: product.short_description || "",
+        short_description:
+          product.short_description || "",
 
-        key_features: product.key_features || "",
+        key_features:
+          product.key_features || "",
 
-        technical_specs: product.technical_specs || "",
+        technical_specs:
+          product.technical_specs || "",
 
-        package_includes: product.package_includes || "",
+        package_includes:
+          product.package_includes || "",
 
         warranty_duration_months:
           product.warranty_duration_months?.toString() || "12",
@@ -98,41 +139,89 @@ export default function EditProductModal({
         recommended_replacement_months:
           product.recommended_replacement_months?.toString() || "6",
 
-        status: product.status || "ACTIVE",
+        status:
+          product.status || "ACTIVE",
 
-        is_featured: product.is_featured || false,
+        is_featured:
+          product.is_featured ??
+          product.featured ??
+          false,
+
+        /*
+         * Existing product image
+         */
+        image_url: productImage,
       });
     } catch (error) {
-      console.error(error);
+      console.error("Failed to load product:", error);
+
+      toast.error("Failed to load product.", {
+        position: "bottom-center",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
     } finally {
       setLoading(false);
     }
   };
+
+  /* -------------------------------------------------------------------------- */
+  /*                           Handle Image                                     */
+  /* -------------------------------------------------------------------------- */
+
   const handleImage = (file: File | null) => {
+    /*
+     * Remove previous preview URL
+     */
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+
     setImageFile(file);
 
+    /*
+     * User removed the new image
+     *
+     * Keep form.image_url so the existing
+     * product image can still be displayed.
+     */
     if (!file) {
       setPreview(null);
       return;
     }
 
-    setPreview(URL.createObjectURL(file));
+    /*
+     * Show newly selected image immediately
+     */
+    const newPreview = URL.createObjectURL(file);
+
+    setPreview(newPreview);
   };
 
+  /* -------------------------------------------------------------------------- */
+  /*                            Save Product                                    */
+  /* -------------------------------------------------------------------------- */
+
   const handleSave = async () => {
+    if (!slug) return;
+
     try {
       setSaving(true);
 
+      /*
+       * Product information
+       */
       const payload = {
         category_id: form.category_id || null,
 
         product_type: form.product_type,
 
-        name: form.name,
+        name: form.name.trim(),
 
-        slug: form.slug,
+        slug: form.slug.trim(),
 
-        sku: form.sku,
+        sku: form.sku.trim(),
 
         price: Number(form.price),
 
@@ -146,58 +235,134 @@ export default function EditProductModal({
 
         package_includes: form.package_includes,
 
-        warranty_duration_months: Number(form.warranty_duration_months),
+        warranty_duration_months:
+          Number(form.warranty_duration_months),
 
-        recommended_replacement_months: Number(
-          form.recommended_replacement_months,
-        ),
+        recommended_replacement_months:
+          Number(form.recommended_replacement_months),
 
         status: form.status,
 
         is_featured: form.is_featured,
       };
 
-      await productService.updateProduct(slug!, payload);
+      /* ---------------------------------------------------------------------- */
+      /* STEP 1: Update Product Information                                     */
+      /* ---------------------------------------------------------------------- */
+
+      await productService.updateProduct(
+        slug,
+        payload
+      );
+
+      /* ---------------------------------------------------------------------- */
+      /* STEP 2: Upload New Image                                               */
+      /* ---------------------------------------------------------------------- */
+
+      if (imageFile) {
+        /*
+         * IMPORTANT:
+         * Use the original slug for the upload endpoint.
+         *
+         * This is safer if the user changed the slug
+         * while editing the product.
+         */
+        await productService.uploadImage(
+          slug,
+          imageFile,
+          form.name.trim(),
+          true
+        );
+      }
+
+      /* ---------------------------------------------------------------------- */
+      /* STEP 3: Refresh Product List                                           */
+      /* ---------------------------------------------------------------------- */
 
       await onUpdated();
-      toast.success("Sign-in Successful!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
+
+      /* ---------------------------------------------------------------------- */
+      /* STEP 4: Success                                                        */
+      /* ---------------------------------------------------------------------- */
+
+      toast.success(
+        "Product updated successfully!",
+        {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        }
+      );
+
+      /* ---------------------------------------------------------------------- */
+      /* STEP 5: Close Modal                                                    */
+      /* ---------------------------------------------------------------------- */
+
       onClose();
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to update product:",
+        error
+      );
 
-      alert("Failed to update product.");
+      toast.error(
+        "Failed to update product.",
+        {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        }
+      );
     } finally {
       setSaving(false);
     }
   };
+
+  /* -------------------------------------------------------------------------- */
+  /*                              Modal                                         */
+  /* -------------------------------------------------------------------------- */
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-999 flex items-center justify-center bg-blue-950/40 backdrop-blur-sm p-6">
-      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-2xl">
-        {/* Header */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Header                                                             */}
+        {/* ------------------------------------------------------------------ */}
 
         <div className="flex items-center justify-between border-b border-blue-100 bg-blue-50 px-8 py-5">
-          <h2 className="text-2xl font-bold text-blue-900">Edit Product</h2>
+          <h2 className="text-2xl font-bold text-blue-900">
+            Edit Product
+          </h2>
 
           <button
+            type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-blue-400 transition hover:bg-blue-100 hover:text-blue-600"
+            disabled={saving}
+            className="rounded-lg p-2 text-blue-400 transition hover:bg-blue-100 hover:text-blue-600 disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Content                                                            */}
+        {/* ------------------------------------------------------------------ */}
 
         {loading ? (
           <div className="flex h-96 items-center justify-center text-sm text-blue-500">
@@ -205,25 +370,55 @@ export default function EditProductModal({
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto bg-blue-50/40 p-8">
-              <ProductForm form={form} setForm={setForm} />
+            <div className="flex-1 overflow-y-auto bg-gray-50 p-8">
+
+              {/* Product Image */}
+
+              <div className="mb-8">
+                <ImageUploader
+                  preview={
+                    preview ||
+                    form.image_url ||
+                    null
+                  }
+                  onFileChange={handleImage}
+                />
+              </div>
+
+              {/* Product Form */}
+
+              <ProductForm
+                form={form}
+                setForm={setForm}
+              />
             </div>
 
+            {/* ---------------------------------------------------------------- */}
+            {/* Footer                                                           */}
+            {/* ---------------------------------------------------------------- */}
+
             <div className="flex justify-end gap-4 border-t border-blue-100 bg-white px-8 py-5">
+
               <button
+                type="button"
                 onClick={onClose}
-                className="rounded-lg border border-blue-200 px-6 py-3 text-slate-700 transition hover:bg-blue-50"
+                disabled={saving}
+                className="rounded-lg border border-blue-200 px-6 py-3 text-slate-700 transition hover:bg-blue-50 disabled:opacity-50"
               >
                 Cancel
               </button>
 
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700 disabled:opacity-60"
+                className="rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving
+                  ? "Saving..."
+                  : "Save Changes"}
               </button>
+
             </div>
           </>
         )}

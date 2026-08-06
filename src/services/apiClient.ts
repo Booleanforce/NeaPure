@@ -1,18 +1,66 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://127.0.0.1:8000";
+
+/* =========================================================
+   API ERROR
+========================================================= */
 
 export class ApiError extends Error {
   status: number;
   data: any;
 
-  constructor(status: number, data: any) {
-    super(
+  constructor(
+    status: number,
+    data: any
+  ) {
+    let message =
       data?.detail ||
-        data?.error ||
-        data?.message ||
-        "Something went wrong."
+      data?.error ||
+      data?.message;
+
+    /*
+     * Django REST Framework validation errors
+     *
+     * Example:
+     *
+     * {
+     *   "email": ["Invalid email."]
+     * }
+     */
+
+    if (
+      !message &&
+      data &&
+      typeof data === "object"
+    ) {
+      const firstKey =
+        Object.keys(data)[0];
+
+      if (firstKey) {
+        const value =
+          data[firstKey];
+
+        if (Array.isArray(value)) {
+          message = value.join(", ");
+        } else if (
+          typeof value === "string"
+        ) {
+          message = value;
+        } else if (
+          value &&
+          typeof value === "object"
+        ) {
+          message = JSON.stringify(value);
+        }
+      }
+    }
+
+    super(
+      message ||
+        `Request failed with status ${status}.`
     );
 
     this.name = "ApiError";
@@ -21,91 +69,222 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(
+/* =========================================================
+   REQUEST
+========================================================= */
+
+async function request<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url =
+    `${API_BASE_URL}${endpoint}`;
 
-  const headers = new Headers(options.headers || {});
+  const headers = new Headers(
+    options.headers || {}
+  );
+
+  /* =======================================================
+     CONTENT TYPE
+  ======================================================= */
+
+  /*
+   * IMPORTANT:
+   *
+   * Never manually set Content-Type when
+   * sending FormData.
+   *
+   * Browser automatically creates:
+   *
+   * multipart/form-data;
+   * boundary=...
+   */
 
   if (
-    !headers.has("Content-Type") &&
-    !(options.body instanceof FormData)
+    !(options.body instanceof FormData) &&
+    !headers.has("Content-Type")
   ) {
-    headers.set("Content-Type", "application/json");
+    headers.set(
+      "Content-Type",
+      "application/json"
+    );
   }
 
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("access");
+  /* =======================================================
+     AUTH
+  ======================================================= */
+
+  if (
+    typeof window !== "undefined"
+  ) {
+    const token =
+      localStorage.getItem(
+        "access"
+      );
 
     if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
+      headers.set(
+        "Authorization",
+        `Bearer ${token}`
+      );
     }
   }
 
-  const controller = new AbortController();
+  /* =======================================================
+     TIMEOUT
+  ======================================================= */
+
+  const controller =
+    new AbortController();
 
   const timeout = setTimeout(() => {
     controller.abort();
   }, 30000);
 
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
-      signal: controller.signal,
-    });
+    const response =
+      await fetch(url, {
+        ...options,
+        headers,
+        signal:
+          controller.signal,
+      });
 
     clearTimeout(timeout);
 
-    if (response.status === 401) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
-        localStorage.removeItem("user");
+    /* =====================================================
+       401
+    ===================================================== */
 
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
+    if (
+      response.status === 401
+    ) {
+      if (
+        typeof window !==
+        "undefined"
+      ) {
+        localStorage.removeItem(
+          "access"
+        );
+
+        localStorage.removeItem(
+          "refresh"
+        );
+
+        localStorage.removeItem(
+          "user"
+        );
+
+        if (
+          window.location.pathname !==
+          "/login"
+        ) {
+          window.location.href =
+            "/login";
         }
       }
 
-      throw new ApiError(401, {
-        message: "Unauthorized",
-      });
+      throw new ApiError(
+        401,
+        {
+          message:
+            "Unauthorized",
+        }
+      );
     }
 
-    if (response.status === 403) {
-      throw new ApiError(403, {
-        message: "Permission denied",
-      });
+    /* =====================================================
+       403
+    ===================================================== */
+
+    if (
+      response.status === 403
+    ) {
+      throw new ApiError(
+        403,
+        {
+          message:
+            "Permission denied",
+        }
+      );
     }
 
-    if (!response.ok) {
-      let errorData: any = {};
+    /* =====================================================
+       204
+    ===================================================== */
 
+    if (
+      response.status === 204
+    ) {
+      return {} as T;
+    }
+
+    /* =====================================================
+       READ RESPONSE
+    ===================================================== */
+
+    const contentType =
+      response.headers.get(
+        "content-type"
+      ) || "";
+
+    const responseText =
+      await response.text();
+
+    let data: any = {};
+
+    if (responseText) {
       try {
-        errorData = await response.json();
+        data =
+          JSON.parse(
+            responseText
+          );
       } catch {
-        errorData = {
-          message: response.statusText,
+        /*
+         * Backend returned HTML/text
+         * instead of JSON.
+         */
+
+        data = {
+          message:
+            responseText,
         };
       }
-
-      throw new ApiError(response.status, errorData);
     }
 
-    if (response.status === 204) {
+    /* =====================================================
+       HTTP ERROR
+    ===================================================== */
+
+    if (!response.ok) {
+      console.error(
+        "API ERROR",
+        {
+          url,
+          status:
+            response.status,
+          contentType,
+          response: data,
+        }
+      );
+
+      throw new ApiError(
+        response.status,
+        data
+      );
+    }
+
+    /* =====================================================
+       EMPTY RESPONSE
+    ===================================================== */
+
+    if (!responseText) {
       return {} as T;
     }
 
-    const contentType = response.headers.get("content-type");
-
-    if (!contentType?.includes("application/json")) {
-      return {} as T;
-    }
-
-    const data = await response.json();
+    /* =====================================================
+       WRAPPED RESPONSE
+    ===================================================== */
 
     if (
       data &&
@@ -116,78 +295,134 @@ async function request<T>(
       return data.data as T;
     }
 
+    /* =====================================================
+       NORMAL RESPONSE
+    ===================================================== */
+
     return data as T;
   } catch (error: any) {
     clearTimeout(timeout);
 
-    if (error.name === "AbortError") {
-      throw new ApiError(408, {
-        message: "Request timeout.",
-      });
+    if (
+      error?.name ===
+      "AbortError"
+    ) {
+      throw new ApiError(
+        408,
+        {
+          message:
+            "Request timeout.",
+        }
+      );
     }
 
     throw error;
   }
 }
 
+/* =========================================================
+   API CLIENT
+========================================================= */
+
 export const apiClient = {
-  get: <T>(
+  /* =======================================================
+     GET
+  ======================================================= */
+
+  get: <T = unknown>(
     endpoint: string,
     options?: RequestInit
-  ) =>
-    request<T>(endpoint, {
-      ...options,
-      method: "GET",
-    }),
+  ): Promise<T> =>
+    request<T>(
+      endpoint,
+      {
+        ...options,
+        method: "GET",
+      }
+    ),
 
-  post: <T>(
+  /* =======================================================
+     POST
+  ======================================================= */
+
+  post: <T = unknown>(
     endpoint: string,
     data?: any,
     options?: RequestInit
-  ) =>
-    request<T>(endpoint, {
-      ...options,
-      method: "POST",
-      body:
-        data instanceof FormData
-          ? data
-          : JSON.stringify(data),
-    }),
+  ): Promise<T> =>
+    request<T>(
+      endpoint,
+      {
+        ...options,
+        method: "POST",
+        body:
+          data instanceof FormData
+            ? data
+            : data !== undefined
+              ? JSON.stringify(data)
+              : undefined,
+      }
+    ),
 
-  put: <T>(
+  /* =======================================================
+     PUT
+  ======================================================= */
+
+  put: <T = unknown>(
     endpoint: string,
     data?: any,
     options?: RequestInit
-  ) =>
-    request<T>(endpoint, {
-      ...options,
-      method: "PUT",
-      body:
-        data instanceof FormData
-          ? data
-          : JSON.stringify(data),
-    }),
+  ): Promise<T> =>
+    request<T>(
+      endpoint,
+      {
+        ...options,
+        method: "PUT",
+        body:
+          data instanceof FormData
+            ? data
+            : data !== undefined
+              ? JSON.stringify(data)
+              : undefined,
+      }
+    ),
 
-  patch: <T>(
+  /* =======================================================
+     PATCH
+  ======================================================= */
+
+  patch: <T = unknown>(
     endpoint: string,
     data?: any,
     options?: RequestInit
-  ) =>
-    request<T>(endpoint, {
-      ...options,
-      method: "PATCH",
-      body:
-        data instanceof FormData
-          ? data
-          : JSON.stringify(data),
-    }),
+  ): Promise<T> =>
+    request<T>(
+      endpoint,
+      {
+        ...options,
+        method: "PATCH",
+        body:
+          data instanceof FormData
+            ? data
+            : data !== undefined
+              ? JSON.stringify(data)
+              : undefined,
+      }
+    ),
 
-  delete: <T>(
+  /* =======================================================
+     DELETE
+  ======================================================= */
+
+  delete: <T = unknown>(
     endpoint: string,
     options?: RequestInit
-  ) =>
-    request<T>(endpoint, {
-      ...options,
-      method: "DELETE",
-    }),
+  ): Promise<T> =>
+    request<T>(
+      endpoint,
+      {
+        ...options,
+        method: "DELETE",
+      }
+    ),
 };
