@@ -4,6 +4,8 @@ import "./globals.css";
 import LayoutWrapper from "./provider/LayoutWrapper";
 import { ToastContainer, Bounce  } from "react-toastify";
 
+import SupportWidget from "@/components/support-widget/SupportWidget";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -34,7 +36,11 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col"
       >
-        <LayoutWrapper>{children}<ToastContainer position="top-right" transition={Bounce} theme="dark" autoClose={3000} /></LayoutWrapper>
+        <LayoutWrapper>
+          {children}
+          <SupportWidget />
+          <ToastContainer position="top-right" transition={Bounce} theme="dark" autoClose={3000} />
+        </LayoutWrapper>
       </body>
     </html>
   );
