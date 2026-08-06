@@ -21,7 +21,9 @@ export default function LayoutWrapper({
   return (
     <>
       <Navbar />
-      {children}
+      <main>
+        {children}
+      </main>
       <Footer/>
     </>
   );
