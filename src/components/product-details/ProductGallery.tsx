@@ -23,7 +23,7 @@ export default function ProductGallery({
         <Image
           src={
             images[selected]?.image_url ||
-            "/images/product-placeholder.png"
+            "/images/kit.png"
           }
           fill
           alt=""
@@ -45,7 +45,7 @@ export default function ProductGallery({
             <Image
               src={
                 img.image_url ||
-                "/images/product-placeholder.png"
+                "/images/kit.png"
               }
               fill
               alt=""

@@ -17,7 +17,7 @@ export default function ProductCard({
         <Image
           src={
             product.images?.[0]?.image_url ||
-            "/images/product-placeholder.png"
+            "/images/kit.png"
           }
           alt={product.name}
           fill

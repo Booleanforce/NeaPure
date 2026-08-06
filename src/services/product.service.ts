@@ -89,6 +89,14 @@ export interface Product {
 
   is_featured: boolean;
 
+  featured?: boolean;
+
+  stock?: number;
+
+  thumbnail?: string;
+
+  image?: string;
+
   images?: ProductImage[];
 
   created_at?: string;

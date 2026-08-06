@@ -49,7 +49,7 @@ export default function CategorySelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={loading}
-        className="w-full rounded-lg border border-gray-300 p-3 focus:border-blue-500 focus:outline-none"
+        className="w-full rounded-lg border border-gray-300 p-3 text-gray-900 focus:border-blue-500 focus:outline-none"
       >
         <option value="">
           {loading

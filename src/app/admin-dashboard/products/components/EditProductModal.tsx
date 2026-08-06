@@ -58,10 +58,14 @@ const [form, setForm] = useState({
   status: "ACTIVE",
 
   is_featured: false,
+
+  image_url: "",
 });
 
   useEffect(() => {
     if (isOpen && slug) {
+      setImageFile(null);
+      setPreview(null);
       loadProduct();
     }
   }, [isOpen, slug]);
@@ -72,6 +76,10 @@ const loadProduct = async () => {
 
     const product =
       await productService.getProduct(slug!);
+
+    const primaryImage = product.images?.find(
+      (img) => img.is_primary
+    );
 
     setForm({
       name: product.name || "",
@@ -117,6 +125,9 @@ const loadProduct = async () => {
 
       is_featured:
         product.is_featured || false,
+
+      image_url:
+        primaryImage?.image_url || product.image || "",
     });
   } catch (error) {
     console.error(error);
@@ -190,6 +201,33 @@ const handleImage = (file: File | null) => {
       payload
     );
 
+    if (imageFile) {
+      const uploadSlug = form.slug || slug;
+
+      const uploaded: any =
+        await productService.uploadImage(
+          uploadSlug,
+          imageFile,
+          form.name,
+          true
+        );
+
+      const imgUrl =
+        uploaded?.image_url ||
+        uploaded?.image ||
+        "";
+
+      if (imgUrl) {
+        await productService.updateProduct(
+          uploadSlug,
+          {
+            image: imgUrl,
+            thumbnail: imgUrl,
+          }
+        );
+      }
+    }
+
     await onUpdated();
 
     onClose();
@@ -229,6 +267,13 @@ const handleImage = (file: File | null) => {
         ) : (
           <>
             <div className="flex-1 overflow-y-auto bg-gray-50 p-8">
+              <div className="mb-8">
+                <ImageUploader
+                  preview={preview || form.image_url || null}
+                  onFileChange={handleImage}
+                />
+              </div>
+
               <ProductForm
                 form={form}
                 setForm={setForm}
