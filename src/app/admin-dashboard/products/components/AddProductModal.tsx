@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -7,6 +8,7 @@ import { productService } from "@/services/product.service";
 import CategorySelect from "../CategorySelect";
 import ProductForm from "./ProductForm";
 import slugify from "slugify";
+import { Bounce, toast } from "react-toastify";
 
 interface Props {
   isOpen: boolean;
@@ -21,201 +23,212 @@ export default function AddProductModal({
 }: Props) {
   const [saving, setSaving] = useState(false);
 
-const [form, setForm] = useState({
-  name: "",
-  slug: "",
-  sku: "",
+  const [form, setForm] = useState({
+    name: "",
+    slug: "",
+    sku: "",
 
-  category_id: "",
+    category_id: "",
 
-  product_type: "FILTER",
+    product_type: "FILTER",
 
-  price: "",
+    price: "",
 
-  perfect_for: "",
+    perfect_for: "",
 
-  short_description: "",
+    short_description: "",
 
-  key_features: "",
+    key_features: "",
 
-  technical_specs: "",
+    technical_specs: "",
 
-  package_includes: "",
+    package_includes: "",
 
-  warranty_duration_months: "12",
+    warranty_duration_months: "12",
 
-  recommended_replacement_months: "6",
+    recommended_replacement_months: "6",
 
-  status: "ACTIVE",
+    status: "ACTIVE",
 
-  is_featured: false,
-});
+    is_featured: false,
+  });
 
   if (!isOpen) return null;
-const handleSave = async () => {
-  try {
-    setSaving(true);
 
-    const payload = {
-      category_id: form.category_id || null,
+  const handleSave = async () => {
+    try {
+      setSaving(true);
 
-      product_type: form.product_type,
+      const payload = {
+        category_id: form.category_id || null,
 
-      name: form.name,
+        product_type: form.product_type,
 
-      slug: slugify(
-        form.slug.trim() || form.name,
-        {
-          lower: true,
-          strict: true,
-        }
-      ),
+        name: form.name,
 
-      sku: form.sku,
-
-      price: Number(form.price),
-
-      perfect_for: form.perfect_for,
-
-      short_description:
-        form.short_description,
-
-      key_features: form.key_features,
-
-      technical_specs:
-        form.technical_specs,
-
-      package_includes:
-        form.package_includes,
-
-      warranty_duration_months: Number(
-        form.warranty_duration_months
-      ),
-
-      recommended_replacement_months:
-        Number(
-          form.recommended_replacement_months
+        slug: slugify(
+          form.slug.trim() || form.name,
+          {
+            lower: true,
+            strict: true,
+          }
         ),
 
-      status: form.status,
+        sku: form.sku,
 
-      is_featured: form.is_featured,
-    };
+        price: Number(form.price),
 
-    console.log("Creating Product:");
-    console.table(payload);
+        perfect_for: form.perfect_for,
 
-    await productService.createProduct(
-      payload
-    );
+        short_description:
+          form.short_description,
 
-    await onCreated();
+        key_features: form.key_features,
 
-    onClose();
+        technical_specs:
+          form.technical_specs,
 
-    setForm({
-      name: "",
-      slug: "",
-      sku: "",
-      category_id: "",
-      product_type: "FILTER",
-      price: "",
-      perfect_for: "",
-      short_description: "",
-      key_features: "",
-      technical_specs: "",
-      package_includes: "",
-      warranty_duration_months: "12",
-      recommended_replacement_months: "6",
-      status: "ACTIVE",
-      is_featured: false,
-    });
-  } catch (error: any) {
-    console.error("Create Product Error:", error);
+        package_includes:
+          form.package_includes,
 
-    if (error?.data) {
-      console.error(
-        "Backend Validation:",
-        error.data
+        warranty_duration_months: Number(
+          form.warranty_duration_months
+        ),
+
+        recommended_replacement_months:
+          Number(
+            form.recommended_replacement_months
+          ),
+
+        status: form.status,
+
+        is_featured: form.is_featured,
+      };
+
+      console.log("Creating Product:");
+      console.table(payload);
+
+      await productService.createProduct(
+        payload
       );
 
-      alert(
-        JSON.stringify(
-          error.data,
-          null,
-          2
-        )
-      );
-    } else {
-      alert(
-        error?.message ||
-          "Failed to create product."
-      );
+      await onCreated();
+      toast.success("Sign-in Successful!", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+      onClose();
+
+      setForm({
+        name: "",
+        slug: "",
+        sku: "",
+        category_id: "",
+        product_type: "FILTER",
+        price: "",
+        perfect_for: "",
+        short_description: "",
+        key_features: "",
+        technical_specs: "",
+        package_includes: "",
+        warranty_duration_months: "12",
+        recommended_replacement_months: "6",
+        status: "ACTIVE",
+        is_featured: false,
+      });
+    } catch (error: any) {
+      console.error("Create Product Error:", error);
+
+      if (error?.data) {
+        console.error(
+          "Backend Validation:",
+          error.data
+        );
+
+        alert(
+          JSON.stringify(
+            error.data,
+            null,
+            2
+          )
+        );
+      } else {
+        alert(
+          error?.message ||
+            "Failed to create product."
+        );
+      }
+    } finally {
+      setSaving(false);
     }
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
-return (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-6">
-    <div className="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+  return (
+    <div className="fixed inset-0 z-999 flex items-center justify-center bg-blue-950/40 p-3 backdrop-blur-sm sm:p-6">
+      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl shadow-blue-900/20">
 
-      {/* Header */}
+        {/* Header */}
 
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b bg-white px-8 py-5">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Add Product
-          </h2>
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-blue-100 bg-white px-4 py-4 sm:px-8 sm:py-5">
+          <div>
+            <h2 className="text-lg font-bold text-blue-900 sm:text-2xl">
+              Add Product
+            </h2>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Create a new product for your catalog.
-          </p>
+            <p className="mt-1 text-xs text-blue-400 sm:text-sm">
+              Create a new product for your catalog.
+            </p>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-blue-400 transition hover:bg-blue-50 hover:text-blue-900 sm:p-2"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        <button
-          onClick={onClose}
-          className="rounded-lg p-2 transition hover:bg-gray-100"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
+        {/* Body */}
 
-      {/* Body */}
+        <div className="flex-1 overflow-y-auto bg-blue-50/40 p-4 sm:p-8">
 
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-8">
+          <ProductForm
+            form={form}
+            setForm={setForm}
+          />
 
-        <ProductForm
-          form={form}
-          setForm={setForm}
-        />
+        </div>
 
-      </div>
+        {/* Footer */}
 
-      {/* Footer */}
+        <div className="flex flex-col-reverse items-stretch gap-3 border-t border-blue-100 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:gap-4 sm:px-8 sm:py-5">
 
-      <div className="flex items-center justify-end gap-4 border-t bg-white px-8 py-5">
+          <button
+            onClick={onClose}
+            disabled={saving}
+            className="rounded-lg border border-blue-100 px-6 py-2.5 text-sm font-medium text-blue-900 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50 sm:py-3"
+          >
+            Cancel
+          </button>
 
-        <button
-          onClick={onClose}
-          disabled={saving}
-          className="rounded-lg border border-gray-300 px-6 py-3 font-medium transition hover:bg-gray-100"
-        >
-          Cancel
-        </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:py-3"
+          >
+            {saving ? "Creating..." : "Create Product"}
+          </button>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {saving ? "Creating..." : "Create Product"}
-        </button>
+        </div>
 
       </div>
-
     </div>
-  </div>
-);
+  );
 }

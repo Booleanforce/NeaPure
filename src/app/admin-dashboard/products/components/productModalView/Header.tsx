@@ -18,35 +18,35 @@ export default function Header({
   product,
 }: Props) {
   return (
-    <div className="border-b bg-white p-6">
+    <div className="border-b border-blue-100 bg-linear-to-r from-blue-50 to-cyan-50 p-4 sm:p-6">
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+      <div className="flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-center">
 
         {/* Product Image */}
 
-        <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-2xl border bg-gray-50">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600 ring-4 ring-white/60 sm:h-24 sm:w-24">
 
           {product.thumbnail ? (
             <Image
               src={product.thumbnail}
               alt={product.name}
-              width={140}
-              height={140}
+              width={96}
+              height={96}
               className="h-full w-full object-cover"
             />
           ) : (
-            <Package className="h-14 w-14 text-gray-400" />
+            <Package className="h-10 w-10 text-white" />
           )}
 
         </div>
 
         {/* Product Info */}
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
 
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="truncate text-lg font-bold text-blue-950 sm:text-2xl">
               {product.name}
             </h1>
 
@@ -59,7 +59,7 @@ export default function Header({
             <span
               className={`rounded-full px-3 py-1 text-xs font-semibold ${
                 product.status === "ACTIVE"
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-emerald-100 text-emerald-700"
                   : "bg-red-100 text-red-700"
               }`}
             >
@@ -68,61 +68,61 @@ export default function Header({
 
           </div>
 
-          <p className="mt-2 text-gray-500">
+          <p className="mt-1 truncate text-sm text-blue-500 sm:text-base">
             {product.slug}
           </p>
 
           {/* Stats */}
 
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 md:grid-cols-4">
 
-            <div className="rounded-xl border p-4">
+            <div className="rounded-xl border border-blue-100 bg-white/70 p-3 sm:p-4">
 
-              <div className="mb-2 flex items-center gap-2 text-gray-500">
+              <div className="mb-2 flex items-center gap-2 text-blue-400">
                 <Tag className="h-4 w-4" />
-                SKU
+                <span className="text-xs sm:text-sm">SKU</span>
               </div>
 
-              <p className="font-semibold">
+              <p className="text-sm font-semibold text-blue-950 sm:text-base">
                 {product.sku || "-"}
               </p>
 
             </div>
 
-            <div className="rounded-xl border p-4">
+            <div className="rounded-xl border border-blue-100 bg-white/70 p-3 sm:p-4">
 
-              <div className="mb-2 flex items-center gap-2 text-gray-500">
+              <div className="mb-2 flex items-center gap-2 text-blue-400">
                 <Boxes className="h-4 w-4" />
-                Category
+                <span className="text-xs sm:text-sm">Category</span>
               </div>
 
-              <p className="font-semibold">
+              <p className="text-sm font-semibold text-blue-950 sm:text-base">
                 {product.category?.name || "-"}
               </p>
 
             </div>
 
-            <div className="rounded-xl border p-4">
+            <div className="rounded-xl border border-blue-100 bg-white/70 p-3 sm:p-4">
 
-              <div className="mb-2 flex items-center gap-2 text-gray-500">
+              <div className="mb-2 flex items-center gap-2 text-blue-400">
                 <BadgeDollarSign className="h-4 w-4" />
-                Price
+                <span className="text-xs sm:text-sm">Price</span>
               </div>
 
-              <p className="font-semibold text-blue-600">
+              <p className="text-sm font-semibold text-blue-600 sm:text-base">
                 ৳{product.price}
               </p>
 
             </div>
 
-            <div className="rounded-xl border p-4">
+            <div className="rounded-xl border border-blue-100 bg-white/70 p-3 sm:p-4">
 
-              <div className="mb-2 flex items-center gap-2 text-gray-500">
+              <div className="mb-2 flex items-center gap-2 text-blue-400">
                 <Package className="h-4 w-4" />
-                Stock
+                <span className="text-xs sm:text-sm">Stock</span>
               </div>
 
-              <p className="font-semibold">
+              <p className="text-sm font-semibold text-blue-950 sm:text-base">
                 {product.stock}
               </p>
 

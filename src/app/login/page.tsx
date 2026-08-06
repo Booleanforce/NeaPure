@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/services/auth.service";
+import { toast, Bounce } from "react-toastify";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,8 +32,17 @@ export default function LoginPage() {
 
       console.log(data);
 
-      // Adjust this to match whatever shape your login() actually returns.
-      // e.g. data.user.role, data.role, data.data.role
+      toast.success("Sign-in Successful!", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
       const role = data?.user?.role ?? data?.role;
 
       if (role === "CUSTOMER") {
@@ -41,13 +51,15 @@ export default function LoginPage() {
         // ADMIN / SUPER_ADMIN / anything else falls back to admin dashboard
         router.replace("/admin-dashboard");
       }
+
     } catch (err: any) {
-      setError(err.message);
+      const message = err.message || "Something went wrong. Please try again.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <main className="relative min-h-screen overflow-hidden bg-aqua-navy text-white">
       {/* Background */}
@@ -63,8 +75,7 @@ export default function LoginPage() {
       <section className="relative z-10 mx-auto flex min-h-screen max-w-6xl items-center px-6 py-16 sm:px-10">
         <div className="w-full max-w-md rounded-3xl bg-white/[0.06] p-8 shadow-card ring-1 ring-white/10 backdrop-blur-xl sm:p-10">
           <h1 className="font-display text-3xl font-semibold text-white">
-            Welcome to{" "}
-            <span className="text-aqua-glow">Neapure</span>
+            Welcome to <span className="text-aqua-glow">Neapure</span>
           </h1>
 
           <p className="mt-3 text-sm text-white/60">
@@ -137,10 +148,7 @@ export default function LoginPage() {
                 Remember Me
               </label>
 
-              <button
-                type="button"
-                className="text-aqua-glow hover:text-white"
-              >
+              <button type="button" className="text-aqua-glow hover:text-white">
                 Forgot Password?
               </button>
             </div>

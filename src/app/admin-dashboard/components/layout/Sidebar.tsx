@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Droplets } from "lucide-react";
 
 import { navItems } from "../../data/navItems";
-import SupportCard from "./SupportCard";
+// import SupportCard from "./SupportCard";
 import UserProfile from "./UserProfile";
 
 export default function Sidebar() {
@@ -58,7 +58,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <SupportCard />
+      {/* <SupportCard /> */}
 
       <UserProfile />
     </aside>
