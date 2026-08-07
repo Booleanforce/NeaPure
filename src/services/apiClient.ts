@@ -21,7 +21,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 
   // Force hardcoded token since there is no login logic yet
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1ODk0NTgzLCJpYXQiOjE3ODU4NjU3ODMsImp0aSI6ImExZjI0OGYzZWQxMDRjNWM5NGYxODliMDg0ZGNmZmRmIiwidXNlcl9pZCI6IjU0M2I5NDQ5LThhMTUtNDM2ZC1iODg5LTQxMDVmYjY0MjJiNyJ9.fP2qwtU9rwY2u33nbyNpb3-qlwuxXCU0_TSA4K04l44";
+  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg2MTE1NjcxLCJpYXQiOjE3ODYwODY4NzEsImp0aSI6ImI3N2NmZjAzNzkxNzQyNzU5MjkwYmUxZmRlYmYzNTA1IiwidXNlcl9pZCI6IjE2ZDExZjAyLWZhM2MtNDBmMC1hZTcyLTc0MTZhYThkMWI2ZCJ9.ac_6Zw2-iX7gvfnpWIqQXR5Z4EioSeu-AE3QIAXO9F8";
 
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);

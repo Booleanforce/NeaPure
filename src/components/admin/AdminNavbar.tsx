@@ -1,4 +1,5 @@
-import { Bell, Search, User } from 'lucide-react';
+import { Search, User } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
 
 export default function AdminNavbar() {
   return (
@@ -20,10 +21,7 @@ export default function AdminNavbar() {
           />
         </form>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
-          <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
-            <span className="sr-only">View notifications</span>
-            <Bell className="h-6 w-6" aria-hidden="true" />
-          </button>
+          <NotificationDropdown />
 
           {/* Separator */}
           <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" aria-hidden="true" />
