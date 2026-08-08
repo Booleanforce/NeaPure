@@ -1,49 +1,50 @@
 // FilterLifeStatus.tsx
-import { Droplet, Filter, ShieldCheck } from "lucide-react";
+import { Cpu, Droplet, ShieldCheck, Sparkles } from "lucide-react";
 import Card from "../common/Card";
 import SectionHeader from "../common/SectionHeader";
 
 function FilterBar({
   label,
   percent,
-  color,
-  badgeBg,
+  iconColor,
+  barColor,
   icon: Icon,
 }: {
   label: string;
   percent: number;
-  color: string;
-  badgeBg: string;
+  iconColor: string;
+  barColor: string;
   icon: React.ElementType;
 }) {
   return (
-    <div className="flex flex-1 flex-col gap-8 rounded-xl border border-slate-100 p-3.5">
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-        <span
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${badgeBg}`}
-        >
-          <Icon className={`h-3.5 w-3.5 ${color}`} />
+    <div className="flex flex-1 flex-col gap-8 rounded-xl border border-slate-100 p-3">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+        {/* Figma: icon badge is white/very light, not a tinted color chip —
+            the color lives in the icon glyph itself */}
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+          <Icon className={`h-4 w-4 ${iconColor}`} />
         </span>
         {label}
       </div>
 
-      {/* Figma: "GOOD" is a small gray uppercase tag, the percentage is bold
-          dark text — not a green-colored percent like the previous version */}
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="font-semibold uppercase tracking-wide text-emerald-600">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-600">
           Good
         </span>
-        <span className="font-semibold text-slate-700">{percent}% Left</span>
+        <span className="text-sm font-bold text-slate-800">{percent}% Left</span>
       </div>
 
+      {/* Bar color is independent of icon color — Carbon Filter's icon is
+          green but its bar is blue, matching Figma exactly */}
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div
-          className="h-full rounded-full bg-emerald-500"
+          className={`h-full rounded-full ${barColor}`}
           style={{ width: `${percent}%` }}
         />
       </div>
-      <button className="mt-1 rounded-lg border border-slate-100 py-1.5 text-[11px] font-medium text-slate-500">
-        Simulate Clean
+
+      <button className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-100 py-2 text-[11px] font-medium text-slate-500">
+        <Sparkles className="h-3.5 w-3.5 text-blue-500" /> Simulate Clean
       </button>
     </div>
   );
@@ -57,33 +58,33 @@ export default function FilterLifeStatus() {
         actionLabel="View All Filters"
         className="w-full"
       />
-      <div className="flex flex-col gap-3 sm:flex-row">
+
+      {/* Mobile: stacked full-width cards; sm+: original 3-up row */}
+      <div className="flex flex-col gap-2 sm:flex-row">
         <FilterBar
           label="Sediment Filter"
           percent={85}
-          color="text-blue-500"
-          badgeBg="bg-blue-50"
+          iconColor="text-emerald-500"
+          barColor="bg-emerald-500"
           icon={Droplet}
         />
         <FilterBar
-          label="Carbon Filter"
+        label="Sediment Filter"
           percent={72}
-          color="text-emerald-500"
-          badgeBg="bg-emerald-50"
+          iconColor="text-emerald-500"
+          barColor="bg-emerald-500"
           icon={ShieldCheck}
         />
         <FilterBar
           label="RO Membrane"
           percent={65}
-          color="text-violet-500"
-          badgeBg="bg-violet-50"
-          icon={Filter}
+          iconColor="text-blue-500"
+          barColor="bg-blue-400"
+          icon={Cpu}
         />
       </div>
 
-      {/* Figma shows a second, centered "View All Filters" link below the
-          cards in addition to the top-right one */}
-      <button className="mx-auto flex items-center text-xs font-medium text-blue-600">
+      <button className="w-full rounded-lg  bg-blue-50/40 py-2.5 text-xs font-semibold text-blue-600 sm:py-2">
         View All Filters <span className="ml-0.5">›</span>
       </button>
     </Card>
