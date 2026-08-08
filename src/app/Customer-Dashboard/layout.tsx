@@ -1,9 +1,7 @@
 // app/dashboard/layout.tsx
-// (Place this wherever your route group lives — e.g. app/(dashboard)/layout.tsx
-// if you're using a route group. Adjust the "./components/..." import paths
-// to match this file's actual location.)
+"use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import Sidebar from "./components/layout/Sidebar";
 import Topbar from "./components/layout/Topbar";
@@ -13,20 +11,23 @@ export default function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar renders once here and stays mounted across every
-          page in this route segment, instead of remounting per page. */}
-      <Sidebar />
+    <div className="flex h-screen bg-slate-50">
+      <Sidebar
+        isOpen={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+      />
 
-      <div className="flex flex-1 flex-col">
-        {/* Topbar is also shared across all dashboard pages now. */}
-        <Topbar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* sticky + z-10 keeps this pinned while <main> scrolls beneath it */}
+        <header className="sticky top-0 z-10 border-b border-slate-100 bg-white px-4 py-3 sm:px-5">
+          <Topbar onMenuClick={() => setMobileNavOpen(true)} />
+        </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="flex max-w-[1200px] flex-col gap-6">
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto p-3 sm:p-5">
+          <div className="flex w-full flex-col gap-4">{children}</div>
         </main>
       </div>
     </div>

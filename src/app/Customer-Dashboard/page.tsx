@@ -20,28 +20,36 @@ export default function DashboardPage() {
           Overview all share one 5-column grid so the right-hand sidebar
           (Account Verification + Quick Actions) can span all three rows,
           matching the Figma layout. */}
-      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-2 items-start gap-3 sm:gap-4 lg:grid-cols-5">
         <StatsCards />
 
-        <div className="row-span-3 flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
+        {/* row-span-3 only applies at lg, where this column actually sits
+            beside 3 stacked rows of content. Below lg it's just two cards
+            stacked in normal flow, spanning the full 2-col width so it
+            doesn't get squeezed into a single 160px column. */}
+        <div className="col-span-2 flex flex-col gap-4 lg:col-span-1 lg:row-span-3">
           <AccountVerification />
           <QuickActions />
         </div>
 
-        <div className="sm:col-span-2 lg:col-span-2">
+        <div className="col-span-2 lg:col-span-2">
           <ProductPanel />
         </div>
-        <div className="sm:col-span-2 lg:col-span-2">
+        <div className="col-span-2 lg:col-span-2">
           <InstallationOverview />
         </div>
 
-        <div className="sm:col-span-2 lg:col-span-4">
+        <div className="col-span-2 lg:col-span-4">
           <ServiceOverview />
         </div>
       </div>
 
-      {/* Bottom row */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_0.85fr]">
+      {/* Bottom row — equal thirds, matching the ~equal container widths
+          in Figma (Filter Life Status / Recent Service History / Promo +
+          Need Help all measure to roughly the same width). The previous
+          0.85fr third column was too narrow, which is what forced the
+          PromoCard illustration and badge to overlap. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <FilterLifeStatus />
         <RecentServiceRequests />
         <div className="flex flex-col gap-4">
