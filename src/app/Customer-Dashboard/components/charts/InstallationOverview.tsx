@@ -107,7 +107,7 @@ export default function InstallationOverview() {
                 />
               </div>
               <p
-                className={`mt-2 max-w-[52px] text-center text-[19px] leading-tight sm:max-w-[70px] sm:text-[10px] ${labelClasses(
+                className={`mt-2 max-w-[52px] text-center text-[9px] leading-tight sm:max-w-[70px] sm:text-[10px] ${labelClasses(
                   step.state
                 )}`}
               >
