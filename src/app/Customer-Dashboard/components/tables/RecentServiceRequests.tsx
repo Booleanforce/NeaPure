@@ -1,20 +1,15 @@
-import { ClipboardList, Droplet, Package, Wrench } from "lucide-react";
+// RecentServiceRequests.tsx
+import { Layers, UserCheck, Wrench } from "lucide-react";
 import Card from "../common/Card";
 import SectionHeader from "../common/SectionHeader";
 import StatusBadge from "../common/StatusBadge";
 
-/**
- * Renamed from the old `RecentServiceHistory` to match the requested
- * tables/RecentServiceRequests.tsx name. Note: the heading text itself
- * ("Recent Service History") is left exactly as it was — only the
- * component/file name changed, not the displayed content.
- */
 export default function RecentServiceRequests() {
   const rows = [
     { icon: <Wrench className="h-4 w-4" />, title: "General Service", time: "24 May 2024, 10:30 AM", status: "Completed" },
-    { icon: <Droplet className="h-4 w-4" />, title: "Filter Replacement", time: "18 Apr 2024, 02:15 PM", status: "Completed" },
-    { icon: <Package className="h-4 w-4" />, title: "Installation", time: "24 Mar 2024, 04:00 PM", status: "Completed" },
-    { icon: <ClipboardList className="h-4 w-4" />, title: "Maintenance Check", time: "13 Mar 2024, 11:30 AM", status: "Pending" },
+    { icon: <Layers className="h-4 w-4" />, title: "Filter Replacement", time: "10 Apr 2024, 02:15 PM", status: "Completed" },
+    { icon: <UserCheck className="h-4 w-4" />, title: "Installation", time: "24 Mar 2024, 04:00 PM", status: "Completed" },
+    { icon: <Layers className="h-4 w-4" />, title: "Maintenance Check", time: "15 May 2024, 11:30 AM", status: "Pending" },
   ];
 
   return (
@@ -25,7 +20,7 @@ export default function RecentServiceRequests() {
         className="w-full"
       />
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-7">
         {rows.map((r) => (
           <div
             key={r.title}

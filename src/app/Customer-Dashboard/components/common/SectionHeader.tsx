@@ -1,12 +1,17 @@
+// SectionHeader.tsx
 import { ReactNode } from "react";
 
 /**
  * The "title on the left, optional link/badge on the right" row that
  * repeats across Filter Life Status, Recent Service Requests, Account
- * Verification, Quick Actions, and Installation Overview. `right` covers
- * the VERIFIED badge case; `actionLabel`/`onAction` covers the
- * "View All ›" link case. `className` lets each caller keep its own
- * original margin (e.g. mb-3, mb-1) so spacing is unchanged.
+ * Verification, Quick Actions, and Installation Overview.
+ *
+ * Mobile: title gets `truncate` + `min-w-0` so a long title never pushes
+ * the right-side badge/link off the card or off-screen — the flex row
+ * needs `min-w-0` on the shrinking child for truncate to actually kick in
+ * inside a flex container. `gap-2` keeps title and right content from
+ * touching when space is tight. Nothing here changes desktop rendering
+ * since these titles were already short.
  */
 export default function SectionHeader({
   title,
@@ -22,13 +27,15 @@ export default function SectionHeader({
   className?: string;
 }) {
   return (
-    <div className={`flex items-center justify-between ${className}`}>
-      <p className="text-xs font-semibold text-slate-500">{title}</p>
+    <div className={`flex min-w-0 items-center justify-between gap-2 ${className}`}>
+      <p className="min-w-0 truncate text-xs font-semibold text-slate-500">
+        {title}
+      </p>
       {right}
       {actionLabel && (
         <button
           onClick={onAction}
-          className="text-[11px] font-medium text-blue-600"
+          className="shrink-0 text-[11px] font-medium text-blue-600"
         >
           {actionLabel} <span className="ml-0.5">›</span>
         </button>

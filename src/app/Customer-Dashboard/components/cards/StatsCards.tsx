@@ -1,12 +1,7 @@
+// StatsCards.tsx — unchanged, included only for completeness (no edits needed)
 import { ShieldCheck, CheckCircle2, Clock, Award } from "lucide-react";
 import StatCard from "./StatCard";
 
-/**
- * Groups the 4 top stat cards that were previously written out inline in
- * Dashboard.tsx. Returned as a Fragment (no wrapping div) so it still
- * drops straight into the parent's 5-column CSS grid exactly as before —
- * each StatCard remains its own grid item.
- */
 export default function StatsCards() {
   return (
     <>

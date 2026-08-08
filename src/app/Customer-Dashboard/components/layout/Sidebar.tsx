@@ -1,3 +1,4 @@
+// app/dashboard/components/layout/Sidebar.tsx
 "use client";
 
 import { useState } from "react";
@@ -20,6 +21,9 @@ import {
   Settings,
   ChevronDown,
   Smartphone,
+  Apple,
+  Play,
+  X,
 } from "lucide-react";
 
 const smartWaterItems = [
@@ -82,125 +86,153 @@ function NavRow({
   );
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  /** Whether the mobile drawer is open. Ignored at lg+ where the sidebar is always visible. */
+  isOpen?: boolean;
+  /** Called when the drawer should close (backdrop click, close button, or nav item tap). */
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [smartWaterOpen, setSmartWaterOpen] = useState(true);
 
+  // Close the mobile drawer after picking a nav item, but not on the
+  // Smart Water Care toggle itself (that just expands/collapses).
+  const handleNavigate = () => onClose?.();
+
   return (
-    // Figma: display:flex; min-width:256px; padding:20px 16px; flex-direction:column; align-items:flex-start;
-    // -> min-w-64 (256px) replaces the old hardcoded w-[280px] so the sidebar can flex/grow
-    //    with its parent instead of being pinned to a fixed width. px-4 py-5 = 16px/20px already matched.
-    <aside className="flex h-full min-w-64 w-64  shrink-0 flex-col items-start border-r border-slate-100 bg-white px-4 py-5">
-      {/* Logo */}
-      <div className="mb-6 flex w-full items-center gap-2.5 px-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600">
-          <Droplet className="h-4 w-4 fill-white text-white" />
-        </div>
-        <div>
-          <p className="text-[15px] font-bold leading-tight text-slate-800">
-            Nea Pure
-          </p>
-          <p className="text-[9px] font-medium tracking-[0.12em] text-slate-400">
-            PURE WATER, PURE LIFE
-          </p>
-        </div>
-      </div>
+    <>
+      {/* Backdrop — only rendered/interactive on mobile while the drawer is open */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-slate-900/50 lg:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Scrollable nav */}
-      <nav className="w-full flex-1 space-y-1 overflow-y-auto pr-1">
-        {mainNavItems.map((item) => (
-          <NavRow key={item.label} {...item} />
-        ))}
-
-        {/* Smart Water Care (collapsible) */}
-        <div>
-          <NavRow
-            icon={Droplet}
-            label="Smart Water Care"
-            onClick={() => setSmartWaterOpen((v) => !v)}
-            trailing={
-              <ChevronDown
-                className={`h-4 w-4 text-slate-400 transition-transform ${
-                  smartWaterOpen ? "rotate-180" : ""
-                }`}
-              />
-            }
-          />
-          {smartWaterOpen && (
-            <div className="ml-4 mt-1 space-y-1 border-l border-slate-100 pl-3">
-              {smartWaterItems.map((item) => (
-                <NavRow key={item.label} {...item} />
-              ))}
+      {/* Figma: display:flex; min-width:256px; padding:20px 16px; flex-direction:column; align-items:flex-start;
+          Below lg: fixed slide-in drawer, translated off-screen when closed.
+          At lg+: static, always visible, back to the original in-flow sidebar. */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex h-full w-72 max-w-[85vw] shrink-0 flex-col items-start overflow-y-auto border-r border-slate-100 bg-white px-4 py-5 transition-transform duration-200 ease-in-out lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Logo */}
+        <div className="mb-6 flex w-full items-center justify-between gap-2.5 px-2">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600">
+              <Droplet className="h-4 w-4 fill-white text-white" />
             </div>
-          )}
+            <div>
+              <p className="text-[15px] font-bold leading-tight text-slate-800">
+                Nea Pure
+              </p>
+              <p className="text-[9px] font-medium tracking-[0.12em] text-slate-400">
+                PURE WATER, PURE LIFE
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 lg:hidden"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        <div className="my-3 border-t border-slate-100" />
+        {/* Scrollable nav */}
+        <nav className="w-full flex-1 space-y-1 overflow-y-auto pr-1">
+          {mainNavItems.map((item) => (
+            <NavRow key={item.label} {...item} onClick={handleNavigate} />
+          ))}
 
-        {bottomNavItems.map((item) => (
-          <NavRow key={item.label} {...item} />
-        ))}
-      </nav>
-
-      {/* Download app card — Figma: width 100%, height "hug" (~229px) */}
-      <div className="mt-4 flex w-full flex-col items-start justify-end gap-[12.096px] self-stretch rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-4 text-white">
-        <div className="flex items-start gap-2">
-          <Smartphone className="mt-0.5 h-4 w-4 shrink-0" />
+          {/* Smart Water Care (collapsible) */}
           <div>
-            <p className="text-[13px] font-semibold leading-tight">
-              Download NeaPure App
-            </p>
-            <p className="mt-1 text-[11px] leading-snug text-blue-100">
-              Manage your products, track services and get alerts on the go.
-            </p>
+            <NavRow
+              icon={Droplet}
+              label="Smart Water Care"
+              onClick={() => setSmartWaterOpen((v) => !v)}
+              trailing={
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-400 transition-transform ${
+                    smartWaterOpen ? "rotate-180" : ""
+                  }`}
+                />
+              }
+            />
+            {smartWaterOpen && (
+              <div className="ml-4 mt-1 space-y-1 border-l border-slate-100 pl-3">
+                {smartWaterItems.map((item) => (
+                  <NavRow key={item.label} {...item} onClick={handleNavigate} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="my-3 border-t border-slate-100" />
+
+          {bottomNavItems.map((item) => (
+            <NavRow key={item.label} {...item} onClick={handleNavigate} />
+          ))}
+        </nav>
+
+        {/* Download app card — Figma: width 100%, height "hug" (~229px) */}
+        <div className="mt-4 flex w-full flex-col items-start justify-end gap-[12.096px] self-stretch rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-4 text-white">
+          <div className="flex items-start gap-2">
+            <Smartphone className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="text-[13px] font-semibold leading-tight">
+                Download NeaPure App
+              </p>
+              <p className="mt-1 text-[11px] leading-snug text-blue-100">
+                Manage your products, track services and get alerts on the go.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-12">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-white p-1.5">
+              <QRPlaceholder />
+            </div>
+            <img
+              src="/images/pic22.png"
+              alt="NeaPure app dashboard preview"
+              className="h-[100px] w-[47.75px] shrink-0 rounded-[8px] object-cover"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <a
+              href="#"
+              className="flex items-center gap-1.5 rounded-md bg-black px-2 py-1 leading-tight hover:bg-slate-800"
+            >
+              <Apple className="h-4 w-4 shrink-0 text-white" />
+              <span className="flex flex-col">
+                <span className="text-[8px] text-slate-300">Download on the</span>
+                <span className="text-[11px] font-semibold text-white">App Store</span>
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-1.5 rounded-md bg-black px-2 py-1 leading-tight hover:bg-slate-800"
+            >
+              <Play className="h-4 w-4 shrink-0" />
+              <span className="flex flex-col">
+                <span className="text-[8px] text-slate-300">GET IT ON</span>
+                <span className="text-[11px] font-semibold text-white">Google Play</span>
+              </span>
+            </a>
           </div>
         </div>
-
-        <div className="flex items-start gap-12">
-          {/* QR code — replace with your exported Figma QR asset when available */}
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-white p-1.5">
-            <QRPlaceholder />
-          </div>
-          {/* Phone mockup — Figma: Fixed 57.75 x 121px */}
-          <img
-            src="/images/pic22.png"
-            alt="NeaPure app dashboard preview"
-            className="h-[100px] w-[47.75px] shrink-0 rounded-[8px] object-cover"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <a
-            href="#"
-            className="flex items-center gap-1.5 rounded-md bg-black px-2 py-1 leading-tight hover:bg-slate-800"
-          >
-            <AppleLogo className="h-4 w-4 shrink-0 text-white" />
-            <span className="flex flex-col">
-              <span className="text-[8px] text-slate-300">Download on the</span>
-              <span className="text-[11px] font-semibold text-white">App Store</span>
-            </span>
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-1.5 rounded-md bg-black px-2 py-1 leading-tight hover:bg-slate-800"
-          >
-            <PlayLogo className="h-4 w-4 shrink-0" />
-            <span className="flex flex-col">
-              <span className="text-[8px] text-slate-300">GET IT ON</span>
-              <span className="text-[11px] font-semibold text-white">Google Play</span>
-            </span>
-          </a>
-        </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 
-/**
- * Lightweight stand-in for a real QR image. Swap this component out for
- * <img src="/your-exported-qr.png" ... /> once you export the asset from Figma.
- */
 function QRPlaceholder() {
-  // Deterministic pseudo-random 7x7 module grid with the 3 corner "finder" squares
   const pattern = [
     [1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 1],
@@ -255,3 +287,4 @@ function PlayLogo({ className }: { className?: string }) {
     </svg>
   );
 }
+

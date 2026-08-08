@@ -25,7 +25,9 @@ export default function Card({
   border?: string;
 }) {
   return (
-    <div className={`${bg} ${rounded} ${border} ${padding} ${className}`}>
+    <div
+      className={`w-full ${bg} ${rounded} ${border} ${padding} ${className}`}
+    >
       {children}
     </div>
   );

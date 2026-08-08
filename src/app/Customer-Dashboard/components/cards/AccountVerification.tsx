@@ -5,14 +5,13 @@ import { VerifiedCheckIcon } from "../common/icons";
 
 export default function AccountVerification() {
   return (
-    <Card className="flex w-full flex-1 flex-col items-start justify-between self-stretch">
+    <Card className="flex-1 items-start justify-between gap-4">
       <SectionHeader
         title="Account Verification"
-        className="w-full"
         right={<StatusBadge label="VERIFIED" tone="success" />}
       />
 
-      <div className="flex w-full items-center justify-center">
+      <div className="flex w-full items-center justify-center py-4">
         <VerifiedCheckIcon />
       </div>
 
