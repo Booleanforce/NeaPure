@@ -6,18 +6,13 @@ import { apiClient } from "./apiClient";
 
 export interface LoginUser {
   id: string;
-
   email: string;
 
   name?: string;
-
   first_name?: string;
-
   last_name?: string;
 
   role?: string;
-
-  [key: string]: unknown;
 }
 
 /* =========================================================
@@ -26,9 +21,7 @@ export interface LoginUser {
 
 export interface LoginResponse {
   access: string;
-
   refresh: string;
-
   user: LoginUser;
 }
 
@@ -40,57 +33,118 @@ export async function login(
   email: string,
   password: string
 ): Promise<LoginResponse> {
-  const data =
-    await apiClient.post<LoginResponse>(
+  try {
+    const data = await apiClient.post<LoginResponse>(
       "/api/auth/login/",
       {
-        email,
+        email: email.trim(),
         password,
       }
     );
 
-  /* -------------------------------------------------------
-     Validate access token
-  ------------------------------------------------------- */
+    /* -------------------------------------------------------
+       Validate response
+    ------------------------------------------------------- */
 
-  if (!data?.access) {
+    if (!data) {
+      throw new Error(
+        "No response received from the server."
+      );
+    }
+
+    if (!data.access) {
+      throw new Error(
+        "Login succeeded but no access token was returned."
+      );
+    }
+
+    if (!data.refresh) {
+      throw new Error(
+        "Login succeeded but no refresh token was returned."
+      );
+    }
+
+    if (!data.user) {
+      throw new Error(
+        "Login succeeded but no user information was returned."
+      );
+    }
+
+    /* -------------------------------------------------------
+       Save authentication data
+    ------------------------------------------------------- */
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "access",
+        data.access
+      );
+
+      localStorage.setItem(
+        "refresh",
+        data.refresh
+      );
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+    }
+
+    return data;
+  } catch (error: unknown) {
+    console.error(
+      "Login API error:",
+      error
+    );
+
+    /* -------------------------------------------------------
+       Handle Error object
+    ------------------------------------------------------- */
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    /* -------------------------------------------------------
+       Handle API error objects
+    ------------------------------------------------------- */
+
+    if (
+      typeof error === "object" &&
+      error !== null
+    ) {
+      const apiError =
+        error as {
+          message?: string;
+          detail?: string;
+          error?: string;
+          data?: unknown;
+        };
+
+      if (apiError.message) {
+        throw new Error(
+          apiError.message
+        );
+      }
+
+      if (apiError.detail) {
+        throw new Error(
+          apiError.detail
+        );
+      }
+
+      if (apiError.error) {
+        throw new Error(
+          apiError.error
+        );
+      }
+    }
+
     throw new Error(
-      "Login succeeded but no access token was returned."
+      "Unable to sign in. Please try again."
     );
   }
-
-  /* -------------------------------------------------------
-     Validate user
-  ------------------------------------------------------- */
-
-  if (!data?.user) {
-    throw new Error(
-      "Login succeeded but no user information was returned."
-    );
-  }
-
-  /* -------------------------------------------------------
-     Store authentication data
-  ------------------------------------------------------- */
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem(
-      "access",
-      data.access
-    );
-
-    localStorage.setItem(
-      "refresh",
-      data.refresh
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
-  }
-
-  return data;
 }
 
 /* =========================================================
@@ -98,11 +152,15 @@ export async function login(
 ========================================================= */
 
 export function getAccessToken(): string | null {
-  if (typeof window === "undefined") {
+  if (
+    typeof window === "undefined"
+  ) {
     return null;
   }
 
-  return localStorage.getItem("access");
+  return localStorage.getItem(
+    "access"
+  );
 }
 
 /* =========================================================
@@ -110,11 +168,15 @@ export function getAccessToken(): string | null {
 ========================================================= */
 
 export function getRefreshToken(): string | null {
-  if (typeof window === "undefined") {
+  if (
+    typeof window === "undefined"
+  ) {
     return null;
   }
 
-  return localStorage.getItem("refresh");
+  return localStorage.getItem(
+    "refresh"
+  );
 }
 
 /* =========================================================
@@ -122,7 +184,9 @@ export function getRefreshToken(): string | null {
 ========================================================= */
 
 export function getCurrentUser(): LoginUser | null {
-  if (typeof window === "undefined") {
+  if (
+    typeof window === "undefined"
+  ) {
     return null;
   }
 
@@ -137,9 +201,24 @@ export function getCurrentUser(): LoginUser | null {
     return JSON.parse(
       user
     ) as LoginUser;
-  } catch {
+  } catch (error) {
+    console.error(
+      "Failed to parse stored user:",
+      error
+    );
+
     return null;
   }
+}
+
+/* =========================================================
+   IS AUTHENTICATED
+========================================================= */
+
+export function isAuthenticated(): boolean {
+  return Boolean(
+    getAccessToken()
+  );
 }
 
 /* =========================================================
@@ -147,7 +226,9 @@ export function getCurrentUser(): LoginUser | null {
 ========================================================= */
 
 export function logout(): void {
-  if (typeof window === "undefined") {
+  if (
+    typeof window === "undefined"
+  ) {
     return;
   }
 

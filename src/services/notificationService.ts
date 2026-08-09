@@ -55,8 +55,8 @@ export interface MarkAsReadResponse {
 ========================================================= */
 
 export interface MarkAllAsReadResponse {
-  status: string;
-  message: string;
+  status?: string;
+  message?: string;
 }
 
 /* =========================================================
@@ -72,36 +72,29 @@ export const notificationService = {
   ======================================================= */
 
   fetchNotifications: async (): Promise<Notification[]> => {
-    const res = await apiClient.get<
+    const response = await apiClient.get<
       NotificationsResponse | Notification[]
     >("/api/notifications/");
 
     /* -----------------------------------------------------
-       Django REST Framework pagination
-       
-       {
-         "count": 10,
-         "next": "...",
-         "previous": null,
-         "results": [...]
-       }
+       Paginated response
     ----------------------------------------------------- */
 
     if (
-      res &&
-      typeof res === "object" &&
-      "results" in res &&
-      Array.isArray(res.results)
+      response &&
+      typeof response === "object" &&
+      "results" in response &&
+      Array.isArray(response.results)
     ) {
-      return res.results;
+      return response.results;
     }
 
     /* -----------------------------------------------------
        Non-paginated response
     ----------------------------------------------------- */
 
-    if (Array.isArray(res)) {
-      return res;
+    if (Array.isArray(response)) {
+      return response;
     }
 
     return [];
@@ -110,8 +103,13 @@ export const notificationService = {
   /* =======================================================
      GET UNREAD COUNT
 
+     OPTIONAL ENDPOINT
+
      GET
      /api/notifications/unread_count/
+
+     The frontend should NOT depend on this endpoint because
+     it currently does not exist in your backend.
   ======================================================= */
 
   fetchUnreadCount: async (): Promise<UnreadCountResponse> => {

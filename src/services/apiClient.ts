@@ -5,6 +5,37 @@ const API_BASE_URL =
   "http://127.0.0.1:8000";
 
 /* =========================================================
+   PUBLIC ENDPOINTS
+
+   These endpoints can be accessed without authentication.
+
+   IMPORTANT:
+   Keep this list synchronized with your Django permissions.
+========================================================= */
+
+const PUBLIC_ENDPOINTS = [
+  "/api/products/products/",
+  "/api/products/categories/",
+  "/api/auth/login/",
+];
+
+/* =========================================================
+   CHECK PUBLIC ENDPOINT
+========================================================= */
+
+function isPublicEndpoint(
+  endpoint: string
+): boolean {
+  return PUBLIC_ENDPOINTS.some(
+    (publicEndpoint) =>
+      endpoint === publicEndpoint ||
+      endpoint.startsWith(
+        publicEndpoint
+      )
+  );
+}
+
+/* =========================================================
    API ERROR
 ========================================================= */
 
@@ -22,7 +53,7 @@ export class ApiError extends Error {
       data?.message;
 
     /*
-     * Django REST Framework validation errors
+     * Django REST Framework validation errors.
      *
      * Example:
      *
@@ -44,7 +75,8 @@ export class ApiError extends Error {
           data[firstKey];
 
         if (Array.isArray(value)) {
-          message = value.join(", ");
+          message =
+            value.join(", ");
         } else if (
           typeof value === "string"
         ) {
@@ -53,7 +85,8 @@ export class ApiError extends Error {
           value &&
           typeof value === "object"
         ) {
-          message = JSON.stringify(value);
+          message =
+            JSON.stringify(value);
         }
       }
     }
@@ -70,6 +103,58 @@ export class ApiError extends Error {
 }
 
 /* =========================================================
+   CLEAR AUTH DATA
+========================================================= */
+
+function clearAuthData(): void {
+  if (
+    typeof window ===
+    "undefined"
+  ) {
+    return;
+  }
+
+  localStorage.removeItem(
+    "access"
+  );
+
+  localStorage.removeItem(
+    "refresh"
+  );
+
+  localStorage.removeItem(
+    "user"
+  );
+}
+
+/* =========================================================
+   REDIRECT TO LOGIN
+========================================================= */
+
+function redirectToLogin(): void {
+  if (
+    typeof window ===
+    "undefined"
+  ) {
+    return;
+  }
+
+  /*
+   * Prevent redirect loop.
+   */
+
+  if (
+    window.location.pathname ===
+    "/login"
+  ) {
+    return;
+  }
+
+  window.location.href =
+    "/login";
+}
+
+/* =========================================================
    REQUEST
 ========================================================= */
 
@@ -77,8 +162,27 @@ async function request<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  /*
+   * Prevent accidental double slash.
+   */
+
+  const normalizedBaseUrl =
+    API_BASE_URL.replace(
+      /\/$/,
+      ""
+    );
+
+  const normalizedEndpoint =
+    endpoint.startsWith("/")
+      ? endpoint
+      : `/${endpoint}`;
+
   const url =
-    `${API_BASE_URL}${endpoint}`;
+    `${normalizedBaseUrl}${normalizedEndpoint}`;
+
+  /* =======================================================
+     HEADERS
+  ======================================================= */
 
   const headers = new Headers(
     options.headers || {}
@@ -94,7 +198,7 @@ async function request<T = unknown>(
    * Never manually set Content-Type when
    * sending FormData.
    *
-   * Browser automatically creates:
+   * The browser automatically creates:
    *
    * multipart/form-data;
    * boundary=...
@@ -102,7 +206,9 @@ async function request<T = unknown>(
 
   if (
     !(options.body instanceof FormData) &&
-    !headers.has("Content-Type")
+    !headers.has(
+      "Content-Type"
+    )
   ) {
     headers.set(
       "Content-Type",
@@ -111,23 +217,38 @@ async function request<T = unknown>(
   }
 
   /* =======================================================
-     AUTH
+     AUTHENTICATION
   ======================================================= */
 
+  let token: string | null =
+    null;
+
   if (
-    typeof window !== "undefined"
+    typeof window !==
+    "undefined"
   ) {
-    const token =
+    token =
       localStorage.getItem(
         "access"
       );
+  }
 
-    if (token) {
-      headers.set(
-        "Authorization",
-        `Bearer ${token}`
-      );
-    }
+  /*
+   * Public endpoints do not require
+   * an Authorization header.
+   *
+   * Protected endpoints will receive
+   * the token when available.
+   */
+
+  if (
+    token &&
+    !isPublicEndpoint(endpoint)
+  ) {
+    headers.set(
+      "Authorization",
+      `Bearer ${token}`
+    );
   }
 
   /* =======================================================
@@ -142,6 +263,10 @@ async function request<T = unknown>(
   }, 30000);
 
   try {
+    /* =====================================================
+       FETCH
+    ===================================================== */
+
     const response =
       await fetch(url, {
         ...options,
@@ -153,48 +278,53 @@ async function request<T = unknown>(
     clearTimeout(timeout);
 
     /* =====================================================
-       401
+       401 UNAUTHORIZED
     ===================================================== */
 
     if (
       response.status === 401
     ) {
+      /*
+       * IMPORTANT:
+       *
+       * Public endpoints must NEVER
+       * redirect the user to login.
+       *
+       * Example:
+       *
+       * GET /api/products/products/
+       *
+       * should remain public.
+       */
+
       if (
-        typeof window !==
-        "undefined"
+        !isPublicEndpoint(endpoint)
       ) {
-        localStorage.removeItem(
-          "access"
-        );
-
-        localStorage.removeItem(
-          "refresh"
-        );
-
-        localStorage.removeItem(
-          "user"
-        );
-
-        if (
-          window.location.pathname !==
-          "/login"
-        ) {
-          window.location.href =
-            "/login";
-        }
+        clearAuthData();
+        redirectToLogin();
       }
+
+      /*
+       * Always throw the error so
+       * the calling component can
+       * handle it if necessary.
+       */
 
       throw new ApiError(
         401,
         {
           message:
-            "Unauthorized",
+            isPublicEndpoint(
+              endpoint
+            )
+              ? "Unauthorized response from public endpoint."
+              : "Unauthorized",
         }
       );
     }
 
     /* =====================================================
-       403
+       403 FORBIDDEN
     ===================================================== */
 
     if (
@@ -210,7 +340,7 @@ async function request<T = unknown>(
     }
 
     /* =====================================================
-       204
+       204 NO CONTENT
     ===================================================== */
 
     if (
@@ -220,13 +350,17 @@ async function request<T = unknown>(
     }
 
     /* =====================================================
-       READ RESPONSE
+       RESPONSE CONTENT TYPE
     ===================================================== */
 
     const contentType =
       response.headers.get(
         "content-type"
       ) || "";
+
+    /* =====================================================
+       READ RESPONSE
+    ===================================================== */
 
     const responseText =
       await response.text();
@@ -241,8 +375,8 @@ async function request<T = unknown>(
           );
       } catch {
         /*
-         * Backend returned HTML/text
-         * instead of JSON.
+         * Backend returned plain text
+         * or HTML instead of JSON.
          */
 
         data = {
@@ -261,6 +395,9 @@ async function request<T = unknown>(
         "API ERROR",
         {
           url,
+          method:
+            options.method ||
+            "GET",
           status:
             response.status,
           contentType,
@@ -283,8 +420,20 @@ async function request<T = unknown>(
     }
 
     /* =====================================================
-       WRAPPED RESPONSE
+       WRAPPED API RESPONSE
     ===================================================== */
+
+    /*
+     * Your Django ApiResponse can return:
+     *
+     * {
+     *   success: true,
+     *   data: {...},
+     *   message: "..."
+     * }
+     *
+     * In that case return only data.
+     */
 
     if (
       data &&
@@ -303,6 +452,10 @@ async function request<T = unknown>(
   } catch (error: any) {
     clearTimeout(timeout);
 
+    /* =====================================================
+       TIMEOUT
+    ===================================================== */
+
     if (
       error?.name ===
       "AbortError"
@@ -311,12 +464,38 @@ async function request<T = unknown>(
         408,
         {
           message:
-            "Request timeout.",
+            "Request timeout. Please try again.",
         }
       );
     }
 
-    throw error;
+    /* =====================================================
+       API ERROR
+    ===================================================== */
+
+    if (
+      error instanceof ApiError
+    ) {
+      throw error;
+    }
+
+    /* =====================================================
+       NETWORK ERROR
+    ===================================================== */
+
+    console.error(
+      "Network/API request failed:",
+      error
+    );
+
+    throw new ApiError(
+      0,
+      {
+        message:
+          error?.message ||
+          "Unable to connect to the server.",
+      }
+    );
   }
 }
 
@@ -359,8 +538,8 @@ export const apiClient = {
           data instanceof FormData
             ? data
             : data !== undefined
-              ? JSON.stringify(data)
-              : undefined,
+            ? JSON.stringify(data)
+            : undefined,
       }
     ),
 
@@ -382,8 +561,8 @@ export const apiClient = {
           data instanceof FormData
             ? data
             : data !== undefined
-              ? JSON.stringify(data)
-              : undefined,
+            ? JSON.stringify(data)
+            : undefined,
       }
     ),
 
@@ -405,8 +584,8 @@ export const apiClient = {
           data instanceof FormData
             ? data
             : data !== undefined
-              ? JSON.stringify(data)
-              : undefined,
+            ? JSON.stringify(data)
+            : undefined,
       }
     ),
 

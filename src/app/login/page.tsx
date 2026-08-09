@@ -1,96 +1,83 @@
 /* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-  login,
-} from "@/services/auth.service";
+import { login } from "@/services/auth.service";
 
 export default function LoginPage() {
-  const router =
-    useRouter();
+  const router = useRouter();
 
-  /* =====================================================
+  /* =========================================================
      STATE
-  ===================================================== */
+  ========================================================= */
 
-  const [
-    showPassword,
-    setShowPassword,
-  ] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
 
-  const [
-    rememberMe,
-    setRememberMe,
-  ] = useState(false);
+  const [rememberMe, setRememberMe] =
+    useState(false);
 
-  const [
-    email,
-    setEmail,
-  ] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-  const [
-    error,
-    setError,
-  ] = useState("");
+  const [error, setError] =
+    useState("");
 
-  /* =====================================================
+  /* =========================================================
      LOGIN
-  ===================================================== */
+  ========================================================= */
 
   const handleLogin = async (
-    e: React.FormEvent
+    e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
+
+    if (loading) {
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      /* -------------------------------------------------
+      /* -----------------------------------------------------
          LOGIN API
-      ------------------------------------------------- */
+      ----------------------------------------------------- */
 
-      const data =
-        await login(
-          email,
-          password
-        );
+      const data = await login(
+        email.trim(),
+        password
+      );
 
       console.log(
         "Login response:",
         data
       );
 
-      /* -------------------------------------------------
+      /* -----------------------------------------------------
          GET USER ROLE
-         
-         LoginResponse:
-         
+
+         Expected:
+
          {
-           access,
-           refresh,
+           access: "...",
+           refresh: "...",
            user: {
-             id,
-             email,
-             role
+             id: "...",
+             email: "...",
+             role: "CUSTOMER"
            }
          }
-      ------------------------------------------------- */
+      ----------------------------------------------------- */
 
       const role =
         data.user?.role;
@@ -100,13 +87,11 @@ export default function LoginPage() {
         role
       );
 
-      /* -------------------------------------------------
+      /* -----------------------------------------------------
          CUSTOMER
-      ------------------------------------------------- */
+      ----------------------------------------------------- */
 
-      if (
-        role === "CUSTOMER"
-      ) {
+      if (role === "CUSTOMER") {
         router.replace(
           "/Customer-Dashboard"
         );
@@ -114,246 +99,337 @@ export default function LoginPage() {
         return;
       }
 
-      /* -------------------------------------------------
-         ADMIN / OTHER ROLES
-      ------------------------------------------------- */
+      /* -----------------------------------------------------
+         ADMIN / SUPER ADMIN / OTHER
+      ----------------------------------------------------- */
 
       router.replace(
         "/admin-dashboard"
       );
-
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(
         "Login error:",
         err
       );
 
-      setError(
-        err?.message ||
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(
           "Invalid email or password."
-      );
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  /* =====================================================
+  /* =========================================================
      RENDER
-  ===================================================== */
+  ========================================================= */
 
   return (
     <main className="relative min-h-screen overflow-hidden">
 
-      {/* =================================================
-          BACKGROUND
-      ================================================= */}
+      {/* =====================================================
+          BACKGROUND IMAGE
+      ===================================================== */}
 
-      <div className="absolute inset-0 bg-slate-950" />
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage:
+            "url('/images/login-bg.png')",
+        }}
+      />
 
-      {/* =================================================
-          LOGIN SECTION
-      ================================================= */}
+      {/* =====================================================
+          DARK BLUE OVERLAY
+      ===================================================== */}
 
-      <section className="relative z-10 mx-auto flex min-h-screen max-w-6xl items-center px-6 py-16 sm:px-10">
+      <div className="absolute inset-0 bg-slate-950/70" />
 
-        <div className="w-full max-w-md rounded-3xl bg-white/[0.06] p-8 shadow-card ring-1 ring-white/10 backdrop-blur-xl sm:p-10">
+      {/* =====================================================
+          BLUE / AQUA GLOW
+      ===================================================== */}
 
-          {/* =================================================
-              TITLE
-          ================================================= */}
+      <div className="pointer-events-none absolute -left-40 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-cyan-500/20 blur-[120px]" />
 
-          <h1 className="font-display text-3xl font-semibold text-white">
+      <div className="pointer-events-none absolute -right-40 top-1/3 h-[450px] w-[450px] rounded-full bg-blue-600/20 blur-[120px]" />
 
-            Welcome to{" "}
+      {/* =====================================================
+          MAIN CONTENT
+      ===================================================== */}
 
-            <span className="text-aqua-glow">
-              Neapure
-            </span>
+      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-10 sm:px-8">
 
-          </h1>
+        {/* ===================================================
+            LOGIN CARD
+        =================================================== */}
 
-          <p className="mt-3 text-sm text-white/60">
-            Sign in to manage your smart
-            purification system
-          </p>
+        <div className="w-full max-w-md">
 
-          {/* =================================================
-              FORM
-          ================================================= */}
+          <div className="overflow-hidden rounded-3xl border border-white/15 bg-slate-950/55 shadow-2xl shadow-black/30 backdrop-blur-2xl">
 
-          <form
-            className="mt-8 space-y-6"
-            onSubmit={
-              handleLogin
-            }
-          >
+            {/* =================================================
+                CARD TOP ACCENT
+            ================================================= */}
 
-            {/* =============================================
-                EMAIL
-            ============================================= */}
+            <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-300" />
 
-            <label className="block">
+            <div className="p-7 sm:p-9">
 
-              <div className="flex items-center gap-3 rounded-xl border border-white/15 px-4 py-3 transition focus-within:border-aqua-glow focus-within:ring-2 focus-within:ring-aqua-glow/30">
+              {/* ===============================================
+                  LOGO / BRAND
+              =============================================== */}
 
-                <MailIcon
-                  className="h-4 w-4 text-white/40"
-                />
+              <div className="mb-7 flex justify-center">
 
-                <input
-                  type="email"
-                  placeholder="Email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) =>
-                    setEmail(
-                      e.target.value
-                    )
-                  }
-                  required
-                  className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
-                />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 shadow-lg shadow-cyan-500/10">
+
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-blue-600">
+
+                    <span className="text-xl font-bold text-white">
+                      N
+                    </span>
+
+                  </div>
+
+                </div>
 
               </div>
 
-            </label>
+              {/* ===============================================
+                  TITLE
+              =============================================== */}
 
-            {/* =============================================
-                PASSWORD
-            ============================================= */}
+              <div className="text-center">
 
-            <label className="block">
+                <h1 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
 
-              <div className="flex items-center gap-3 rounded-xl border border-white/15 px-4 py-3 transition focus-within:border-aqua-glow focus-within:ring-2 focus-within:ring-aqua-glow/30">
+                  Welcome to{" "}
 
-                <LockIcon
-                  className="h-4 w-4 text-white/40"
-                />
+                  <span className="text-cyan-300">
+                    Neapure
+                  </span>
 
-                <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
-                  placeholder="Password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) =>
-                    setPassword(
-                      e.target.value
-                    )
-                  }
-                  required
-                  className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
-                />
+                </h1>
+
+                <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-white/55">
+                  Sign in to manage your smart
+                  purification system
+                </p>
+
+              </div>
+
+              {/* ===============================================
+                  FORM
+              =============================================== */}
+
+              <form
+                className="mt-8 space-y-5"
+                onSubmit={handleLogin}
+              >
+
+                {/* ===========================================
+                    EMAIL
+                =========================================== */}
+
+                <label className="block">
+
+                  <span className="mb-2 block text-sm font-medium text-white/70">
+                    Email Address
+                  </span>
+
+                  <div className="group flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3.5 transition-all duration-200 focus-within:border-cyan-300/70 focus-within:bg-white/[0.07] focus-within:ring-2 focus-within:ring-cyan-300/10">
+
+                    <MailIcon className="h-5 w-5 shrink-0 text-white/35 transition group-focus-within:text-cyan-300" />
+
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Enter your email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) =>
+                        setEmail(
+                          e.target.value
+                        )
+                      }
+                      required
+                      disabled={loading}
+                      className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+
+                  </div>
+
+                </label>
+
+                {/* ===========================================
+                    PASSWORD
+                =========================================== */}
+
+                <label className="block">
+
+                  <span className="mb-2 block text-sm font-medium text-white/70">
+                    Password
+                  </span>
+
+                  <div className="group flex items-center gap-3 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3.5 transition-all duration-200 focus-within:border-cyan-300/70 focus-within:bg-white/[0.07] focus-within:ring-2 focus-within:ring-cyan-300/10">
+
+                    <LockIcon className="h-5 w-5 shrink-0 text-white/35 transition group-focus-within:text-cyan-300" />
+
+                    <input
+                      type={
+                        showPassword
+                          ? "text"
+                          : "password"
+                      }
+                      name="password"
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) =>
+                        setPassword(
+                          e.target.value
+                        )
+                      }
+                      required
+                      disabled={loading}
+                      className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPassword(
+                          (value) =>
+                            !value
+                        )
+                      }
+                      disabled={loading}
+                      className="shrink-0 text-white/35 transition hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label={
+                        showPassword
+                          ? "Hide password"
+                          : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+
+                  </div>
+
+                </label>
+
+                {/* ===========================================
+                    ERROR
+                =========================================== */}
+
+                {error && (
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-300"
+                  >
+                    {error}
+                  </div>
+                )}
+
+                {/* ===========================================
+                    REMEMBER / FORGOT
+                =========================================== */}
+
+                <div className="flex items-center justify-between gap-4">
+
+                  <label className="flex cursor-pointer items-center gap-2 text-sm text-white/55">
+
+                    <input
+                      type="checkbox"
+                      checked={
+                        rememberMe
+                      }
+                      onChange={(e) =>
+                        setRememberMe(
+                          e.target.checked
+                        )
+                      }
+                      disabled={loading}
+                      className="h-4 w-4 cursor-pointer accent-cyan-400"
+                    />
+
+                    <span>
+                      Remember Me
+                    </span>
+
+                  </label>
+
+                  <button
+                    type="button"
+                    disabled={loading}
+                    className="text-sm font-medium text-cyan-300 transition hover:text-white disabled:opacity-50"
+                  >
+                    Forgot Password?
+                  </button>
+
+                </div>
+
+                {/* ===========================================
+                    LOGIN BUTTON
+                =========================================== */}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/10 transition-all duration-300 hover:from-cyan-300 hover:to-blue-500 hover:shadow-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+
+                  <span className="relative z-10">
+
+                    {loading
+                      ? "Signing In..."
+                      : "SIGN IN"}
+
+                  </span>
+
+                </button>
+
+              </form>
+
+              {/* ===============================================
+                  CREATE ACCOUNT
+              =============================================== */}
+
+              <p className="mt-7 text-center text-sm text-white/45">
+
+                Don't have an account?{" "}
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(
-                      !showPassword
-                    )
-                  }
-                  className="text-white/40 hover:text-white"
-                  aria-label={
-                    showPassword
-                      ? "Hide password"
-                      : "Show password"
-                  }
+                  className="font-medium text-cyan-300 transition hover:text-white"
                 >
-                  {showPassword ? (
-                    <EyeOffIcon className="h-4 w-4" />
-                  ) : (
-                    <EyeIcon className="h-4 w-4" />
-                  )}
+                  Create One
                 </button>
 
-              </div>
-
-            </label>
-
-            {/* =============================================
-                ERROR
-            ============================================= */}
-
-            {error && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
-                {error}
-              </div>
-            )}
-
-            {/* =============================================
-                REMEMBER / FORGOT
-            ============================================= */}
-
-            <div className="flex items-center justify-between text-sm">
-
-              <label className="flex items-center gap-2 text-white/60">
-
-                <input
-                  type="checkbox"
-                  checked={
-                    rememberMe
-                  }
-                  onChange={() =>
-                    setRememberMe(
-                      !rememberMe
-                    )
-                  }
-                  className="accent-cyan-500"
-                />
-
-                Remember Me
-
-              </label>
-
-              <button
-                type="button"
-                className="text-aqua-glow hover:text-white"
-              >
-                Forgot Password?
-              </button>
+              </p>
 
             </div>
+          </div>
 
-            {/* =============================================
-                SIGN IN
-            ============================================= */}
+          {/* ===============================================
+              FOOTER
+          =============================================== */}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-aqua-brand py-3 font-semibold transition hover:bg-aqua-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading
-                ? "Signing In..."
-                : "SIGN IN"}
-            </button>
-
-          </form>
-
-          {/* =================================================
-              CREATE ACCOUNT
-          ================================================= */}
-
-          <p className="mt-6 text-center text-sm text-white/60">
-
-            Don't have an account?{" "}
-
-            <button
-              type="button"
-              className="text-aqua-glow hover:text-white"
-            >
-              Create One
-            </button>
-
+          <p className="mt-5 text-center text-xs text-white/30">
+            © {new Date().getFullYear()} Neapure.
+            All rights reserved.
           </p>
 
         </div>
-
       </section>
-
     </main>
   );
 }
