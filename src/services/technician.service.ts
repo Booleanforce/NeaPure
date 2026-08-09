@@ -136,7 +136,7 @@ export interface UpdateTechnicianPayload {
 export const technicianService = {
   /* =======================================================
      GET ALL TECHNICIANS
-     
+
      GET
      /api/technicians/admin/technicians/
   ======================================================= */
@@ -148,10 +148,16 @@ export const technicianService = {
     const params = new URLSearchParams();
 
     if (search.trim()) {
-      params.append("search", search.trim());
+      params.append(
+        "search",
+        search.trim()
+      );
     }
 
-    params.append("page", String(page));
+    params.append(
+      "page",
+      String(page)
+    );
 
     return apiClient.get<
       TechniciansResponse | Technician[]
@@ -187,7 +193,9 @@ export const technicianService = {
   ======================================================= */
 
   async createTechnician(
-    payload: FormData | CreateTechnicianPayload
+    payload:
+      | FormData
+      | CreateTechnicianPayload
   ): Promise<Technician> {
     return apiClient.post<Technician>(
       "/api/technicians/admin/technicians/",
@@ -201,13 +209,17 @@ export const technicianService = {
      PATCH
      /api/technicians/admin/technicians/{id}/
 
-     IMPORTANT:
-     FormData is supported for profile photo upload.
+     Supports:
+     - JSON
+     - FormData
+     - Profile photo upload
   ======================================================= */
 
   async updateTechnician(
     id: string,
-    payload: FormData | UpdateTechnicianPayload
+    payload:
+      | FormData
+      | UpdateTechnicianPayload
   ): Promise<Technician> {
     return apiClient.patch<Technician>(
       `/api/technicians/admin/technicians/${id}/`,
@@ -306,6 +318,11 @@ export const technicianService = {
 
      PATCH
      /api/technicians/dashboard/my-profile/me/
+
+     Supports:
+     - JSON
+     - FormData
+     - Profile photo upload
   ======================================================= */
 
   async updateMyProfile(
@@ -329,11 +346,14 @@ export const technicianService = {
   async getMyJobs(
     page = 1
   ): Promise<
-    TechniciansResponse | TechnicianJob[]
+    TechnicianJobsResponse | TechnicianJob[]
   > {
     const params = new URLSearchParams();
 
-    params.append("page", String(page));
+    params.append(
+      "page",
+      String(page)
+    );
 
     return apiClient.get<
       TechnicianJobsResponse | TechnicianJob[]
