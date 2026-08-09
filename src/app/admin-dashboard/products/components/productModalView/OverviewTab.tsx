@@ -19,13 +19,17 @@ export default function OverviewTab({
   product,
 }: Props) {
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6">
 
-      {/* Top Cards */}
+      {/* =====================================================
+          TOP CARDS
+      ===================================================== */}
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
 
-        {/* Product Information */}
+        {/* ===================================================
+            PRODUCT INFORMATION
+        =================================================== */}
 
         <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
 
@@ -35,47 +39,65 @@ export default function OverviewTab({
 
           <div className="space-y-3 sm:space-y-4">
 
-            <InfoRow
-              icon={<Package className="h-4 w-4" />}
-              label="Product Name"
-              value={product.name}
-            />
+            {/* Product Name */}
 
             <InfoRow
-              icon={<Tag className="h-4 w-4" />}
+              icon={
+                <Package className="h-4 w-4" />
+              }
+              label="Product Name"
+              value={product.name || "-"}
+            />
+
+            {/* SKU */}
+
+            <InfoRow
+              icon={
+                <Tag className="h-4 w-4" />
+              }
               label="SKU"
               value={product.sku || "-"}
             />
 
+            {/* Slug */}
+
             <InfoRow
-              icon={<Package className="h-4 w-4" />}
+              icon={
+                <Package className="h-4 w-4" />
+              }
               label="Slug"
-              value={product.slug}
+              value={product.slug || "-"}
             />
 
+            {/* Product Type */}
+
             <InfoRow
-              icon={<Boxes className="h-4 w-4" />}
+              icon={
+                <Package className="h-4 w-4" />
+              }
+              label="Product Type"
+              value={product.product_type || "-"}
+            />
+
+            {/* Category */}
+
+            <InfoRow
+              icon={
+                <Boxes className="h-4 w-4" />
+              }
               label="Category"
-              value={product.category?.name || "-"}
-            />
-
-            <InfoRow
-              icon={<Boxes className="h-4 w-4" />}
-              label="Brand"
-              value={product.brand?.name || "-"}
-            />
-
-            <InfoRow
-              icon={<Package className="h-4 w-4" />}
-              label="Model"
-              value={product.model || "-"}
+              value={
+                product.category?.name || "-"
+              }
             />
 
           </div>
-
         </div>
 
-        {/* Pricing */}
+
+        {/* ===================================================
+            PRICING & INVENTORY
+        =================================================== */}
 
         <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
 
@@ -85,46 +107,93 @@ export default function OverviewTab({
 
           <div className="space-y-3 sm:space-y-4">
 
-            <InfoRow
-              icon={<BadgeDollarSign className="h-4 w-4" />}
-              label="Price"
-              value={`৳${product.price}`}
-            />
+            {/* Price */}
 
             <InfoRow
-              icon={<BadgeDollarSign className="h-4 w-4" />}
-              label="Sale Price"
+              icon={
+                <BadgeDollarSign className="h-4 w-4" />
+              }
+              label="Price"
               value={
-                product.sale_price
-                  ? `৳${product.sale_price}`
+                product.price !== undefined &&
+                product.price !== null
+                  ? `৳${product.price}`
                   : "-"
               }
             />
 
-            <InfoRow
-              icon={<Boxes className="h-4 w-4" />}
-              label="Stock"
-              value={`${product.stock}`}
-            />
+            {/* Stock */}
 
             <InfoRow
-              icon={<CheckCircle className="h-4 w-4" />}
+              icon={
+                <Boxes className="h-4 w-4" />
+              }
+              label="Stock"
+              value={product.stock ?? 0}
+            />
+
+            {/* Featured */}
+
+            <InfoRow
+              icon={
+                <CheckCircle className="h-4 w-4" />
+              }
               label="Featured"
               value={
-                product.featured
+                product.is_featured
                   ? "Yes"
                   : "No"
               }
             />
 
-            <InfoRow
-              icon={<CheckCircle className="h-4 w-4" />}
-              label="Status"
-              value={product.status}
-            />
+            {/* Status */}
 
             <InfoRow
-              icon={<Calendar className="h-4 w-4" />}
+              icon={
+                <CheckCircle className="h-4 w-4" />
+              }
+              label="Status"
+              value={product.status || "-"}
+            />
+
+            {/* Warranty */}
+
+            <InfoRow
+              icon={
+                <Calendar className="h-4 w-4" />
+              }
+              label="Warranty"
+              value={
+                product.warranty_duration_months !==
+                undefined
+                  ? `${product.warranty_duration_months} months`
+                  : "-"
+              }
+            />
+
+            {/* Recommended Replacement */}
+
+            <InfoRow
+              icon={
+                <Calendar className="h-4 w-4" />
+              }
+              label="Replacement"
+              value={
+                product.recommended_replacement_months !==
+                  undefined &&
+                product.recommended_replacement_months !==
+                  null
+                  ? `${product.recommended_replacement_months} months`
+                  : "-"
+              }
+            />
+
+            {/* Created */}
+
+            <InfoRow
+              icon={
+                <Calendar className="h-4 w-4" />
+              }
               label="Created"
               value={
                 product.created_at
@@ -136,12 +205,14 @@ export default function OverviewTab({
             />
 
           </div>
-
         </div>
 
       </div>
 
-      {/* Short Description */}
+
+      {/* =====================================================
+          SHORT DESCRIPTION
+      ===================================================== */}
 
       <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
 
@@ -156,29 +227,86 @@ export default function OverviewTab({
 
       </div>
 
-      {/* Full Description */}
+
+      {/* =====================================================
+          PERFECT FOR
+      ===================================================== */}
 
       <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
 
         <h2 className="mb-3 text-base font-semibold text-blue-900 sm:mb-4 sm:text-lg">
-          Description
+          Perfect For
         </h2>
 
-        <div className="prose prose-sm max-w-none text-slate-600 sm:prose-base">
+        <p className="text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+          {product.perfect_for ||
+            "No information available."}
+        </p>
 
-          {product.description || (
-            <p>
-              No description available.
-            </p>
-          )}
+      </div>
 
-        </div>
+
+      {/* =====================================================
+          KEY FEATURES
+      ===================================================== */}
+
+      <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
+
+        <h2 className="mb-3 text-base font-semibold text-blue-900 sm:mb-4 sm:text-lg">
+          Key Features
+        </h2>
+
+        <p className="whitespace-pre-line text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+          {product.key_features ||
+            "No key features available."}
+        </p>
+
+      </div>
+
+
+      {/* =====================================================
+          TECHNICAL SPECIFICATIONS
+      ===================================================== */}
+
+      <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
+
+        <h2 className="mb-3 text-base font-semibold text-blue-900 sm:mb-4 sm:text-lg">
+          Technical Specifications
+        </h2>
+
+        <p className="whitespace-pre-line text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+          {product.technical_specs ||
+            "No technical specifications available."}
+        </p>
+
+      </div>
+
+
+      {/* =====================================================
+          PACKAGE INCLUDES
+      ===================================================== */}
+
+      <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
+
+        <h2 className="mb-3 text-base font-semibold text-blue-900 sm:mb-4 sm:text-lg">
+          Package Includes
+        </h2>
+
+        <p className="whitespace-pre-line text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+          {product.package_includes ||
+            "No package information available."}
+        </p>
 
       </div>
 
     </div>
   );
 }
+
+
+/* =========================================================
+   INFO ROW
+========================================================= */
 
 interface InfoRowProps {
   icon: React.ReactNode;
@@ -192,17 +320,19 @@ function InfoRow({
   value,
 }: InfoRowProps) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-blue-100 pb-3">
+    <div className="flex min-w-0 items-center justify-between gap-4">
 
-      <div className="flex items-center gap-2 text-blue-400 sm:gap-3">
+      <div className="flex min-w-0 items-center gap-2 text-blue-400 sm:gap-3">
 
         {icon}
 
-        <span className="text-sm">{label}</span>
+        <span className="text-sm">
+          {label}
+        </span>
 
       </div>
 
-      <span className="text-right text-sm font-medium text-slate-900">
+      <span className="max-w-[55%] truncate text-right text-sm font-medium text-slate-900">
         {value}
       </span>
 

@@ -1,42 +1,77 @@
 import { apiClient } from "./apiClient";
 
+/* =========================================================
+   LOGIN USER
+========================================================= */
+
 export interface LoginUser {
   id: string;
+
   email: string;
+
   name?: string;
+
   first_name?: string;
+
   last_name?: string;
+
   role?: string;
+
   [key: string]: unknown;
 }
 
+/* =========================================================
+   LOGIN RESPONSE
+========================================================= */
+
 export interface LoginResponse {
   access: string;
+
   refresh: string;
+
   user: LoginUser;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                   Login                                    */
-/* -------------------------------------------------------------------------- */
+/* =========================================================
+   LOGIN
+========================================================= */
 
 export async function login(
   email: string,
   password: string
 ): Promise<LoginResponse> {
-  const data = await apiClient.post<LoginResponse>(
-    "/api/auth/login/",
-    {
-      email,
-      password,
-    }
-  );
+  const data =
+    await apiClient.post<LoginResponse>(
+      "/api/auth/login/",
+      {
+        email,
+        password,
+      }
+    );
+
+  /* -------------------------------------------------------
+     Validate access token
+  ------------------------------------------------------- */
 
   if (!data?.access) {
     throw new Error(
       "Login succeeded but no access token was returned."
     );
   }
+
+  /* -------------------------------------------------------
+     Validate user
+  ------------------------------------------------------- */
+
+  if (!data?.user) {
+    throw new Error(
+      "Login succeeded but no user information was returned."
+    );
+  }
+
+  /* -------------------------------------------------------
+     Store authentication data
+  ------------------------------------------------------- */
 
   if (typeof window !== "undefined") {
     localStorage.setItem(
@@ -58,9 +93,9 @@ export async function login(
   return data;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              Access Token                                  */
-/* -------------------------------------------------------------------------- */
+/* =========================================================
+   ACCESS TOKEN
+========================================================= */
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") {
@@ -70,9 +105,9 @@ export function getAccessToken(): string | null {
   return localStorage.getItem("access");
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              Refresh Token                                 */
-/* -------------------------------------------------------------------------- */
+/* =========================================================
+   REFRESH TOKEN
+========================================================= */
 
 export function getRefreshToken(): string | null {
   if (typeof window === "undefined") {
@@ -82,40 +117,52 @@ export function getRefreshToken(): string | null {
   return localStorage.getItem("refresh");
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              Current User                                  */
-/* -------------------------------------------------------------------------- */
+/* =========================================================
+   CURRENT USER
+========================================================= */
 
 export function getCurrentUser(): LoginUser | null {
   if (typeof window === "undefined") {
     return null;
   }
 
-  const user = localStorage.getItem("user");
+  const user =
+    localStorage.getItem("user");
 
   if (!user) {
     return null;
   }
 
   try {
-    return JSON.parse(user) as LoginUser;
+    return JSON.parse(
+      user
+    ) as LoginUser;
   } catch {
     return null;
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Logout                                    */
-/* -------------------------------------------------------------------------- */
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 export function logout(): void {
   if (typeof window === "undefined") {
     return;
   }
 
-  localStorage.removeItem("access");
-  localStorage.removeItem("refresh");
-  localStorage.removeItem("user");
+  localStorage.removeItem(
+    "access"
+  );
 
-  window.location.href = "/login";
+  localStorage.removeItem(
+    "refresh"
+  );
+
+  localStorage.removeItem(
+    "user"
+  );
+
+  window.location.href =
+    "/login";
 }

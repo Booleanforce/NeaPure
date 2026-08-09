@@ -1,13 +1,57 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/immutability */
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+
 import ImageUploader from "@/components/ui/ImageUploader";
 import { productService } from "@/services/product.service";
 import ProductForm from "./ProductForm";
 import { Bounce, toast } from "react-toastify";
+
+/* =========================================================
+   TYPES
+========================================================= */
+
+type ProductStatus = "ACTIVE" | "INACTIVE";
+
+interface EditProductFormState {
+  name: string;
+  slug: string;
+  sku: string;
+
+  category_id: string;
+
+  product_type: string;
+
+  price: string;
+
+  perfect_for: string;
+
+  short_description: string;
+
+  key_features: string;
+
+  technical_specs: string;
+
+  package_includes: string;
+
+  warranty_duration_months: string;
+
+  recommended_replacement_months: string;
+
+  status: ProductStatus;
+
+  is_featured: boolean;
+
+  image_url: string;
+}
+
+/* =========================================================
+   PROPS
+========================================================= */
 
 interface Props {
   isOpen: boolean;
@@ -16,52 +60,95 @@ interface Props {
   onUpdated: () => void;
 }
 
+/* =========================================================
+   INITIAL FORM
+========================================================= */
+
+const initialForm: EditProductFormState = {
+  name: "",
+  slug: "",
+  sku: "",
+
+  category_id: "",
+
+  product_type: "FILTER",
+
+  price: "",
+
+  perfect_for: "",
+
+  short_description: "",
+
+  key_features: "",
+
+  technical_specs: "",
+
+  package_includes: "",
+
+  warranty_duration_months: "12",
+
+  recommended_replacement_months: "6",
+
+  status: "ACTIVE",
+
+  is_featured: false,
+
+  image_url: "",
+};
+
+/* =========================================================
+   COMPONENT
+========================================================= */
+
 export default function EditProductModal({
   isOpen,
   slug,
   onClose,
   onUpdated,
 }: Props) {
+  /* =======================================================
+     LOADING / SAVING
+  ======================================================= */
+
   const [loading, setLoading] = useState(false);
+
   const [saving, setSaving] = useState(false);
 
+  /* =======================================================
+     IMAGE
+  ======================================================= */
+
   const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [preview, setPreview] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
-    name: "",
-    slug: "",
-    sku: "",
-    category_id: "",
-    product_type: "FILTER",
-    price: "",
-    perfect_for: "",
-    short_description: "",
-    key_features: "",
-    technical_specs: "",
-    package_includes: "",
-    warranty_duration_months: "12",
-    recommended_replacement_months: "6",
-    status: "ACTIVE",
-    is_featured: false,
-    image_url: "",
-  });
+  /* =======================================================
+     FORM
+  ======================================================= */
 
-  /* -------------------------------------------------------------------------- */
-  /*                              Load Product                                  */
-  /* -------------------------------------------------------------------------- */
+  const [form, setForm] =
+    useState<EditProductFormState>(initialForm);
+
+  /* =======================================================
+     LOAD PRODUCT WHEN MODAL OPENS
+  ======================================================= */
 
   useEffect(() => {
-    if (isOpen && slug) {
-      setImageFile(null);
-      setPreview(null);
-      loadProduct();
+    if (!isOpen || !slug) {
+      return;
     }
+
+    setImageFile(null);
+    setPreview(null);
+
+    loadProduct();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, slug]);
 
-  /* -------------------------------------------------------------------------- */
-  /*                            Cleanup Preview                                 */
-  /* -------------------------------------------------------------------------- */
+  /* =======================================================
+     CLEANUP PREVIEW URL
+  ======================================================= */
 
   useEffect(() => {
     return () => {
@@ -71,41 +158,81 @@ export default function EditProductModal({
     };
   }, [preview]);
 
-  /* -------------------------------------------------------------------------- */
-  /*                            Get Product                                     */
-  /* -------------------------------------------------------------------------- */
+  /* =======================================================
+     GET PRODUCT
+  ======================================================= */
 
   const loadProduct = async () => {
-    if (!slug) return;
+    if (!slug) {
+      return;
+    }
 
     try {
       setLoading(true);
 
-      const product = await productService.getProduct(slug);
+      const product =
+        await productService.getProduct(slug);
 
-      /*
-       * Find primary product image
-       */
-      const primaryImage = product.images?.find(
-        (img) => img.is_primary
-      );
+      /* -----------------------------------------------------
+         FIND PRIMARY IMAGE
+      ----------------------------------------------------- */
 
-      /*
-       * Try all possible image fields
-       */
+      const primaryImage =
+        product.images?.find(
+          (img) => img.is_primary
+        );
+
+      /* -----------------------------------------------------
+         FALLBACK TO FIRST IMAGE
+      ----------------------------------------------------- */
+
+      const firstImage =
+        product.images?.[0];
+
+      /* -----------------------------------------------------
+         GET IMAGE URL
+         
+         Django ProductDetailSerializer returns:
+         
+         images: [
+           {
+             image,
+             image_url,
+             is_primary
+           }
+         ]
+      ----------------------------------------------------- */
+
       const productImage =
         primaryImage?.image_url ||
         primaryImage?.image ||
-        product.thumbnail ||
-        product.image ||
+        firstImage?.image_url ||
+        firstImage?.image ||
+        product.primary_image ||
         "";
 
+      /* -----------------------------------------------------
+         NORMALIZE STATUS
+      ----------------------------------------------------- */
+
+      const productStatus: ProductStatus =
+        product.status === "INACTIVE"
+          ? "INACTIVE"
+          : "ACTIVE";
+
+      /* -----------------------------------------------------
+         SET FORM
+      ----------------------------------------------------- */
+
       setForm({
-        name: product.name || "",
+        name:
+          product.name || "",
 
-        slug: product.slug || "",
+        slug:
+          product.slug || "",
 
-        sku: product.sku || "",
+        sku:
+          product.sku || "",
 
         category_id:
           product.category?.id ||
@@ -113,10 +240,14 @@ export default function EditProductModal({
           "",
 
         product_type:
-          product.product_type || "FILTER",
+          product.product_type ||
+          "FILTER",
 
         price:
-          product.price?.toString() || "",
+          product.price !== undefined &&
+          product.price !== null
+            ? product.price.toString()
+            : "",
 
         perfect_for:
           product.perfect_for || "",
@@ -134,139 +265,182 @@ export default function EditProductModal({
           product.package_includes || "",
 
         warranty_duration_months:
-          product.warranty_duration_months?.toString() || "12",
+          product.warranty_duration_months !==
+            undefined &&
+          product.warranty_duration_months !==
+            null
+            ? product.warranty_duration_months.toString()
+            : "12",
 
         recommended_replacement_months:
-          product.recommended_replacement_months?.toString() || "6",
+          product.recommended_replacement_months !==
+            undefined &&
+          product.recommended_replacement_months !==
+            null
+            ? product.recommended_replacement_months.toString()
+            : "6",
 
         status:
-          product.status || "ACTIVE",
+          productStatus,
 
         is_featured:
-          product.is_featured ??
-          product.featured ??
-          false,
+          product.is_featured ?? false,
 
-        /*
-         * Existing product image
-         */
-        image_url: productImage,
+        image_url:
+          productImage,
       });
     } catch (error) {
-      console.error("Failed to load product:", error);
+      console.error(
+        "Failed to load product:",
+        error
+      );
 
-      toast.error("Failed to load product.", {
-        position: "bottom-center",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.error(
+        "Failed to load product.",
+        {
+          position: "bottom-center",
+          autoClose: 5000,
+          theme: "light",
+          transition: Bounce,
+        }
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------------------------------------------------------------------------- */
-  /*                           Handle Image                                     */
-  /* -------------------------------------------------------------------------- */
+  /* =======================================================
+     HANDLE IMAGE
+  ======================================================= */
 
-  const handleImage = (file: File | null) => {
-    /*
-     * Remove previous preview URL
-     */
+  const handleImage = (
+    file: File | null
+  ) => {
+    /* -----------------------------------------------------
+       Remove previous preview
+    ----------------------------------------------------- */
+
     if (preview) {
       URL.revokeObjectURL(preview);
     }
 
     setImageFile(file);
 
-    /*
-     * User removed the new image
-     *
-     * Keep form.image_url so the existing
-     * product image can still be displayed.
-     */
+    /* -----------------------------------------------------
+       No file
+    ----------------------------------------------------- */
+
     if (!file) {
       setPreview(null);
       return;
     }
 
-    /*
-     * Show newly selected image immediately
-     */
-    const newPreview = URL.createObjectURL(file);
+    /* -----------------------------------------------------
+       Create new preview
+    ----------------------------------------------------- */
+
+    const newPreview =
+      URL.createObjectURL(file);
 
     setPreview(newPreview);
   };
 
-  /* -------------------------------------------------------------------------- */
-  /*                            Save Product                                    */
-  /* -------------------------------------------------------------------------- */
+  /* =======================================================
+     SAVE PRODUCT
+  ======================================================= */
 
   const handleSave = async () => {
-    if (!slug) return;
+    if (!slug) {
+      return;
+    }
 
     try {
       setSaving(true);
 
-      /*
-       * Product information
-       */
+      /* ===================================================
+         PRODUCT PAYLOAD
+      =================================================== */
+
       const payload = {
-        category_id: form.category_id || null,
+        category_id:
+          form.category_id || null,
 
-        product_type: form.product_type,
+        product_type:
+          form.product_type,
 
-        name: form.name.trim(),
+        name:
+          form.name.trim(),
 
-        slug: form.slug.trim(),
+        slug:
+          form.slug.trim(),
 
-        sku: form.sku.trim(),
+        sku:
+          form.sku.trim(),
 
-        price: Number(form.price),
+        price:
+          Number(form.price),
 
-        perfect_for: form.perfect_for,
+        perfect_for:
+          form.perfect_for,
 
-        short_description: form.short_description,
+        short_description:
+          form.short_description,
 
-        key_features: form.key_features,
+        key_features:
+          form.key_features,
 
-        technical_specs: form.technical_specs,
+        technical_specs:
+          form.technical_specs,
 
-        package_includes: form.package_includes,
+        package_includes:
+          form.package_includes,
 
         warranty_duration_months:
-          Number(form.warranty_duration_months),
+          Number(
+            form.warranty_duration_months
+          ),
 
         recommended_replacement_months:
-          Number(form.recommended_replacement_months),
+          Number(
+            form.recommended_replacement_months
+          ),
 
-        status: form.status,
+        status:
+          form.status,
 
-        is_featured: form.is_featured,
+        is_featured:
+          form.is_featured,
       };
 
-      /* ---------------------------------------------------------------------- */
-      /* STEP 1: Update Product Information                                     */
-      /* ---------------------------------------------------------------------- */
+      /* ===================================================
+         DEBUG
+      =================================================== */
+
+      console.log(
+        "Updating Product:"
+      );
+
+      console.table(payload);
+
+      /* ===================================================
+         STEP 1
+         UPDATE PRODUCT INFORMATION
+      =================================================== */
 
       await productService.updateProduct(
         slug,
         payload
       );
 
-      /* ---------------------------------------------------------------------- */
-      /* STEP 2: Upload New Image                                               */
-      /* ---------------------------------------------------------------------- */
+      /* ===================================================
+         STEP 2
+         UPLOAD NEW IMAGE
+         
+         Only upload when the user selected
+         a new image.
+      =================================================== */
 
       if (imageFile) {
-        /*
-         * IMPORTANT:
-         * Use the original slug for the upload endpoint.
-         *
-         * This is safer if the user changed the slug
-         * while editing the product.
-         */
         await productService.uploadImage(
           slug,
           imageFile,
@@ -275,36 +449,68 @@ export default function EditProductModal({
         );
       }
 
-      /* ---------------------------------------------------------------------- */
-      /* STEP 3: Refresh Product List                                           */
-      /* ---------------------------------------------------------------------- */
+      /* ===================================================
+         STEP 3
+         REFRESH PRODUCT LIST
+      =================================================== */
 
       await onUpdated();
 
-      /* ---------------------------------------------------------------------- */
-      /* STEP 4: Success                                                        */
-      /* ---------------------------------------------------------------------- */
+      /* ===================================================
+         STEP 4
+         SUCCESS
+      =================================================== */
 
       toast.success(
         "Product updated successfully!",
         {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+          position:
+            "bottom-center",
+
+          autoClose:
+            5000,
+
+          hideProgressBar:
+            false,
+
+          closeOnClick:
+            true,
+
+          pauseOnHover:
+            true,
+
+          draggable:
+            true,
+
+          progress:
+            undefined,
+
+          theme:
+            "light",
+
+          transition:
+            Bounce,
         }
       );
 
-      /* ---------------------------------------------------------------------- */
-      /* STEP 5: Close Modal                                                    */
-      /* ---------------------------------------------------------------------- */
+      /* ===================================================
+         STEP 5
+         CLOSE
+      =================================================== */
 
       onClose();
+
+      /* ===================================================
+         RESET
+      =================================================== */
+
+      setForm({
+        ...initialForm,
+      });
+
+      setImageFile(null);
+
+      setPreview(null);
     } catch (error) {
       console.error(
         "Failed to update product:",
@@ -312,17 +518,36 @@ export default function EditProductModal({
       );
 
       toast.error(
-        "Failed to update product.",
+        error instanceof Error
+          ? error.message
+          : "Failed to update product.",
         {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+          position:
+            "bottom-center",
+
+          autoClose:
+            5000,
+
+          hideProgressBar:
+            false,
+
+          closeOnClick:
+            true,
+
+          pauseOnHover:
+            true,
+
+          draggable:
+            true,
+
+          progress:
+            undefined,
+
+          theme:
+            "light",
+
+          transition:
+            Bounce,
         }
       );
     } finally {
@@ -330,21 +555,25 @@ export default function EditProductModal({
     }
   };
 
-  /* -------------------------------------------------------------------------- */
-  /*                              Modal                                         */
-  /* -------------------------------------------------------------------------- */
+  /* =======================================================
+     MODAL
+  ======================================================= */
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+
       <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-        {/* ------------------------------------------------------------------ */}
-        {/* Header                                                             */}
-        {/* ------------------------------------------------------------------ */}
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
         <div className="flex items-center justify-between border-b border-blue-100 bg-blue-50 px-8 py-5">
+
           <h2 className="text-2xl font-bold text-blue-900">
             Edit Product
           </h2>
@@ -358,46 +587,62 @@ export default function EditProductModal({
           >
             <X className="h-5 w-5" />
           </button>
+
         </div>
 
-        {/* ------------------------------------------------------------------ */}
-        {/* Content                                                            */}
-        {/* ------------------------------------------------------------------ */}
+        {/* =================================================
+            CONTENT
+        ================================================= */}
 
         {loading ? (
+
           <div className="flex h-96 items-center justify-center text-sm text-blue-500">
             Loading...
           </div>
+
         ) : (
+
           <>
+
             <div className="flex-1 overflow-y-auto bg-gray-50 p-8">
 
-              {/* Product Image */}
+              {/* ===========================================
+                  PRODUCT IMAGE
+              =========================================== */}
 
               <div className="mb-8">
+
                 <ImageUploader
                   preview={
                     preview ||
                     form.image_url ||
                     null
                   }
-                  onFileChange={handleImage}
+                  onFileChange={
+                    handleImage
+                  }
                 />
+
               </div>
 
-              {/* Product Form */}
+              {/* ===========================================
+                  PRODUCT FORM
+              =========================================== */}
 
               <ProductForm
                 form={form}
                 setForm={setForm}
               />
+
             </div>
 
-            {/* ---------------------------------------------------------------- */}
-            {/* Footer                                                           */}
-            {/* ---------------------------------------------------------------- */}
+            {/* =============================================
+                FOOTER
+            ============================================= */}
 
             <div className="flex justify-end gap-4 border-t border-blue-100 bg-white px-8 py-5">
+
+              {/* CANCEL */}
 
               <button
                 type="button"
@@ -408,10 +653,15 @@ export default function EditProductModal({
                 Cancel
               </button>
 
+              {/* SAVE */}
+
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={saving}
+                disabled={
+                  saving ||
+                  loading
+                }
                 className="rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving
@@ -420,9 +670,13 @@ export default function EditProductModal({
               </button>
 
             </div>
+
           </>
+
         )}
+
       </div>
+
     </div>
   );
 }
