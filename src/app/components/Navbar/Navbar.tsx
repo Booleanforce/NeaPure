@@ -1,25 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Phone, ShoppingCart, Droplet, Menu, X } from "lucide-react";
+import { useState,useEffect } from "react";
+import { Phone, ShoppingCart, Droplet, Menu, X, LogIn} from "lucide-react";
+
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
   { label: "Smart Water Care", href: "/smart-water-care" },
-  { label: "Technology", href: "/technology" },
   { label: "About Us", href: "/about-us" },
-  { label: "Support", href: "/support" },
+  { label: "Login", href: "/login" },
 ];
 
 export default function Navbar() {
   const [active, setActive] = useState("Home");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const cartCount = 2;
+  useEffect(() => {
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
 
+    // Always show at the top
+    if (currentScrollY < 20) {
+      setShowNavbar(true);
+    }
+    // Scrolling down -> hide
+    else if (currentScrollY > lastScrollY) {
+      setShowNavbar(false);
+    }
+    // Scrolling up -> show
+    else {
+      setShowNavbar(true);
+    }
+
+    setLastScrollY(currentScrollY);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+}, [lastScrollY]);
   return (
-    <header className="w-full bg-[#0a1628] border-b border-white/10">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#0a1628] transition-transform duration-300 ${
+        showNavbar ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3 lg:px-10">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
@@ -61,6 +92,13 @@ export default function Navbar() {
 
         {/* Right side actions */}
         <div className="hidden items-center gap-4 lg:flex">
+          <Link
+            href="/login"
+            className="flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-sky-600"
+          >
+            <LogIn className="h-4 w-4" />
+            Login
+          </Link>
           <a
             href="tel:09613123123"
             className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:border-sky-400/60"
@@ -117,6 +155,14 @@ export default function Navbar() {
           </ul>
 
           <div className="mt-5 flex items-center gap-4">
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 rounded-full bg-sky-500 px-4 py-2 text-sm font-semibold text-white"
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
             <a
               href="tel:09613123123"
               className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white"
