@@ -191,6 +191,7 @@ export default function Footer() {
               width={95}
               height={90}
               className="hidden object-contain sm:absolute sm:bottom-0 sm:left-0 sm:block"
+              style={{ height: "auto" }}
             />
 
             <div className="flex flex-col">

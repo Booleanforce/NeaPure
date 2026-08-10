@@ -39,7 +39,11 @@ export default function ProductForm({
             </label>
 
             <input
+<<<<<<< HEAD
               className={inputClass}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.name}
               onChange={(e) =>
                 setForm({
@@ -56,7 +60,11 @@ export default function ProductForm({
             </label>
 
             <input
+<<<<<<< HEAD
               className={inputClass}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.slug}
               onChange={(e) =>
                 setForm({
@@ -73,7 +81,11 @@ export default function ProductForm({
             </label>
 
             <input
+<<<<<<< HEAD
               className={inputClass}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.sku}
               onChange={(e) =>
                 setForm({
@@ -113,8 +125,13 @@ export default function ProductForm({
                 Product Type
               </label>
 
+<<<<<<< HEAD
               <select
                 className={inputClass}
+=======
+            <select
+                className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
                 value={form.product_type}
                 onChange={(e) =>
                   setForm({
@@ -146,7 +163,11 @@ export default function ProductForm({
 
             <input
               type="number"
+<<<<<<< HEAD
               className={inputClass}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.price}
               onChange={(e) =>
                 setForm({
@@ -163,7 +184,11 @@ export default function ProductForm({
             </label>
 
             <select
+<<<<<<< HEAD
               className={inputClass}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.status}
               onChange={(e) =>
                 setForm({
@@ -201,7 +226,11 @@ export default function ProductForm({
 
             <textarea
               rows={3}
+<<<<<<< HEAD
               className={`${inputClass} resize-none`}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.perfect_for}
               onChange={(e) =>
                 setForm({
@@ -219,7 +248,11 @@ export default function ProductForm({
 
             <textarea
               rows={3}
+<<<<<<< HEAD
               className={`${inputClass} resize-none`}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.short_description}
               onChange={(e) =>
                 setForm({
@@ -238,7 +271,11 @@ export default function ProductForm({
 
             <textarea
               rows={5}
+<<<<<<< HEAD
               className={`${inputClass} resize-none`}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.key_features}
               onChange={(e) =>
                 setForm({
@@ -257,7 +294,11 @@ export default function ProductForm({
 
             <textarea
               rows={5}
+<<<<<<< HEAD
               className={`${inputClass} resize-none`}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.technical_specs}
               onChange={(e) =>
                 setForm({
@@ -276,7 +317,11 @@ export default function ProductForm({
 
             <textarea
               rows={5}
+<<<<<<< HEAD
               className={`${inputClass} resize-none`}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.package_includes}
               onChange={(e) =>
                 setForm({
@@ -307,7 +352,11 @@ export default function ProductForm({
 
             <input
               type="number"
+<<<<<<< HEAD
               className={inputClass}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={form.warranty_duration_months}
               onChange={(e) =>
                 setForm({
@@ -326,7 +375,11 @@ export default function ProductForm({
 
             <input
               type="number"
+<<<<<<< HEAD
               className={inputClass}
+=======
+              className="w-full rounded-lg border p-3 text-gray-900"
+>>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               value={
                 form.recommended_replacement_months
               }

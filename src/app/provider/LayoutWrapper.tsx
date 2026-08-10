@@ -12,7 +12,9 @@ export default function LayoutWrapper({
   const pathname = usePathname();
 
   const isHiddenLayoutRoute =
-    pathname.startsWith("/admin") || pathname === "/login";
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/Customer-Dashboard") ||
+    pathname === "/login";
 
   if (isHiddenLayoutRoute) {
     return <>{children}</>;
