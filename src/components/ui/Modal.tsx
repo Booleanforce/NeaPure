@@ -68,11 +68,7 @@ export function Modal({
         type="button"
         aria-label="Close modal"
         onClick={onClose}
-<<<<<<< HEAD
-        className="absolute inset-0 bg-blue-950/40 backdrop-blur-sm"
-=======
         className="absolute inset-0 cursor-default bg-blue-950/40 backdrop-blur-sm"
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
       />
 
       {/* Modal */}

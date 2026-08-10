@@ -128,13 +128,6 @@ export default function ProductPage() {
   ===================================================== */
 
   return (
-<<<<<<< HEAD
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-=======
     <div className="space-y-6">
 
       {/* =================================================
@@ -145,27 +138,16 @@ export default function ProductPage() {
 
         <div>
           <h1 className="text-2xl font-bold text-blue-950 sm:text-3xl">
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
             Products
           </h1>
 
           <p className="mt-1 text-sm text-slate-500">
-<<<<<<< HEAD
-            Manage your product inventory, featured items, and product status.
-=======
             Manage your product inventory,
             featured items, and product status.
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
           </p>
         </div>
 
         <button
-<<<<<<< HEAD
-          onClick={() => setAddOpen(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-blue-700 hover:shadow-lg active:scale-95"
-        >
-          <Plus size={18} />
-=======
           type="button"
           onClick={() =>
             setAddOpen(true)
@@ -174,70 +156,10 @@ export default function ProductPage() {
         >
           <Plus size={18} />
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
           Add Product
         </button>
       </div>
 
-<<<<<<< HEAD
-      {/* Statistics */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {/* Total Products */}
-        <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">
-                Total Products
-              </p>
-
-              <h2 className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
-                {products.length}
-              </h2>
-            </div>
-
-            <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
-              <Package size={28} />
-            </div>
-          </div>
-        </div>
-
-        {/* Featured Products */}
-        <div className="group rounded-2xl border border-yellow-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-yellow-600">
-                Featured Products
-              </p>
-
-              <h2 className="mt-2 text-4xl font-bold tracking-tight text-yellow-700">
-                {featuredProducts}
-              </h2>
-            </div>
-
-            <div className="rounded-xl bg-yellow-100 p-3 text-yellow-600">
-              <Star size={28} />
-            </div>
-          </div>
-        </div>
-
-        {/* Active Products */}
-        <div className="group rounded-2xl border border-green-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 xl:col-span-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-green-600">
-                Active Products
-              </p>
-
-              <h2 className="mt-2 text-4xl font-bold tracking-tight text-green-700">
-                {activeProducts}
-              </h2>
-            </div>
-
-            <div className="rounded-xl bg-green-100 p-3 text-green-600">
-              <BadgeCheck size={28} />
-            </div>
-          </div>
-=======
       {/* =================================================
           STATISTICS
       ================================================= */}
@@ -326,20 +248,9 @@ export default function ProductPage() {
 
           </div>
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Search */}
-      
-        <ProductSearch
-          value={search}
-          onChange={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
-=======
       {/* =================================================
           SEARCH
       ================================================= */}
@@ -380,7 +291,6 @@ export default function ProductPage() {
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
         />
      
 
@@ -395,23 +305,10 @@ export default function ProductPage() {
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Pagination */}
-      <div className="flex justify-center">
-        <ProductPagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-        />
-      </div>
-
-      {/* Add Product Modal */}
-=======
       {/* =================================================
           ADD PRODUCT MODAL
       ================================================= */}
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
       <AddProductModal
         isOpen={addOpen}
         onClose={() =>

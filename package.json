@@ -15,12 +15,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-toastify": "^11.1.0",
-<<<<<<< HEAD
-    "slugify": "^1.6.9"
-=======
     "slugify": "^1.6.9",
     "toastify": "^2.0.1"
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

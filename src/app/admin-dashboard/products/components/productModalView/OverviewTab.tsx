@@ -19,11 +19,7 @@ export default function OverviewTab({
   product,
 }: Props) {
   return (
-<<<<<<< HEAD
-    <div className="space-y-4 sm:space-y-6">
-=======
     <div className="space-y-5 sm:space-y-6">
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
       {/* =====================================================
           TOP CARDS
@@ -42,11 +38,8 @@ export default function OverviewTab({
           </h2>
 
           <div className="space-y-3 sm:space-y-4">
-<<<<<<< HEAD
-=======
 
             {/* Product Name */}
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
             <InfoRow
               icon={
@@ -102,27 +95,19 @@ export default function OverviewTab({
         </div>
 
 
-<<<<<<< HEAD
-        <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
-
-=======
         {/* ===================================================
             PRICING & INVENTORY
         =================================================== */}
 
         <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
           <h2 className="mb-4 text-base font-semibold text-blue-900 sm:mb-5 sm:text-lg">
             Pricing & Inventory
           </h2>
 
           <div className="space-y-3 sm:space-y-4">
-<<<<<<< HEAD
-=======
 
             {/* Price */}
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
             <InfoRow
               icon={
@@ -225,17 +210,12 @@ export default function OverviewTab({
       </div>
 
 
-<<<<<<< HEAD
-      <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
-
-=======
       {/* =====================================================
           SHORT DESCRIPTION
       ===================================================== */}
 
       <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
         <h2 className="mb-3 text-base font-semibold text-blue-900 sm:mb-4 sm:text-lg">
           Short Description
         </h2>
@@ -248,15 +228,6 @@ export default function OverviewTab({
       </div>
 
 
-<<<<<<< HEAD
-      <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50 sm:rounded-2xl sm:p-6">
-
-        <h2 className="mb-3 text-base font-semibold text-blue-900 sm:mb-4 sm:text-lg">
-          Description
-        </h2>
-
-        <div className="prose prose-sm max-w-none text-slate-600 sm:prose-base">
-=======
       {/* =====================================================
           PERFECT FOR
       ===================================================== */}
@@ -271,7 +242,6 @@ export default function OverviewTab({
           {product.perfect_for ||
             "No information available."}
         </p>
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
       </div>
 
@@ -350,19 +320,6 @@ function InfoRow({
   value,
 }: InfoRowProps) {
   return (
-<<<<<<< HEAD
-    <div className="flex items-center justify-between gap-3 border-b border-blue-100 pb-3">
-
-      <div className="flex items-center gap-2 text-blue-400 sm:gap-3">
-
-        {icon}
-
-        <span className="text-sm">{label}</span>
-
-      </div>
-
-      <span className="text-right text-sm font-medium text-slate-900">
-=======
     <div className="flex min-w-0 items-center justify-between gap-4">
 
       <div className="flex min-w-0 items-center gap-2 text-blue-400 sm:gap-3">
@@ -376,7 +333,6 @@ function InfoRow({
       </div>
 
       <span className="max-w-[55%] truncate text-right text-sm font-medium text-slate-900">
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
         {value}
       </span>
 

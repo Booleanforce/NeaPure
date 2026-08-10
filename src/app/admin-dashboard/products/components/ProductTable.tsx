@@ -24,22 +24,15 @@ export default function ProductTable({
   const [editSlug, setEditSlug] = useState<string | null>(null);
   const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-<<<<<<< HEAD
-=======
 
   /* -------------------------------------------------------------------------- */
   /*                              Status Badge                                  */
   /* -------------------------------------------------------------------------- */
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case "ACTIVE":
         return "bg-emerald-100 text-emerald-700";
-<<<<<<< HEAD
-=======
-
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
       case "INACTIVE":
         return "bg-red-100 text-red-700";
       default:
@@ -47,18 +40,6 @@ export default function ProductTable({
     }
   };
 
-<<<<<<< HEAD
-  const handleDelete = async () => {
-    if (!deleteSlug) return;
-
-    try {
-      setDeleting(true);
-      await productService.deleteProduct(deleteSlug);
-      await onRefresh();
-      setDeleteSlug(null);
-    } catch (error) {
-      console.error(error);
-=======
   /* -------------------------------------------------------------------------- */
   /*                              Product Image                                 */
   /* -------------------------------------------------------------------------- */
@@ -85,19 +66,15 @@ export default function ProductTable({
     } catch (error) {
       console.error("Failed to delete product:", error);
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
       alert("Failed to delete product.");
     } finally {
       setDeleting(false);
     }
   };
-<<<<<<< HEAD
-=======
 
   /* -------------------------------------------------------------------------- */
   /*                                Loading                                      */
   /* -------------------------------------------------------------------------- */
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
   if (loading) {
     return (
@@ -107,13 +84,10 @@ export default function ProductTable({
     );
   }
 
-<<<<<<< HEAD
-=======
   /* -------------------------------------------------------------------------- */
   /*                              Empty State                                    */
   /* -------------------------------------------------------------------------- */
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
   if (products.length === 0) {
     return (
       <div className="py-16 text-center text-sm text-blue-400">
@@ -122,15 +96,6 @@ export default function ProductTable({
     );
   }
 
-<<<<<<< HEAD
-  return (
-    <>
-      {/* ---------- Mobile / tablet: stacked cards (below md) ---------- */}
-      <div className="grid grid-cols-1 gap-3 bg-blue-50/40 p-3 sm:grid-cols-2 md:hidden">
-        {products.map((product) => {
-          const avatar = product.name?.charAt(0).toUpperCase() || "P";
-
-=======
   /* -------------------------------------------------------------------------- */
   /*                                  Render                                     */
   /* -------------------------------------------------------------------------- */
@@ -148,7 +113,6 @@ export default function ProductTable({
 
           const productImage = getProductImage(product);
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
           return (
             <div
               key={product.slug}
@@ -156,17 +120,11 @@ export default function ProductTable({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-<<<<<<< HEAD
-                  {product.thumbnail ? (
-                    <img
-                      src={product.thumbnail}
-=======
 
                   {/* Product Image */}
                   {productImage ? (
                     <img
                       src={productImage}
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
                       alt={product.name}
                       className="h-11 w-11 shrink-0 rounded-lg object-cover ring-2 ring-blue-100"
                     />
@@ -175,27 +133,6 @@ export default function ProductTable({
                       {avatar}
                     </div>
                   )}
-<<<<<<< HEAD
-
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-slate-900">
-                      {product.name}
-                    </p>
-                    <p className="truncate text-xs text-blue-400">
-                      {product.slug}
-                    </p>
-                  </div>
-                </div>
-
-                <span
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadge(
-                    product.status
-                  )}`}
-                >
-                  {product.status ?? "N/A"}
-                </span>
-              </div>
-=======
 
                   {/* Product Name */}
                   <div className="min-w-0">
@@ -512,7 +449,6 @@ export default function ProductTable({
       {/* ====================================================================== */}
       {/* Product View Modal                                                    */}
       {/* ====================================================================== */}
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
               <div className="mt-3 space-y-1.5 border-t border-blue-50 pt-3 text-sm">
                 <div className="flex items-center justify-between text-slate-600">
@@ -717,13 +653,10 @@ export default function ProductTable({
         onClose={() => setViewSlug(null)}
       />
 
-<<<<<<< HEAD
-=======
       {/* ====================================================================== */}
       {/* Edit Product Modal                                                    */}
       {/* ====================================================================== */}
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
       <EditProductModal
         isOpen={!!editSlug}
         slug={editSlug}
@@ -734,13 +667,10 @@ export default function ProductTable({
         }}
       />
 
-<<<<<<< HEAD
-=======
       {/* ====================================================================== */}
       {/* Delete Product Modal                                                  */}
       {/* ====================================================================== */}
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
       <DeleteProductModal
         isOpen={!!deleteSlug}
         loading={deleting}

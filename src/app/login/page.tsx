@@ -6,10 +6,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { login } from "@/services/auth.service";
-<<<<<<< HEAD
-import { toast, Bounce } from "react-toastify";
-=======
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,18 +20,6 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] =
     useState(false);
 
-<<<<<<< HEAD
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = await login(email, password);
-
-      console.log(data);
-=======
   const [email, setEmail] =
     useState("");
 
@@ -143,7 +127,6 @@ export default function LoginPage() {
   /* =========================================================
      RENDER
   ========================================================= */
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
 
       toast.success("Sign-in Successful!", {
         position: "bottom-center",
@@ -168,33 +151,6 @@ export default function LoginPage() {
   return (
     <main className="relative min-h-screen overflow-hidden">
 
-<<<<<<< HEAD
-      <section className="relative z-10 mx-auto flex min-h-screen max-w-6xl items-center px-6 py-16 sm:px-10">
-        <div className="w-full max-w-md rounded-3xl bg-white/[0.06] p-8 shadow-card ring-1 ring-white/10 backdrop-blur-xl sm:p-10">
-          <h1 className="font-display text-3xl font-semibold text-white">
-            Welcome to <span className="text-aqua-glow">Neapure</span>
-          </h1>
-
-          <p className="mt-3 text-sm text-white/60">
-            Sign in to manage your smart purification system
-          </p>
-
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-            {/* Email */}
-            <label className="block">
-              <div className="flex items-center gap-3 rounded-xl border border-white/15 px-4 py-3 transition focus-within:border-aqua-glow focus-within:ring-2 focus-within:ring-aqua-glow/30">
-                <MailIcon className="h-4 w-4 text-white/40" />
-
-                <input
-                  type="email"
-                  placeholder="Email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
-                />
-=======
       {/* =====================================================
           BACKGROUND IMAGE
       ===================================================== */}
@@ -261,29 +217,12 @@ export default function LoginPage() {
 
                 </div>
 
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
               </div>
 
               {/* ===============================================
                   TITLE
               =============================================== */}
 
-<<<<<<< HEAD
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-white/40 hover:text-white"
-=======
               <div className="text-center">
 
                 <h1 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
@@ -491,51 +430,15 @@ export default function LoginPage() {
                 <button
                   type="button"
                   className="font-medium text-cyan-300 transition hover:text-white"
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
                 >
                   Create One
                 </button>
 
               </p>
 
-<<<<<<< HEAD
-            {/* Remember */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-white/60">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={() => setRememberMe(!rememberMe)}
-                  className="accent-cyan-500"
-                />
-                Remember Me
-              </label>
-
-              <button type="button" className="text-aqua-glow hover:text-white">
-                Forgot Password?
-              </button>
-=======
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
             </div>
           </div>
 
-<<<<<<< HEAD
-            {/* Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-aqua-brand py-3 font-semibold transition hover:bg-aqua-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Signing In..." : "SIGN IN"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-white/60">
-            Don't have an account?{" "}
-            <button className="text-aqua-glow hover:text-white">
-              Create One
-            </button>
-=======
           {/* ===============================================
               FOOTER
           =============================================== */}
@@ -543,7 +446,6 @@ export default function LoginPage() {
           <p className="mt-5 text-center text-xs text-white/30">
             © {new Date().getFullYear()} Neapure.
             All rights reserved.
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
           </p>
 
         </div>
@@ -568,10 +470,6 @@ function MailIcon({ className }: { className?: string }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-<<<<<<< HEAD
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="m4 7 8 6 8-6" />
-=======
       <rect
         width="20"
         height="16"
@@ -581,14 +479,10 @@ function MailIcon({ className }: { className?: string }) {
       />
 
       <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
     </svg>
   );
 }
 
-<<<<<<< HEAD
-function LockIcon({ className }: { className?: string }) {
-=======
 /* =========================================================
    LOCK ICON
 ========================================================= */
@@ -598,7 +492,6 @@ function LockIcon({
 }: {
   className?: string;
 }) {
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
   return (
     <svg
       className={className}
@@ -610,10 +503,6 @@ function LockIcon({
       strokeLinejoin="round"
       aria-hidden="true"
     >
-<<<<<<< HEAD
-      <rect x="4" y="10" width="16" height="10" rx="2" />
-      <path d="M8 10V7a4 4 0 118 0v3" />
-=======
       <rect
         width="18"
         height="11"
@@ -623,14 +512,10 @@ function LockIcon({
       />
 
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
     </svg>
   );
 }
 
-<<<<<<< HEAD
-function EyeIcon({ className }: { className?: string }) {
-=======
 /* =========================================================
    EYE ICON
 ========================================================= */
@@ -640,7 +525,6 @@ function EyeIcon({
 }: {
   className?: string;
 }) {
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
   return (
     <svg
       className={className}
@@ -652,10 +536,6 @@ function EyeIcon({
       strokeLinejoin="round"
       aria-hidden="true"
     >
-<<<<<<< HEAD
-      <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z" />
-      <circle cx="12" cy="12" r="2.5" />
-=======
       <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
 
       <circle
@@ -663,14 +543,10 @@ function EyeIcon({
         cy="12"
         r="3"
       />
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
     </svg>
   );
 }
 
-<<<<<<< HEAD
-function EyeOffIcon({ className }: { className?: string }) {
-=======
 /* =========================================================
    EYE OFF ICON
 ========================================================= */
@@ -680,7 +556,6 @@ function EyeOffIcon({
 }: {
   className?: string;
 }) {
->>>>>>> 7c8818adebc156e5448b97640f07e38500c50aa0
   return (
     <svg
       className={className}
