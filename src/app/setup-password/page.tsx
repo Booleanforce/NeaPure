@@ -51,7 +51,7 @@ function SetupPasswordForm() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/dashboard");
+        window.location.href = "/admin/customers";
       }, 1500);
     } catch (err: any) {
       console.error(err);

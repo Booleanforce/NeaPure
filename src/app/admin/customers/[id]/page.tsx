@@ -66,7 +66,7 @@ export default function CustomerDetails({ params }: { params: Promise<{ id: stri
             </Badge>
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Customer ID: #{customer.id} • Joined {new Date(customer.date_joined).toLocaleDateString()}
+            Customer ID: #{customer.id} • Joined {new Date(customer.created_at).toLocaleDateString()}
           </p>
         </div>
         <Button variant="outline">
