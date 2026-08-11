@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import Sidebar from "./components/layout/Sidebar";
 import Topbar from "./components/layout/Topbar";
+import { UserProvider } from "./context/UserContext"; // <-- adjust path to match where UserContext.tsx actually lives
 
 export default function DashboardLayout({
   children,
@@ -29,6 +30,6 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
-    </div>
+    </UserProvider>
   );
 }
