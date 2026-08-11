@@ -1,7 +1,9 @@
 // app/dashboard/components/layout/Sidebar.tsx
 "use client";
-
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import {
   LayoutDashboard,
   Package,
@@ -27,32 +29,34 @@ import {
 } from "lucide-react";
 
 const smartWaterItems = [
-  { label: "Service Requests", icon: Wrench, badge: 2 },
-  { label: "Installation Tracking", icon: MapPin },
-  { label: "Before & After Setup", icon: Camera },
-  { label: "QR Code Service", icon: QrCode },
-  { label: "Service History", icon: History },
+  { label: "Service Requests", icon: Wrench, badge: 2, href: "/Customer-Dashboard/service-requests" },
+  { label: "Installation Tracking", icon: MapPin, href: "/Customer-Dashboard/installation-tracking" },
+  { label: "Before & After Setup", icon: Camera, href: "/Customer-Dashboard/before-after-setup" },
+  { label: "QR Code Service", icon: QrCode, href: "/Customer-Dashboard/qr-code-service" },
+  { label: "Service History", icon: History, href: "/Customer-Dashboard/service-history" },
 ];
 
 const mainNavItems = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true },
-  { label: "My Products", icon: Package },
-  { label: "Warranty & Registration", icon: ShieldCheck },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/Customer-Dashboard" },
+  { label: "My Products", icon: Package, href: "/Customer-Dashboard/my-products" },
+  { label: "Warranty & Registration", icon: ShieldCheck, href: "/Customer-Dashboard/warranty-registration" },
 ];
 
 const bottomNavItems = [
-  { label: "Buy Replacement Kit", icon: Boxes },
-  { label: "My Orders", icon: ClipboardList },
-  { label: "Reminders & Alerts", icon: Bell },
-  { label: "Offers & Rewards", icon: Gift },
-  { label: "My Profile", icon: User },
-  { label: "Support Center", icon: Headphones },
-  { label: "Settings", icon: Settings },
+  { label: "Buy Replacement Kit", icon: Boxes, href: "/Customer-Dashboard/replacement-kit" },
+  { label: "My Orders", icon: ClipboardList, href: "/Customer-Dashboard/my-orders" },
+  { label: "Reminders & Alerts", icon: Bell, href: "/Customer-Dashboard/reminders-alerts" },
+  { label: "Offers & Rewards", icon: Gift, href: "/Customer-Dashboard/offers-rewards" },
+  // Links to the My Profile page
+  { label: "My Profile", icon: User, href: "/Customer-Dashboard/my-profile" },
+  { label: "Support Center", icon: Headphones, href: "/Customer-Dashboard/support-center" },
+  { label: "Settings", icon: Settings, href: "/Customer-Dashboard/settings" },
 ];
 
 function NavRow({
   icon: Icon,
   label,
+  href,
   active = false,
   badge,
   onClick,
@@ -60,20 +64,20 @@ function NavRow({
 }: {
   icon: React.ElementType;
   label: string;
+  href?: string;
   active?: boolean;
   badge?: number;
   onClick?: () => void;
   trailing?: React.ReactNode;
 }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
-        active
-          ? "bg-blue-600 text-white font-medium shadow-sm"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-      }`}
-    >
+  const classes = `flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+    active
+      ? "bg-blue-600 text-white font-medium shadow-sm"
+      : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+  }`;
+
+  const content = (
+    <>
       <Icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-white" : "text-slate-400"}`} />
       <span className="flex-1 text-left">{label}</span>
       {badge ? (
@@ -82,6 +86,24 @@ function NavRow({
         </span>
       ) : null}
       {trailing}
+    </>
+  );
+
+  // Items with an href are real routes: render as a Link so users get
+  // client-side navigation, prefetching, and correct <a> semantics.
+  if (href) {
+    return (
+      <Link href={href} onClick={onClick} className={classes}>
+        {content}
+      </Link>
+    );
+  }
+
+  // Items without an href (e.g. the Smart Water Care collapsible toggle)
+  // stay as plain buttons.
+  return (
+    <button onClick={onClick} className={classes}>
+      {content}
     </button>
   );
 }
@@ -95,6 +117,13 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [smartWaterOpen, setSmartWaterOpen] = useState(true);
+  const pathname = usePathname();
+
+  // A nav item is active when the current route matches its href exactly,
+  // or sits under it (so /Customer-Dashboard/my-profile/edit still
+  // highlights "My Profile").
+  const isActive = (href: string) =>
+    pathname === href || pathname?.startsWith(`${href}/`);
 
   // Close the mobile drawer after picking a nav item, but not on the
   // Smart Water Care toggle itself (that just expands/collapses).
@@ -146,7 +175,12 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         {/* Scrollable nav */}
         <nav className="w-full flex-1 space-y-1 overflow-y-auto pr-1">
           {mainNavItems.map((item) => (
-            <NavRow key={item.label} {...item} onClick={handleNavigate} />
+            <NavRow
+              key={item.label}
+              {...item}
+              active={isActive(item.href)}
+              onClick={handleNavigate}
+            />
           ))}
 
           {/* Smart Water Care (collapsible) */}
@@ -166,7 +200,12 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             {smartWaterOpen && (
               <div className="ml-4 mt-1 space-y-1 border-l border-slate-100 pl-3">
                 {smartWaterItems.map((item) => (
-                  <NavRow key={item.label} {...item} onClick={handleNavigate} />
+                  <NavRow
+                    key={item.label}
+                    {...item}
+                    active={isActive(item.href)}
+                    onClick={handleNavigate}
+                  />
                 ))}
               </div>
             )}
@@ -175,7 +214,12 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <div className="my-3 border-t border-slate-100" />
 
           {bottomNavItems.map((item) => (
-            <NavRow key={item.label} {...item} onClick={handleNavigate} />
+            <NavRow
+              key={item.label}
+              {...item}
+              active={isActive(item.href)}
+              onClick={handleNavigate}
+            />
           ))}
         </nav>
 
@@ -287,4 +331,3 @@ function PlayLogo({ className }: { className?: string }) {
     </svg>
   );
 }
-

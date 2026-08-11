@@ -4,6 +4,7 @@
 import { useRouter } from "next/navigation";
 import { Bell, LogOut, Menu, MessageSquare, Search } from "lucide-react";
 import UserProfile from "./UserProfile";
+import { useUser } from "../../context/UserContext";
 
 interface TopbarProps {
   /** Opens the mobile sidebar drawer. Button only shows below lg. */
@@ -12,6 +13,10 @@ interface TopbarProps {
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
   const router = useRouter();
+  // Same shared context ProfilePage writes to — so a changed avatar
+  // or name shows up here immediately, with no prop drilling and no
+  // hardcoded fallback values.
+  const { profile } = useUser();
 
   const handleLogout = () => {
     // TODO: clear session/cookies/auth state here before redirecting
@@ -32,7 +37,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
 
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-slate-800 sm:text-base">
-            Welcome back, <span className="text-slate-900">Mahfuzur Rahman</span> 👋
+            Welcome back, <span className="text-slate-900">{profile.fullName}</span> 👋
           </p>
           <p className="hidden truncate text-xs text-slate-400 sm:block">
             Here&apos;s what&apos;s happening with your water care today.
@@ -64,10 +69,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
           <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-rose-500" />
         </button>
 
-        <UserProfile
-          name="Mahfuzur Rahman"
-          avatarSrc="https://i.pravatar.cc/72?img=12"
-        />
+        <UserProfile name={profile.fullName} avatarSrc={profile.avatarUrl} />
 
         <button
           type="button"
