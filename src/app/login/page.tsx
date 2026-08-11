@@ -128,26 +128,6 @@ export default function LoginPage() {
      RENDER
   ========================================================= */
 
-      toast.success("Sign-in Successful!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
-      router.replace("/admin-dashboard");
-    } catch (err: any) {
-      const message = err.message || "Something went wrong. Please try again.";
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <main className="relative min-h-screen overflow-hidden">
 
@@ -458,7 +438,11 @@ export default function LoginPage() {
    MAIL ICON
 ========================================================= */
 
-function MailIcon({ className }: { className?: string }) {
+function MailIcon({
+  className,
+}: {
+  className?: string;
+}) {
   return (
     <svg
       className={className}

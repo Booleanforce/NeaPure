@@ -167,12 +167,12 @@ export default function TechnicianList() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       {/* HEADER */}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-blue-950">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             Technicians
           </h1>
 
@@ -195,7 +195,7 @@ export default function TechnicianList() {
 
       {/* STATISTICS */}
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {/* Total */}
 
         <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -238,7 +238,7 @@ export default function TechnicianList() {
 
         {/* Blocked */}
 
-        <div className="group rounded-2xl border border-red-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+        <div className="group rounded-2xl border border-red-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 xl:col-span-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-red-600">
@@ -272,13 +272,15 @@ export default function TechnicianList() {
       {/* TABLE */}
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <TechnicianTable
-          technicians={technicians}
-          loading={loading}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className="overflow-x-auto">
+          <TechnicianTable
+            technicians={technicians}
+            loading={loading}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
       </div>
 
       {/* PAGINATION */}
