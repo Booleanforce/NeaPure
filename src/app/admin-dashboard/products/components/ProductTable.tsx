@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
-import { Product, productService } from "@/services/product.service";
+import {
+  Product,
+  productService,
+} from "@/services/product.service";
 
 import ProductViewModal from "./ProductViewModal";
 import EditProductModal from "./EditProductModal";
@@ -20,10 +23,17 @@ export default function ProductTable({
   loading,
   onRefresh,
 }: Props) {
-  const [viewSlug, setViewSlug] = useState<string | null>(null);
-  const [editSlug, setEditSlug] = useState<string | null>(null);
-  const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [viewSlug, setViewSlug] =
+    useState<string | null>(null);
+
+  const [editSlug, setEditSlug] =
+    useState<string | null>(null);
+
+  const [deleteSlug, setDeleteSlug] =
+    useState<string | null>(null);
+
+  const [deleting, setDeleting] =
+    useState(false);
 
   /* -------------------------------------------------------------------------- */
   /*                              Status Badge                                  */
@@ -60,13 +70,18 @@ export default function ProductTable({
     try {
       setDeleting(true);
 
-      await productService.deleteProduct(deleteSlug);
+      await productService.deleteProduct(
+        deleteSlug
+      );
 
       await onRefresh();
 
       setDeleteSlug(null);
     } catch (error) {
-      console.error("Failed to delete product:", error);
+      console.error(
+        "Failed to delete product:",
+        error
+      );
 
       alert("Failed to delete product.");
     } finally {
@@ -105,24 +120,30 @@ export default function ProductTable({
   return (
     <>
       {/* ====================================================================== */}
-      {/* Mobile / Tablet                                                       */}
+      {/* MOBILE / TABLET                                                       */}
       {/* ====================================================================== */}
 
       <div className="grid grid-cols-1 gap-3 bg-blue-50/40 p-3 sm:grid-cols-2 md:hidden">
         {products.map((product) => {
           const avatar =
-            product.name?.charAt(0).toUpperCase() || "P";
+            product.name
+              ?.charAt(0)
+              .toUpperCase() || "P";
 
-          const productImage = getProductImage(product);
+          const productImage =
+            getProductImage(product);
 
           return (
             <div
               key={product.slug}
               className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/50"
             >
+              {/* ============================================================ */}
+              {/* PRODUCT HEADER                                                */}
+              {/* ============================================================ */}
+
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-
                   {/* Product Image */}
                   {productImage ? (
                     <img
@@ -158,14 +179,16 @@ export default function ProductTable({
                 </span>
               </div>
 
-              {/* Product Information */}
-              <div className="mt-3 space-y-1.5 border-t border-blue-50 pt-3 text-sm">
+              {/* ============================================================ */}
+              {/* PRODUCT INFORMATION                                           */}
+              {/* ============================================================ */}
 
+              <div className="mt-3 space-y-1.5 border-t border-blue-50 pt-3 text-sm">
                 {/* Category */}
-                <div className="flex items-center justify-between text-slate-600">
+                <div className="flex items-center justify-between gap-4 text-slate-600">
                   <span>Category</span>
 
-                  <span className="font-medium text-slate-900">
+                  <span className="truncate font-medium text-slate-900">
                     {product.category_name || "-"}
                   </span>
                 </div>
@@ -189,9 +212,11 @@ export default function ProductTable({
                 </div>
               </div>
 
-              {/* Bottom Actions */}
-              <div className="mt-3 flex items-center justify-between border-t border-blue-50 pt-3">
+              {/* ============================================================ */}
+              {/* BOTTOM ACTIONS                                                */}
+              {/* ============================================================ */}
 
+              <div className="mt-3 flex items-center justify-between border-t border-blue-50 pt-3">
                 {/* Featured */}
                 {product.is_featured ? (
                   <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
@@ -205,11 +230,12 @@ export default function ProductTable({
 
                 {/* Actions */}
                 <div className="flex items-center gap-1">
-
                   {/* View */}
                   <button
                     type="button"
-                    onClick={() => setViewSlug(product.slug)}
+                    onClick={() =>
+                      setViewSlug(product.slug)
+                    }
                     className="rounded-lg p-2 transition hover:bg-blue-50 active:bg-blue-100"
                     aria-label="View product"
                   >
@@ -219,7 +245,9 @@ export default function ProductTable({
                   {/* Edit */}
                   <button
                     type="button"
-                    onClick={() => setEditSlug(product.slug)}
+                    onClick={() =>
+                      setEditSlug(product.slug)
+                    }
                     className="rounded-lg p-2 transition hover:bg-sky-50 active:bg-sky-100"
                     aria-label="Edit product"
                   >
@@ -229,7 +257,9 @@ export default function ProductTable({
                   {/* Delete */}
                   <button
                     type="button"
-                    onClick={() => setDeleteSlug(product.slug)}
+                    onClick={() =>
+                      setDeleteSlug(product.slug)
+                    }
                     className="rounded-lg p-2 transition hover:bg-red-50 active:bg-red-100"
                     aria-label="Delete product"
                   >
@@ -243,19 +273,17 @@ export default function ProductTable({
       </div>
 
       {/* ====================================================================== */}
-      {/* Desktop / Laptop                                                      */}
+      {/* DESKTOP / LAPTOP                                                      */}
       {/* ====================================================================== */}
 
       <div className="hidden overflow-x-auto rounded-xl border border-blue-100 md:block">
-        <table className="w-full min-w-180 table-fixed">
-
-          {/* ------------------------------------------------------------------ */}
-          {/* Table Header                                                       */}
-          {/* ------------------------------------------------------------------ */}
+        <table className="w-full min-w-[900px] table-fixed">
+          {/* ================================================================== */}
+          {/* TABLE HEADER                                                        */}
+          {/* ================================================================== */}
 
           <thead className="border-b border-blue-100 bg-blue-50">
             <tr>
-
               <th className="w-[28%] px-4 py-4 text-left text-sm font-semibold text-blue-900">
                 Product
               </th>
@@ -283,18 +311,19 @@ export default function ProductTable({
               <th className="w-[12%] px-4 py-4 text-center text-sm font-semibold text-blue-900">
                 Actions
               </th>
-
             </tr>
           </thead>
 
-          {/* ------------------------------------------------------------------ */}
-          {/* Table Body                                                         */}
-          {/* ------------------------------------------------------------------ */}
+          {/* ================================================================== */}
+          {/* TABLE BODY                                                          */}
+          {/* ================================================================== */}
 
           <tbody className="bg-white">
             {products.map((product) => {
               const avatar =
-                product.name?.charAt(0).toUpperCase() || "P";
+                product.name
+                  ?.charAt(0)
+                  .toUpperCase() || "P";
 
               const productImage =
                 getProductImage(product);
@@ -304,14 +333,12 @@ export default function ProductTable({
                   key={product.slug}
                   className="border-b border-blue-50 transition hover:bg-blue-50/60"
                 >
-
                   {/* ========================================================== */}
-                  {/* Product                                                     */}
+                  {/* PRODUCT                                                     */}
                   {/* ========================================================== */}
 
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-
                       {/* Product Image */}
                       {productImage ? (
                         <img
@@ -325,7 +352,7 @@ export default function ProductTable({
                         </div>
                       )}
 
-                      {/* Product Name + Slug */}
+                      {/* Product Name */}
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-slate-900">
                           {product.name}
@@ -335,12 +362,11 @@ export default function ProductTable({
                           {product.slug}
                         </p>
                       </div>
-
                     </div>
                   </td>
 
                   {/* ========================================================== */}
-                  {/* Category                                                     */}
+                  {/* CATEGORY                                                     */}
                   {/* ========================================================== */}
 
                   <td className="px-4 py-4">
@@ -350,7 +376,7 @@ export default function ProductTable({
                   </td>
 
                   {/* ========================================================== */}
-                  {/* Price                                                        */}
+                  {/* PRICE                                                        */}
                   {/* ========================================================== */}
 
                   <td className="whitespace-nowrap px-4 py-4 text-center text-slate-600">
@@ -358,7 +384,7 @@ export default function ProductTable({
                   </td>
 
                   {/* ========================================================== */}
-                  {/* Stock                                                        */}
+                  {/* STOCK                                                        */}
                   {/* ========================================================== */}
 
                   <td className="px-4 py-4 text-center text-slate-600">
@@ -366,7 +392,7 @@ export default function ProductTable({
                   </td>
 
                   {/* ========================================================== */}
-                  {/* Featured                                                     */}
+                  {/* FEATURED                                                     */}
                   {/* ========================================================== */}
 
                   <td className="px-4 py-4 text-center">
@@ -382,7 +408,7 @@ export default function ProductTable({
                   </td>
 
                   {/* ========================================================== */}
-                  {/* Status                                                       */}
+                  {/* STATUS                                                       */}
                   {/* ========================================================== */}
 
                   <td className="px-4 py-4 text-center">
@@ -396,12 +422,11 @@ export default function ProductTable({
                   </td>
 
                   {/* ========================================================== */}
-                  {/* Actions                                                      */}
+                  {/* ACTIONS                                                      */}
                   {/* ========================================================== */}
 
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-center gap-2">
-
                       {/* View */}
                       <button
                         type="button"
@@ -437,10 +462,8 @@ export default function ProductTable({
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </button>
-
                     </div>
                   </td>
-
                 </tr>
               );
             })}
@@ -449,23 +472,27 @@ export default function ProductTable({
       </div>
 
       {/* ====================================================================== */}
-      {/* Product View Modal                                                    */}
+      {/* PRODUCT VIEW MODAL                                                     */}
       {/* ====================================================================== */}
 
       <ProductViewModal
         isOpen={!!viewSlug}
         slug={viewSlug}
-        onClose={() => setViewSlug(null)}
+        onClose={() =>
+          setViewSlug(null)
+        }
       />
 
       {/* ====================================================================== */}
-      {/* Edit Product Modal                                                    */}
+      {/* EDIT PRODUCT MODAL                                                     */}
       {/* ====================================================================== */}
 
       <EditProductModal
         isOpen={!!editSlug}
         slug={editSlug}
-        onClose={() => setEditSlug(null)}
+        onClose={() =>
+          setEditSlug(null)
+        }
         onUpdated={async () => {
           await onRefresh();
           setEditSlug(null);
@@ -473,13 +500,15 @@ export default function ProductTable({
       />
 
       {/* ====================================================================== */}
-      {/* Delete Product Modal                                                  */}
+      {/* DELETE PRODUCT MODAL                                                   */}
       {/* ====================================================================== */}
 
       <DeleteProductModal
         isOpen={!!deleteSlug}
         loading={deleting}
-        onClose={() => setDeleteSlug(null)}
+        onClose={() =>
+          setDeleteSlug(null)
+        }
         onConfirm={handleDelete}
       />
     </>
