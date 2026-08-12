@@ -73,7 +73,7 @@ export default function AboutPage() {
   ];
 
   const brandImages = [
-    { title: 'Our Showroom', color: 'from-gray-200 to-gray-300' },
+    { title: 'Our Showroom', color: 'from-gray-200 to-gray-300', image: '/images/showroom.png' },
     { title: 'Our Service Team', color: 'from-blue-200 to-blue-300' },
     { title: 'Professional Installation', color: 'from-gray-300 to-gray-400' },
     { title: 'NeaPure Customer App', color: 'from-blue-300 to-blue-400' }
@@ -123,19 +123,12 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-3xl blur-3xl opacity-30"></div>
-            <div className="relative bg-gradient-to-br from-blue-100 to-white rounded-3xl p-8 flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
-                <div className="w-64 h-80 bg-gradient-to-b from-gray-800 to-gray-600 rounded-2xl mx-auto relative shadow-2xl">
-                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-16 bg-black rounded-lg flex items-center justify-center">
-                    <div className="text-green-400 font-mono text-lg">99.9</div>
-                  </div>
-                  <div className="absolute top-24 left-1/2 transform -translate-x-1/2 w-4 h-32 bg-blue-400 rounded-full opacity-60"></div>
-                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-20 bg-blue-100 rounded-lg border-2 border-blue-300"></div>
-                </div>
-              </div>
-            </div>
+          <div>
+            <img
+              src="/images/neaPureFilter.png"
+              alt="NeaPure Water Purifier"
+              className="w-full max-w-md h-auto object-contain drop-shadow-2xl scale-200"
+            />
           </div>
         </div>
       </section>
@@ -145,12 +138,12 @@ export default function AboutPage() {
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-1">
-              <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl overflow-hidden h-80 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-48 h-56 bg-gradient-to-b from-blue-300 to-blue-500 rounded-lg mx-auto shadow-lg flex items-center justify-center">
-                    <div className="text-white font-bold text-sm">Family Image</div>
-                  </div>
-                </div>
+              <div className="rounded-2xl overflow-hidden h-80 flex items-center justify-center">
+                <img
+                  src="/images/family-image.png"
+                  alt="NeaPure Family"
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
 
@@ -385,7 +378,11 @@ export default function AboutPage() {
             {brandImages.map((img, idx) => (
               <div key={idx} className="group cursor-pointer">
                 <div className={`bg-gradient-to-br ${img.color} rounded-2xl h-48 flex items-center justify-center mb-3 overflow-hidden relative`}>
-                  <div className="text-white font-bold text-sm opacity-50">{img.title}</div>
+                  {img.image ? (
+                    <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-white font-bold text-sm opacity-50">{img.title}</div>
+                  )}
                   <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity"></div>
                 </div>
                 <div className="text-center font-semibold text-gray-900 text-sm">{img.title}</div>
