@@ -13,6 +13,7 @@ import Hero from "./components/Hero";
 import CategoryTabs from "./components/CategoryTabs";
 import ProductSection from "./components/ProductSection";
 import ProductDetailModal from "./components/ProductDetailModal";
+import SmartCareSection from "./components/ecoSystemSection";
 
 export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -79,6 +80,8 @@ export default function ProductsPage() {
         slug={selectedSlug}
         onClose={() => setSelectedSlug(null)}
       />
+
+            <SmartCareSection />
 
     </main>
   );

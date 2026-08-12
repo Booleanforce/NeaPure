@@ -166,7 +166,6 @@ export default function ProductDetailModal({
         "Failed to load product:",
         error
       );
-
       setProduct(null);
     } finally {
       setLoading(false);
@@ -235,7 +234,6 @@ export default function ProductDetailModal({
         <div className="flex min-h-[500px] items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
-
             <p className="text-sm text-blue-500">
               Loading Product...
             </p>
@@ -251,7 +249,6 @@ export default function ProductDetailModal({
             <p className="text-lg font-semibold text-gray-800">
               Product not found.
             </p>
-
             <p className="mt-1 text-sm text-gray-500">
               Unable to load product information.
             </p>
@@ -580,7 +577,6 @@ export default function ProductDetailModal({
                       }{" "}
                       months
                     </strong>{" "}
-
                     for optimal performance.
                   </p>
                 </div>

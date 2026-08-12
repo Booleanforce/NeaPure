@@ -22,6 +22,7 @@ const PUBLIC_GET_ENDPOINTS = [
 
 const PUBLIC_POST_ENDPOINTS = [
   "/api/auth/login/",
+  "/api/ai/chat/",
 ];
 
 /* ============================================================================
