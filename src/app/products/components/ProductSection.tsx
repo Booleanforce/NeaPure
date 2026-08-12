@@ -4,10 +4,12 @@ import { Product } from "@/services/product.service";
 
 interface Props {
   products: Product[];
+  onViewDetails: (slug: string) => void;
 }
 
 export default function ProductSection({
   products,
+  onViewDetails,
 }: Props) {
   return (
     <section className="container mx-auto py-10">
@@ -38,6 +40,7 @@ export default function ProductSection({
           <ProductCard
             key={product.id}
             product={product}
+            onViewDetails={onViewDetails}
           />
         ))}
 

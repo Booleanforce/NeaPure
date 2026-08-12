@@ -4,10 +4,12 @@ import { Product } from "@/services/product.service";
 
 interface Props {
   product: Product;
+  onViewDetails: (slug: string) => void;
 }
 
 export default function ProductCard({
   product,
+  onViewDetails,
 }: Props) {
   const productImage =
     product.primary_image || "/images/kit.png";
@@ -44,6 +46,7 @@ export default function ProductCard({
 
         <button
           type="button"
+          onClick={() => onViewDetails(product.slug)}
           className="w-full rounded-xl bg-blue-600 py-3 text-white transition hover:bg-blue-700"
         >
           View Details
