@@ -39,7 +39,7 @@ export default function ProductForm({
             </label>
 
             <input
-              className={inputClass}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.name}
               onChange={(e) =>
                 setForm({
@@ -56,7 +56,7 @@ export default function ProductForm({
             </label>
 
             <input
-              className={inputClass}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.slug}
               onChange={(e) =>
                 setForm({
@@ -73,7 +73,7 @@ export default function ProductForm({
             </label>
 
             <input
-              className={inputClass}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.sku}
               onChange={(e) =>
                 setForm({
@@ -113,8 +113,8 @@ export default function ProductForm({
                 Product Type
               </label>
 
-              <select
-                className={inputClass}
+            <select
+                className="w-full rounded-lg border p-3 text-gray-900"
                 value={form.product_type}
                 onChange={(e) =>
                   setForm({
@@ -146,7 +146,7 @@ export default function ProductForm({
 
             <input
               type="number"
-              className={inputClass}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.price}
               onChange={(e) =>
                 setForm({
@@ -163,7 +163,7 @@ export default function ProductForm({
             </label>
 
             <select
-              className={inputClass}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.status}
               onChange={(e) =>
                 setForm({
@@ -201,7 +201,7 @@ export default function ProductForm({
 
             <textarea
               rows={3}
-              className={`${inputClass} resize-none`}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.perfect_for}
               onChange={(e) =>
                 setForm({
@@ -219,7 +219,7 @@ export default function ProductForm({
 
             <textarea
               rows={3}
-              className={`${inputClass} resize-none`}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.short_description}
               onChange={(e) =>
                 setForm({
@@ -238,7 +238,7 @@ export default function ProductForm({
 
             <textarea
               rows={5}
-              className={`${inputClass} resize-none`}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.key_features}
               onChange={(e) =>
                 setForm({
@@ -257,7 +257,7 @@ export default function ProductForm({
 
             <textarea
               rows={5}
-              className={`${inputClass} resize-none`}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.technical_specs}
               onChange={(e) =>
                 setForm({
@@ -276,7 +276,7 @@ export default function ProductForm({
 
             <textarea
               rows={5}
-              className={`${inputClass} resize-none`}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.package_includes}
               onChange={(e) =>
                 setForm({
@@ -307,7 +307,7 @@ export default function ProductForm({
 
             <input
               type="number"
-              className={inputClass}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={form.warranty_duration_months}
               onChange={(e) =>
                 setForm({
@@ -326,7 +326,7 @@ export default function ProductForm({
 
             <input
               type="number"
-              className={inputClass}
+              className="w-full rounded-lg border p-3 text-gray-900"
               value={
                 form.recommended_replacement_months
               }

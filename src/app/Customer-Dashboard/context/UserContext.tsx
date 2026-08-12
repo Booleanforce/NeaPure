@@ -1,15 +1,22 @@
 // app/dashboard/context/UserContext.tsx
+/* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  useCallback,
 } from "react";
 
-// Keep this in sync with the shape used in ProfilePage.tsx
+import { apiClient } from "@/services/apiClient";
+
+/* ============================================================================
+   CUSTOMER PROFILE
+============================================================================ */
+
 export interface CustomerProfile {
   fullName: string;
   email: string;
@@ -20,98 +27,231 @@ export interface CustomerProfile {
   language: "English" | "Bangla";
 }
 
-// Fallback used only while the real profile is loading, or if the
-// fetch fails. Replace avatarUrl with a local placeholder image if
-// you don't want to depend on an external URL.
+/* ============================================================================
+   FALLBACK PROFILE
+============================================================================ */
+
 const FALLBACK_PROFILE: CustomerProfile = {
   fullName: "Mahfuzur Rahman",
   email: "mahfuzur@gmail.com",
   phone: "+880 1XX-XXXXXXX",
   location: "Dhaka, Bangladesh",
   role: "Customer",
-  avatarUrl: "https://i.pravatar.cc/300?img=12",
+  avatarUrl:
+    "https://i.pravatar.cc/300?img=12",
   language: "English",
 };
 
+/* ============================================================================
+   CONTEXT TYPE
+============================================================================ */
+
 interface UserContextValue {
   profile: CustomerProfile;
-  // Patch one or more fields locally (optimistic update) AND persist
-  // them to the backend. Returns once the persist call settles.
-  updateProfile: (updates: Partial<CustomerProfile>) => Promise<void>;
+
+  updateProfile: (
+    updates: Partial<CustomerProfile>
+  ) => Promise<void>;
+
   loading: boolean;
+
   error: string | null;
+
   refetch: () => Promise<void>;
 }
 
-const UserContext = createContext<UserContextValue | null>(null);
+/* ============================================================================
+   CONTEXT
+============================================================================ */
 
-export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfile] = useState<CustomerProfile>(FALLBACK_PROFILE);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const UserContext =
+  createContext<UserContextValue | null>(
+    null
+  );
 
-  const fetchProfile = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Swap this for your real endpoint / session hook (e.g. next-auth,
-      // Supabase, your own API). Must return JSON matching CustomerProfile.
-      const res = await fetch("/api/profile", { cache: "no-store" });
-      if (!res.ok) throw new Error(`Failed to load profile (${res.status})`);
-      const data: CustomerProfile = await res.json();
-      setProfile(data);
-    } catch (err) {
-      console.error(err);
-      setError("Couldn't load your profile.");
-      // Keep whatever profile we already have (fallback or last good one)
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+/* ============================================================================
+   PROVIDER
+============================================================================ */
+
+export function UserProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [profile, setProfile] =
+    useState<CustomerProfile>(
+      FALLBACK_PROFILE
+    );
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  /* ==========================================================================
+     FETCH PROFILE
+  ========================================================================== */
+
+  const fetchProfile =
+    useCallback(async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        /*
+         * This endpoint should return the
+         * currently authenticated user's profile.
+         *
+         * Example:
+         *
+         * GET /api/accounts/profile/
+         *
+         * Change the endpoint below if your
+         * Django backend uses a different URL.
+         */
+
+        const data =
+          await apiClient.get<CustomerProfile>(
+            "/api/accounts/profile/"
+          );
+
+        setProfile({
+          ...FALLBACK_PROFILE,
+          ...data,
+        });
+      } catch (err) {
+        console.error(
+          "Failed to load profile:",
+          err
+        );
+
+        setError(
+          "Couldn't load your profile."
+        );
+
+        /*
+         * Keep the previous profile instead
+         * of replacing it with empty data.
+         */
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
+  /* ==========================================================================
+     INITIAL PROFILE LOAD
+  ========================================================================== */
 
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
-  const updateProfile = useCallback(
-    async (updates: Partial<CustomerProfile>) => {
-      // Optimistic update so the UI (Topbar, ProfilePage, anywhere else
-      // that reads this context) reflects the change immediately.
-      setProfile((prev) => ({ ...prev, ...updates }));
+  /* ==========================================================================
+     UPDATE PROFILE
+  ========================================================================== */
 
-      try {
-        const res = await fetch("/api/profile", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updates),
-        });
-        if (!res.ok) throw new Error(`Failed to save profile (${res.status})`);
-        const saved: CustomerProfile = await res.json();
-        setProfile(saved); // reconcile with whatever the server actually stored
-      } catch (err) {
-        console.error(err);
-        setError("Couldn't save your changes.");
-        // Optional: roll back optimistic update here if you want stricter
-        // consistency, e.g. by calling fetchProfile() again.
-        throw err;
-      }
-    },
-    []
-  );
+  const updateProfile =
+    useCallback(
+      async (
+        updates: Partial<CustomerProfile>
+      ) => {
+        /*
+         * Save previous state in case
+         * the backend request fails.
+         */
+
+        const previousProfile =
+          profile;
+
+        /* -------------------------------------------------------------- */
+        /* Optimistic Update                                               */
+        /* -------------------------------------------------------------- */
+
+        setProfile((prev) => ({
+          ...prev,
+          ...updates,
+        }));
+
+        setError(null);
+
+        try {
+          /*
+           * Change this endpoint if your Django
+           * profile endpoint uses another URL.
+           */
+
+          const saved =
+            await apiClient.patch<CustomerProfile>(
+              "/api/accounts/profile/",
+              updates
+            );
+
+          /*
+           * Reconcile local state with
+           * backend response.
+           */
+
+          setProfile({
+            ...previousProfile,
+            ...saved,
+          });
+        } catch (err) {
+          console.error(
+            "Failed to save profile:",
+            err
+          );
+
+          /*
+           * Roll back optimistic update.
+           */
+
+          setProfile(
+            previousProfile
+          );
+
+          setError(
+            "Couldn't save your changes."
+          );
+
+          throw err;
+        }
+      },
+      [profile]
+    );
+
+  /* ==========================================================================
+     PROVIDER
+  ========================================================================== */
 
   return (
     <UserContext.Provider
-      value={{ profile, updateProfile, loading, error, refetch: fetchProfile }}
+      value={{
+        profile,
+        updateProfile,
+        loading,
+        error,
+        refetch: fetchProfile,
+      }}
     >
       {children}
     </UserContext.Provider>
   );
 }
 
+/* ============================================================================
+   USE USER
+============================================================================ */
+
 export function useUser() {
-  const ctx = useContext(UserContext);
-  if (!ctx) {
-    throw new Error("useUser must be used inside a <UserProvider>");
+  const context =
+    useContext(UserContext);
+
+  if (!context) {
+    throw new Error(
+      "useUser must be used inside a UserProvider"
+    );
   }
-  return ctx;
+
+  return context;
 }

@@ -34,7 +34,16 @@ export const navItems = [
     href: "/admin-dashboard/products",
     icon: Package,
   },
-
+    {
+    name: "Dealers",
+    href: "/admin-dashboard/dealers",
+    icon: UserCog,
+  }, 
+  {
+    name: "Technicians",
+    href: "/admin-dashboard/technicians",
+    icon: UserCog,
+  },
   {
     name: "Sales & Orders",
     href: "/admin-dashboard/orders",
@@ -53,11 +62,6 @@ export const navItems = [
     icon: FileText,
   },
 
-  {
-    name: "Technicians",
-    href: "/admin-dashboard/technicians",
-    icon: UserCog,
-  },
 
   {
     name: "Service Tracking",
