@@ -10,19 +10,20 @@ import Card from "../common/Card";
  */
 export default function NeedHelp() {
   return (
-    <Card className="flex flex-1 flex-col gap-3">
+    <Card className="flex flex-1 flex-col justify-between">
       <div className="flex items-center justify-between">
-        <p className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+        <div>
+          <p className="flex items-center gap-2 text-sm font-semibold text-slate-800">
           <HeartHandshake className="h-4 w-4 text-blue-500" /> Need Help?
         </p>
+        <p className="text-[11px] text-slate-400">
+          Our support team is here for you.
+        </p>
+        </div>
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
           <Headphones className="h-4 w-4" />
         </span>
       </div>
-
-      <p className="text-[11px] text-slate-400">
-        Our support team is here for you.
-      </p>
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="flex flex-1 items-center gap-2 rounded-xl border border-blue-200 px-3 py-2.5">
@@ -30,11 +31,9 @@ export default function NeedHelp() {
             <MessageSquare className="h-4 w-4" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-700">
-              Chat with Us
-            </p>
+            <p className="text-xs font-semibold text-slate-700">Chat with Us</p>
             <p className="truncate text-[8px] text-slate-400">
-              We reply in a few minutes 
+              We reply in a few minutes
             </p>
           </div>
           <button className="shrink-0 text-xs font-semibold text-blue-600">

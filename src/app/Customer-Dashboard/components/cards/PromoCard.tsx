@@ -29,14 +29,14 @@ export default function PromoCard() {
         </span>
 
         <p className="text-base font-bold leading-snug text-slate-800">
-          Get 15% OFF on all Genuine NeaPure Kits
+          Get 15% OFF on all <br />Genuine NeaPure Kits
         </p>
 
-        <span className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold tracking-wide text-slate-700">
-          NEAPURE15 <Copy className="h-3 w-3" />
+        <span className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold tracking-wide text-[#155DFC] hover:cursor-pointer hover:underline">
+          NEAPURE15 <div className="bg-[#EFF6FF] h-6 w-6 rounded-full flex items-center justify-center"><Copy className="h-3 w-3 " /></div>
         </span>
 
-        <button className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white">
+        <button className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:cursor-pointer">
           <ShoppingBag className="h-3.5 w-3.5" /> Shop Now
         </button>
       </div>

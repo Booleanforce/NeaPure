@@ -81,10 +81,10 @@ export default function InstallationOverview() {
 
   return (
     <Card
-      padding="p-10 sm:p-10"
-      className="flex flex-[1_0_0] flex-col items-start justify-between gap-6 self-stretch sm:gap-10"
+      padding="p-10 sm:p-6"
+      className="h-100 flex flex-[1_0_0] flex-col items-start justify-between gap-6 self-stretch sm:gap-10"
     >
-      <SectionHeader title="Installation Tracking" />
+      <SectionHeader className="font-bold text-[14px] text-black" title="Installation Tracking" />
 
       {/* Step row: icons shrink on mobile (see StepIcon) so 5 steps + labels
           still fit a ~320px card without wrapping the connecting lines. */}
@@ -107,7 +107,7 @@ export default function InstallationOverview() {
                 />
               </div>
               <p
-                className={`mt-2 max-w-[52px] text-center text-[9px] leading-tight sm:max-w-[70px] sm:text-[10px] ${labelClasses(
+                className={`mt-2 max-w-13 text-center text-[9px] leading-tight sm:max-w-17.5 sm:text-[10px] ${labelClasses(
                   step.state
                 )}`}
               >

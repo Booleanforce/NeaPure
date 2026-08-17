@@ -18,18 +18,18 @@ export default function RecentServiceRequests() {
   ];
 
   return (
-    <Card className="flex flex-1 flex-col gap-3">
+    <Card className="p-6">
       <SectionHeader
         title="Recent Service History"
         actionLabel="View All"
-        className="w-full"
+        className="w-full  mb-5"
       />
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-3">
         {rows.map((r) => (
           <div
             key={r.title}
-            className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-slate-50"
+            className="flex items-center justify-between rounded-xl px-3 py-3 hover:bg-slate-50"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">

@@ -20,14 +20,15 @@ export default function ServiceOverview() {
   ];
 
   return (
-    <Card rounded="rounded-xl" padding="p-4" className="flex h-full flex-col">
-      <SectionHeader title="Service Shortcuts" className="mb-3" />
+    <Card padding="p-6" className="flex h-47 flex-col rounded-2xl">
+      <SectionHeader title="Service Shortcuts" className="mb-5" />
       <div className="grid flex-1 grid-cols-3 gap-0 sm:grid-cols-6">
         {items.map((it) => (
           <button
-            key={it.label}
-            className="flex flex-col items-center gap-2 text-center"
-          >
+  key={it.label}
+  className="flex flex-col border border-[#F1F5F9CC]/50 py-4 w-47 items-center gap-2 text-center rounded-xl transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1"
+>
+  {/* Button content */}
             <div className="relative">
               <div
                 className={`flex h-12 w-12 items-center justify-center rounded-2xl ${it.bg} ${it.color}`}

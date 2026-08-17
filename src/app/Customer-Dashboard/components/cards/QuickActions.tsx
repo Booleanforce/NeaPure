@@ -39,13 +39,13 @@ export default function QuickActions() {
   ];
 
   return (
-    <Card className="flex w-full flex-col">
-      <SectionHeader title="Quick Actions" className="mb-1 w-full" />
-      <div className="flex flex-col divide-y divide-slate-100">
+    <Card className="flex w-full flex-col h-117">
+      <SectionHeader title="Quick Actions" className=" text-[#1D293D] font-bold text-sm w-full mb-3" />
+      <div className="flex flex-col gap-3 divide-y divide-slate-100">
         {actions.map((a) => (
           <button
             key={a.title}
-            className="flex w-full items-center gap-3 py-4 text-left hover:bg-slate-50"
+            className="flex w-full items-center bg-[#F1F5F980] rounded-2xl gap-3 px-2 py-4 text-left hover:bg-slate-50 hover:underline hover:cursor-pointer"
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               {a.icon}

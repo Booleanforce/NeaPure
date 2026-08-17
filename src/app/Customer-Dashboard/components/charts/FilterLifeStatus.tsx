@@ -17,7 +17,7 @@ function FilterBar({
   icon: React.ElementType;
 }) {
   return (
-    <div className="flex flex-1 flex-col gap-8 rounded-xl border border-slate-100 p-3">
+    <div className="rounded-xl border border-slate-100 p-4">
       <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
         {/* Figma: icon badge is white/very light, not a tinted color chip —
             the color lives in the icon glyph itself */}
@@ -27,7 +27,7 @@ function FilterBar({
         {label}
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex mt-8 items-center justify-between">
         <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-600">
           Good
         </span>
@@ -36,14 +36,14 @@ function FilterBar({
 
       {/* Bar color is independent of icon color — Carbon Filter's icon is
           green but its bar is blue, matching Figma exactly */}
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="h-1.5 mt-1.5 mb-8 w-full overflow-hidden rounded-full bg-slate-100">
         <div
           className={`h-full rounded-full ${barColor}`}
           style={{ width: `${percent}%` }}
         />
       </div>
 
-      <button className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-100 py-2 text-[11px] font-medium text-slate-500">
+      <button className="flex items-center w-full justify-center gap-1.5 rounded-lg border border-slate-100 py-2 text-[11px] font-medium text-slate-500">
         <Sparkles className="h-3.5 w-3.5 text-blue-500" /> Simulate Clean
       </button>
     </div>
@@ -56,7 +56,7 @@ export default function FilterLifeStatus() {
       <SectionHeader
         title="Filter Life Status"
         actionLabel="View All Filters"
-        className="w-full"
+        className="w-full mb-6"
       />
 
       {/* Mobile: stacked full-width cards; sm+: original 3-up row */}

@@ -10,31 +10,31 @@ import StatusBadge from "../common/StatusBadge";
  */
 export default function ProductPanel() {
   return (
-    <Card bg="bg-blue-100" className="flex flex-1 items-center gap-6 self-stretch">
-      <div className="relative h-[273px] w-[151px] shrink-0 overflow-hidden rounded-[30px] bg-blue-100">
+    <Card bg="bg-blue-100" className="flex p-1 flex-1 h-100 w-142 items-center gap-6 self-stretch">
+      <div className="relative h-68 w-37 shrink-0 overflow-hidden rounded-[30px] bg-blue-100">
         <Image
           src="/images/pic23.png"
           alt="NeaPure Pro Max"
           fill
-          className="object-cover"
+          className="object-cover h-68 w-37"
         />
       </div>
 
       <div className="flex flex-1 flex-col items-start gap-4 self-stretch">
-        <p className="text-sm font-bold text-slate-800">NeaPure Pro Max</p>
+        <p className="text-lg font-bold text-[#1D293D]">NeaPure Pro Max</p>
 
         <div className="space-y-1 text-[11px] text-slate-400">
           <div className="flex gap-2">
-            <span>Model:</span>
-            <span className="font-medium text-slate-600">NP-Pro Max</span>
+            <span className="text-xs">Model:</span>
+            <span className="font-semibold text-xs text-black">NP-Pro Max</span>
           </div>
           <div className="flex gap-2">
-            <span>Serial No:</span>
-            <span className="font-medium text-slate-600">MPX12457896</span>
+            <span className="text-xs">Serial No:</span>
+            <span className="font-semibold text-xs text-black">MPX12457896</span>
           </div>
           <div className="flex gap-2">
-            <span>Technology:</span>
-            <span className="font-medium text-slate-600">
+            <span className="text-xs">Technology:</span>
+            <span className="font-semibold text-xs text-black">
               RO + UV + Copper Active
             </span>
           </div>
@@ -47,7 +47,7 @@ export default function ProductPanel() {
           className="rounded-full px-2.5 py-1 text-[11px] font-medium"
         />
 
-        <button className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline">
+        <button className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline hover:cursor-pointer">
           View Product Details
           <ChevronRight className="h-3 w-3" />
         </button>

@@ -11,9 +11,10 @@ export default function StatsCards() {
         iconColor="text-blue-600"
         label="Warranty Status"
         value="Active"
-        valueColor="text-slate-800"
+        valueColor="text-emerald-600"
         badge
-        sub="Valid till 24 Aug 2026"
+        sub="Valid till "
+        subDate="24 Aug 2026"
         action="View Warranty"
       />
       <StatCard
@@ -24,7 +25,8 @@ export default function StatsCards() {
         value="All Good"
         valueColor="text-emerald-600"
         badge
-        sub="Last service on 24 May 2024"
+        sub="Last service"
+        subDate="24 Aug 2026"
         action="View Service History"
       />
       <StatCard
@@ -34,7 +36,8 @@ export default function StatsCards() {
         label="Next Service Due"
         value="45 Days Left"
         valueColor="text-blue-600"
-        sub="Estimated on 24 May 2024"
+        sub="Estimated on"
+        subDate="24 Aug 2026"
         action="Set reminder"
       />
       <StatCard
@@ -44,7 +47,8 @@ export default function StatsCards() {
         label="Neapure Points"
         value="320"
         valueColor="text-blue-600"
-        sub="Available points 24 May 2024"
+        sub="Available points"
+        subDate="24 Aug 2026"
         action="Redeem now"
       />
     </>

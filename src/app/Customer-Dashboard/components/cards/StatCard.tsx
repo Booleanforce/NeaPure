@@ -19,6 +19,7 @@ export default function StatCard({
   valueColor,
   badge,
   sub,
+  subDate,
   action,
 }: {
   icon: React.ReactNode;
@@ -29,31 +30,37 @@ export default function StatCard({
   valueColor: string;
   badge?: boolean;
   sub: string;
+  subDate?:string;
   action: string;
 }) {
   return (
-    <Card className="flex min-w-0 flex-1 flex-col items-start gap-3">
-      <div className="flex w-full items-start justify-between">
+    <Card className="flex min-w-0 w-77 h-38 flex-1 flex-col items-start">
+      <div className="flex w-full items-center gap-3">
         <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBg}`}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${iconBg}`}
         >
           <div className={iconColor}>{icon}</div>
         </div>
-      </div>
 
-      <div className="min-w-0 w-full">
-        <p className="text-xs text-slate-400">{label}</p>
-        <div className="mt-1 flex items-center gap-1.5">
-          <span className={`text-base font-bold ${valueColor}`}>{value}</span>
-          {badge && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />}
+        <div className="min-w-0">
+          <p className="text-xs font-bold">{label}</p>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className={`text-xl font-bold ${valueColor}`}>{value}</span>
+            {badge && (
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+            )}
+          </div>
+          <p className="text-[11px] text-slate-400">{sub}</p>
+          <p className="text-[11px] font-bold">{subDate}</p>
         </div>
       </div>
-
-      <p className="text-[11px] text-slate-400">{sub}</p>
-
-      <button className="text-xs font-medium text-blue-600 hover:underline">
-        {action} <span className="ml-0.5">›</span>
+      <div className="h-px w-full bg-[#F8FAFC] mt-4" />
+      <div className="flex">
+        <button className="text-xs font-bold text-blue-600 hover:underline hover:cursor-pointer">
+        {action} 
       </button>
+      <span className="ml-2 text-blue-600">›</span>
+      </div>
     </Card>
   );
 }
