@@ -36,9 +36,9 @@ function isPublicEndpoint(
   const normalizedMethod =
     method.toUpperCase();
 
-  /* ------------------------------------------------------------------------ */
-  /* PUBLIC GET                                                               */
-  /* ------------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------------
+     PUBLIC GET
+  ------------------------------------------------------------------------ */
 
   if (normalizedMethod === "GET") {
     return PUBLIC_GET_ENDPOINTS.some(
@@ -50,9 +50,9 @@ function isPublicEndpoint(
     );
   }
 
-  /* ------------------------------------------------------------------------ */
-  /* PUBLIC POST                                                              */
-  /* ------------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------------
+     PUBLIC POST
+  ------------------------------------------------------------------------ */
 
   if (normalizedMethod === "POST") {
     return PUBLIC_POST_ENDPOINTS.some(
@@ -81,9 +81,9 @@ export class ApiError extends Error {
       data?.error ||
       data?.message;
 
-    /* ---------------------------------------------------------------------- */
-    /* Django REST Framework validation errors                                */
-    /* ---------------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       Django REST Framework validation errors
+    ---------------------------------------------------------------------- */
 
     if (
       !message &&
@@ -162,9 +162,9 @@ function redirectToLogin(): void {
     return;
   }
 
-  /* ------------------------------------------------------------------------ */
-  /* Prevent redirect loop                                                    */
-  /* ------------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------------
+     Prevent redirect loop
+  ------------------------------------------------------------------------ */
 
   if (
     window.location.pathname ===
@@ -276,9 +276,9 @@ async function request<T = unknown>(
    *
    * Therefore:
    *
-   * GET  /api/products/products/   -> public
+   * GET  /api/products/products/    -> public
    * POST /api/products/products/   -> protected
-   * PATCH /api/products/products/ -> protected
+   * PATCH /api/products/products/  -> protected
    * DELETE /api/products/products/ -> protected
    */
 
@@ -350,14 +350,6 @@ async function request<T = unknown>(
     if (
       response.status === 401
     ) {
-      /*
-       * Only public requests should be treated
-       * as unauthenticated public requests.
-       *
-       * POST /api/products/products/
-       * is NOT public anymore.
-       */
-
       if (!publicEndpoint) {
         clearAuthData();
         redirectToLogin();

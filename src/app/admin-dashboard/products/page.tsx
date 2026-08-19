@@ -87,10 +87,7 @@ export default function ProductPage() {
       ------------------------------------------------- */
 
       else {
-        setProducts(
-          response
-        );
-
+        setProducts(response);
         setTotalPages(1);
       }
     } catch (error) {
@@ -100,7 +97,6 @@ export default function ProductPage() {
       );
 
       setProducts([]);
-
       setTotalPages(1);
     } finally {
       setLoading(false);
@@ -155,7 +151,6 @@ export default function ProductPage() {
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-blue-700 hover:shadow-lg active:scale-95"
         >
           <Plus size={18} />
-
           Add Product
         </button>
       </div>
@@ -166,16 +161,11 @@ export default function ProductPage() {
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 
-        {/* ===============================================
-            TOTAL PRODUCTS
-        =============================================== */}
+        {/* TOTAL PRODUCTS */}
 
         <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-
           <div className="flex items-center justify-between">
-
             <div>
-
               <p className="text-sm font-medium text-slate-500">
                 Total Products
               </p>
@@ -183,27 +173,19 @@ export default function ProductPage() {
               <h2 className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
                 {products.length}
               </h2>
-
             </div>
 
             <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
               <Package size={28} />
             </div>
-
           </div>
-
         </div>
 
-        {/* ===============================================
-            FEATURED PRODUCTS
-        =============================================== */}
+        {/* FEATURED PRODUCTS */}
 
         <div className="group rounded-2xl border border-yellow-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-
           <div className="flex items-center justify-between">
-
             <div>
-
               <p className="text-sm font-medium text-yellow-600">
                 Featured Products
               </p>
@@ -211,27 +193,19 @@ export default function ProductPage() {
               <h2 className="mt-2 text-4xl font-bold tracking-tight text-yellow-700">
                 {featuredProducts}
               </h2>
-
             </div>
 
             <div className="rounded-xl bg-yellow-100 p-3 text-yellow-600">
               <Star size={28} />
             </div>
-
           </div>
-
         </div>
 
-        {/* ===============================================
-            ACTIVE PRODUCTS
-        =============================================== */}
+        {/* ACTIVE PRODUCTS */}
 
         <div className="group rounded-2xl border border-green-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:col-span-2 xl:col-span-1">
-
           <div className="flex items-center justify-between">
-
             <div>
-
               <p className="text-sm font-medium text-green-600">
                 Active Products
               </p>
@@ -239,15 +213,12 @@ export default function ProductPage() {
               <h2 className="mt-2 text-4xl font-bold tracking-tight text-green-700">
                 {activeProducts}
               </h2>
-
             </div>
 
             <div className="rounded-xl bg-green-100 p-3 text-green-600">
               <BadgeCheck size={28} />
             </div>
-
           </div>
-
         </div>
       </div>
 
@@ -268,17 +239,13 @@ export default function ProductPage() {
       ================================================= */}
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-
         <div className="overflow-x-auto">
-
           <ProductTable
             products={products}
             loading={loading}
             onRefresh={loadProducts}
           />
-
         </div>
-
       </div>
 
       {/* =================================================
@@ -286,14 +253,12 @@ export default function ProductPage() {
       ================================================= */}
 
       <div className="flex justify-center">
-
         <ProductPagination
           page={page}
           totalPages={totalPages}
           onPageChange={setPage}
         />
-     
-
+      </div>
 
       {/* =================================================
           ADD PRODUCT MODAL
@@ -306,11 +271,9 @@ export default function ProductPage() {
         }
         onCreated={async () => {
           await loadProducts();
-
           setAddOpen(false);
         }}
       />
-    </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -258,9 +259,9 @@ export default function ProductDetailModal({
       onClose={onClose}
       size="xl"
     >
-      {/* ====================================================================== */
-      /* LOADING                                                                 */
-      /* ====================================================================== */}
+      {/* ====================================================================== */}
+      {/* LOADING                                                               */}
+      {/* ====================================================================== */}
 
       {loading ? (
         <div className="flex min-h-[500px] items-center justify-center">
@@ -295,15 +296,13 @@ export default function ProductDetailModal({
 
         <div className="p-6">
 
-          {/* ================================================================== */
-          /* TOP: IMAGE + BASIC INFO                                            */
-          /* ================================================================== */}
+          {/* ================================================================== */}
+          {/* TOP: IMAGE + BASIC INFO                                            */}
+          {/* ================================================================== */}
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
 
-            {/* ================================================================= */
-            /* IMAGE GALLERY                                                      */
-            /* ================================================================= */}
+            {/* IMAGE GALLERY */}
 
             <div className="space-y-4">
 
@@ -334,7 +333,7 @@ export default function ProductDetailModal({
                   </div>
                 )}
 
-                {/* Navigation Arrows */}
+                {/* Navigation */}
 
                 {galleryImages.length > 1 && (
                   <>
@@ -411,9 +410,7 @@ export default function ProductDetailModal({
               )}
             </div>
 
-            {/* ================================================================= */
-            /* PRODUCT INFORMATION                                                */
-            /* ================================================================= */}
+            {/* PRODUCT INFORMATION */}
 
             <div className="space-y-6">
 
@@ -489,9 +486,9 @@ export default function ProductDetailModal({
             </div>
           </div>
 
-          {/* ================================================================== */
-          /* BOTTOM: DETAILS                                                     */
-          /* ================================================================== */}
+          {/* ================================================================== */}
+          {/* BOTTOM: DETAILS                                                     */}
+          {/* ================================================================== */}
 
           <div className="mt-10 space-y-6">
 
@@ -516,7 +513,6 @@ export default function ProductDetailModal({
 
             {product.technical_specs && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
-
                 <h3 className="mb-4 text-base font-semibold text-gray-900">
                   Technical Specifications
                 </h3>
@@ -529,7 +525,8 @@ export default function ProductDetailModal({
                           key={key}
                           className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
                             index !==
-                            technicalSpecEntries.length - 1
+                            technicalSpecEntries.length -
+                              1
                               ? "border-b border-gray-200"
                               : ""
                           }`}
@@ -559,7 +556,6 @@ export default function ProductDetailModal({
 
             {product.package_includes && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
-
                 <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900">
                   <Package className="h-5 w-5 text-blue-500" />
                   What&apos;s in the Box

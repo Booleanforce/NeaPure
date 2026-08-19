@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { login } from "@/services/auth.service";
+import { toast, Bounce } from "react-toastify";
 
 export default function LoginPage() {
   const router = useRouter();
