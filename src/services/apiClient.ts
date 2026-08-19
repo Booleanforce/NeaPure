@@ -1,43 +1,71 @@
+"use client";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://127.0.0.1:8000";
 
-/* =========================================================
+/* ============================================================================
    PUBLIC ENDPOINTS
 
-   These endpoints can be accessed without authentication.
+   Public access is METHOD-SPECIFIC.
 
-   IMPORTANT:
-   Keep this list synchronized with your Django permissions.
-========================================================= */
+   GET products/categories can be public,
+   but POST/PATCH/DELETE operations are protected.
+============================================================================ */
 
-const PUBLIC_ENDPOINTS = [
+const PUBLIC_GET_ENDPOINTS = [
   "/api/products/products/",
   "/api/products/categories/",
+];
+
+const PUBLIC_POST_ENDPOINTS = [
   "/api/auth/login/",
 ];
 
-/* =========================================================
+/* ============================================================================
    CHECK PUBLIC ENDPOINT
-========================================================= */
+============================================================================ */
 
 function isPublicEndpoint(
-  endpoint: string
+  endpoint: string,
+  method: string
 ): boolean {
-  return PUBLIC_ENDPOINTS.some(
-    (publicEndpoint) =>
-      endpoint === publicEndpoint ||
-      endpoint.startsWith(
-        publicEndpoint
-      )
-  );
+  const normalizedMethod =
+    method.toUpperCase();
+
+  /* ------------------------------------------------------------------------ */
+  /* PUBLIC GET                                                               */
+  /* ------------------------------------------------------------------------ */
+
+  if (normalizedMethod === "GET") {
+    return PUBLIC_GET_ENDPOINTS.some(
+      (publicEndpoint) =>
+        endpoint === publicEndpoint ||
+        endpoint.startsWith(
+          publicEndpoint
+        )
+    );
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* PUBLIC POST                                                              */
+  /* ------------------------------------------------------------------------ */
+
+  if (normalizedMethod === "POST") {
+    return PUBLIC_POST_ENDPOINTS.some(
+      (publicEndpoint) =>
+        endpoint === publicEndpoint
+    );
+  }
+
+  return false;
 }
 
-/* =========================================================
+/* ============================================================================
    API ERROR
-========================================================= */
+============================================================================ */
 
 export class ApiError extends Error {
   status: number;
@@ -52,15 +80,9 @@ export class ApiError extends Error {
       data?.error ||
       data?.message;
 
-    /*
-     * Django REST Framework validation errors.
-     *
-     * Example:
-     *
-     * {
-     *   "email": ["Invalid email."]
-     * }
-     */
+    /* ---------------------------------------------------------------------- */
+    /* Django REST Framework validation errors                                */
+    /* ---------------------------------------------------------------------- */
 
     if (
       !message &&
@@ -102,9 +124,9 @@ export class ApiError extends Error {
   }
 }
 
-/* =========================================================
+/* ============================================================================
    CLEAR AUTH DATA
-========================================================= */
+============================================================================ */
 
 function clearAuthData(): void {
   if (
@@ -127,9 +149,9 @@ function clearAuthData(): void {
   );
 }
 
-/* =========================================================
+/* ============================================================================
    REDIRECT TO LOGIN
-========================================================= */
+============================================================================ */
 
 function redirectToLogin(): void {
   if (
@@ -139,9 +161,9 @@ function redirectToLogin(): void {
     return;
   }
 
-  /*
-   * Prevent redirect loop.
-   */
+  /* ------------------------------------------------------------------------ */
+  /* Prevent redirect loop                                                    */
+  /* ------------------------------------------------------------------------ */
 
   if (
     window.location.pathname ===
@@ -154,17 +176,17 @@ function redirectToLogin(): void {
     "/login";
 }
 
-/* =========================================================
+/* ============================================================================
    REQUEST
-========================================================= */
+============================================================================ */
 
 async function request<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  /*
-   * Prevent accidental double slash.
-   */
+  /* ==========================================================================
+     URL
+  ========================================================================== */
 
   const normalizedBaseUrl =
     API_BASE_URL.replace(
@@ -180,28 +202,34 @@ async function request<T = unknown>(
   const url =
     `${normalizedBaseUrl}${normalizedEndpoint}`;
 
-  /* =======================================================
+  /* ==========================================================================
+     METHOD
+  ========================================================================== */
+
+  const method =
+    (
+      options.method ||
+      "GET"
+    ).toUpperCase();
+
+  /* ==========================================================================
      HEADERS
-  ======================================================= */
+  ========================================================================== */
 
   const headers = new Headers(
     options.headers || {}
   );
 
-  /* =======================================================
+  /* ==========================================================================
      CONTENT TYPE
-  ======================================================= */
+  ========================================================================== */
 
   /*
-   * IMPORTANT:
+   * Never manually set Content-Type for FormData.
    *
-   * Never manually set Content-Type when
-   * sending FormData.
+   * The browser automatically sets:
    *
-   * The browser automatically creates:
-   *
-   * multipart/form-data;
-   * boundary=...
+   * multipart/form-data; boundary=...
    */
 
   if (
@@ -216,9 +244,9 @@ async function request<T = unknown>(
     );
   }
 
-  /* =======================================================
+  /* ==========================================================================
      AUTHENTICATION
-  ======================================================= */
+  ========================================================================== */
 
   let token: string | null =
     null;
@@ -233,17 +261,29 @@ async function request<T = unknown>(
       );
   }
 
+  const publicEndpoint =
+    isPublicEndpoint(
+      endpoint,
+      method
+    );
+
   /*
-   * Public endpoints do not require
-   * an Authorization header.
+   * IMPORTANT:
    *
-   * Protected endpoints will receive
-   * the token when available.
+   * Only skip Authorization for genuinely
+   * public METHOD + ENDPOINT combinations.
+   *
+   * Therefore:
+   *
+   * GET  /api/products/products/   -> public
+   * POST /api/products/products/   -> protected
+   * PATCH /api/products/products/ -> protected
+   * DELETE /api/products/products/ -> protected
    */
 
   if (
     token &&
-    !isPublicEndpoint(endpoint)
+    !publicEndpoint
   ) {
     headers.set(
       "Authorization",
@@ -251,25 +291,50 @@ async function request<T = unknown>(
     );
   }
 
-  /* =======================================================
+  /* ==========================================================================
+     DEBUG AUTH
+  ========================================================================== */
+
+  if (
+    typeof window !==
+      "undefined" &&
+    process.env.NODE_ENV ===
+      "development"
+  ) {
+    console.log(
+      "[API REQUEST]",
+      {
+        method,
+        endpoint,
+        publicEndpoint,
+        hasToken: Boolean(token),
+      }
+    );
+  }
+
+  /* ==========================================================================
      TIMEOUT
-  ======================================================= */
+  ========================================================================== */
 
   const controller =
     new AbortController();
 
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, 30000);
+  const timeout = setTimeout(
+    () => {
+      controller.abort();
+    },
+    30000
+  );
 
   try {
-    /* =====================================================
+    /* ========================================================================
        FETCH
-    ===================================================== */
+    ======================================================================== */
 
     const response =
       await fetch(url, {
         ...options,
+        method,
         headers,
         signal:
           controller.signal,
@@ -277,55 +342,40 @@ async function request<T = unknown>(
 
     clearTimeout(timeout);
 
-    /* =====================================================
+    /* ========================================================================
        401 UNAUTHORIZED
-    ===================================================== */
+    ======================================================================== */
 
     if (
       response.status === 401
     ) {
       /*
-       * IMPORTANT:
+       * Only public requests should be treated
+       * as unauthenticated public requests.
        *
-       * Public endpoints must NEVER
-       * redirect the user to login.
-       *
-       * Example:
-       *
-       * GET /api/products/products/
-       *
-       * should remain public.
+       * POST /api/products/products/
+       * is NOT public anymore.
        */
 
-      if (
-        !isPublicEndpoint(endpoint)
-      ) {
+      if (!publicEndpoint) {
         clearAuthData();
         redirectToLogin();
       }
-
-      /*
-       * Always throw the error so
-       * the calling component can
-       * handle it if necessary.
-       */
 
       throw new ApiError(
         401,
         {
           message:
-            isPublicEndpoint(
-              endpoint
-            )
+            publicEndpoint
               ? "Unauthorized response from public endpoint."
-              : "Unauthorized",
+              : "Unauthorized. Please log in again.",
         }
       );
     }
 
-    /* =====================================================
+    /* ========================================================================
        403 FORBIDDEN
-    ===================================================== */
+    ======================================================================== */
 
     if (
       response.status === 403
@@ -334,14 +384,14 @@ async function request<T = unknown>(
         403,
         {
           message:
-            "Permission denied",
+            "Permission denied. You do not have permission to perform this action.",
         }
       );
     }
 
-    /* =====================================================
+    /* ========================================================================
        204 NO CONTENT
-    ===================================================== */
+    ======================================================================== */
 
     if (
       response.status === 204
@@ -349,18 +399,18 @@ async function request<T = unknown>(
       return {} as T;
     }
 
-    /* =====================================================
+    /* ========================================================================
        RESPONSE CONTENT TYPE
-    ===================================================== */
+    ======================================================================== */
 
     const contentType =
       response.headers.get(
         "content-type"
       ) || "";
 
-    /* =====================================================
+    /* ========================================================================
        READ RESPONSE
-    ===================================================== */
+    ======================================================================== */
 
     const responseText =
       await response.text();
@@ -386,18 +436,16 @@ async function request<T = unknown>(
       }
     }
 
-    /* =====================================================
+    /* ========================================================================
        HTTP ERROR
-    ===================================================== */
+    ======================================================================== */
 
     if (!response.ok) {
       console.error(
         "API ERROR",
         {
           url,
-          method:
-            options.method ||
-            "GET",
+          method,
           status:
             response.status,
           contentType,
@@ -411,28 +459,26 @@ async function request<T = unknown>(
       );
     }
 
-    /* =====================================================
+    /* ========================================================================
        EMPTY RESPONSE
-    ===================================================== */
+    ======================================================================== */
 
     if (!responseText) {
       return {} as T;
     }
 
-    /* =====================================================
+    /* ========================================================================
        WRAPPED API RESPONSE
-    ===================================================== */
+    ======================================================================== */
 
     /*
-     * Your Django ApiResponse can return:
+     * Your Django API may return:
      *
      * {
      *   success: true,
      *   data: {...},
      *   message: "..."
      * }
-     *
-     * In that case return only data.
      */
 
     if (
@@ -444,17 +490,17 @@ async function request<T = unknown>(
       return data.data as T;
     }
 
-    /* =====================================================
+    /* ========================================================================
        NORMAL RESPONSE
-    ===================================================== */
+    ======================================================================== */
 
     return data as T;
   } catch (error: any) {
     clearTimeout(timeout);
 
-    /* =====================================================
+    /* ========================================================================
        TIMEOUT
-    ===================================================== */
+    ======================================================================== */
 
     if (
       error?.name ===
@@ -469,9 +515,9 @@ async function request<T = unknown>(
       );
     }
 
-    /* =====================================================
+    /* ========================================================================
        API ERROR
-    ===================================================== */
+    ======================================================================== */
 
     if (
       error instanceof ApiError
@@ -479,9 +525,9 @@ async function request<T = unknown>(
       throw error;
     }
 
-    /* =====================================================
+    /* ========================================================================
        NETWORK ERROR
-    ===================================================== */
+    ======================================================================== */
 
     console.error(
       "Network/API request failed:",
@@ -499,14 +545,14 @@ async function request<T = unknown>(
   }
 }
 
-/* =========================================================
+/* ============================================================================
    API CLIENT
-========================================================= */
+============================================================================ */
 
 export const apiClient = {
-  /* =======================================================
+  /* ==========================================================================
      GET
-  ======================================================= */
+  ========================================================================== */
 
   get: <T = unknown>(
     endpoint: string,
@@ -520,9 +566,9 @@ export const apiClient = {
       }
     ),
 
-  /* =======================================================
+  /* ==========================================================================
      POST
-  ======================================================= */
+  ========================================================================== */
 
   post: <T = unknown>(
     endpoint: string,
@@ -543,9 +589,9 @@ export const apiClient = {
       }
     ),
 
-  /* =======================================================
+  /* ==========================================================================
      PUT
-  ======================================================= */
+  ========================================================================== */
 
   put: <T = unknown>(
     endpoint: string,
@@ -566,9 +612,9 @@ export const apiClient = {
       }
     ),
 
-  /* =======================================================
+  /* ==========================================================================
      PATCH
-  ======================================================= */
+  ========================================================================== */
 
   patch: <T = unknown>(
     endpoint: string,
@@ -589,9 +635,9 @@ export const apiClient = {
       }
     ),
 
-  /* =======================================================
+  /* ==========================================================================
      DELETE
-  ======================================================= */
+  ========================================================================== */
 
   delete: <T = unknown>(
     endpoint: string,

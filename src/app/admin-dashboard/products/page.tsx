@@ -158,7 +158,6 @@ export default function ProductPage() {
 
           Add Product
         </button>
-
       </div>
 
       {/* =================================================
@@ -250,7 +249,6 @@ export default function ProductPage() {
           </div>
 
         </div>
-
       </div>
 
       {/* =================================================
@@ -294,7 +292,17 @@ export default function ProductPage() {
           totalPages={totalPages}
           onPageChange={setPage}
         />
+     
 
+      {/* Product Table */}
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <ProductTable
+            products={products}
+            loading={loading}
+            onRefresh={loadProducts}
+          />
+        </div>
       </div>
 
       {/* =================================================
@@ -312,7 +320,7 @@ export default function ProductPage() {
           setAddOpen(false);
         }}
       />
-
+    </div>
     </div>
   );
 }

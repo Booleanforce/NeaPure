@@ -14,6 +14,7 @@ export default function LayoutWrapper({
   const isHiddenLayoutRoute =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/Customer-Dashboard") ||
+    pathname.startsWith("/Technician-Dashboard") ||
     pathname === "/login";
 
   if (isHiddenLayoutRoute) {
