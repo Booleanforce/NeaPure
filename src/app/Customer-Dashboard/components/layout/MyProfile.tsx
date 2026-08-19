@@ -154,6 +154,16 @@ function getPasswordRules(
 // everywhere else that reads the context, like Topbar. The context is
 // also responsible for actually persisting changes to the backend, so
 // they survive a refresh.
+//
+// Avatar uploads go through the context's uploadAvatar() — do NOT
+// re-implement the upload fetch here. uploadAvatar() already:
+//   - shows an instant local preview (via a blob URL)
+//   - posts to {API_URL}/api/auth/avatar/ with field name "photo"
+//     (must match what the Django serializer/view expects)
+//   - attaches the Authorization header from the stored access token
+//   - swaps the preview for the real hosted URL once the backend responds
+// Duplicating that logic here previously caused uploads to silently
+// fail (wrong field name, no auth header, wrong endpoint).
 export default function ProfilePage({
   onChangePassword,
 }: {
@@ -164,7 +174,7 @@ export default function ProfilePage({
     newPassword: string;
   }) => Promise<void> | void;
 }) {
-  const { profile, updateProfile } = useUser();
+  const { profile, updateProfile, uploadAvatar } = useUser();
   const lang = profile.language;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -204,25 +214,10 @@ export default function ProfilePage({
 
     setUploading(true);
     try {
-      // FileReader -> base64 data URL. This shows a reliable local
-      // preview immediately (and updates it everywhere via context,
-      // e.g. the Topbar avatar) while the real upload happens.
-      const localPreview = await readFileAsDataUrl(file);
-      await updateProfile({ avatarUrl: localPreview });
-
-      // Now actually upload the file to storage and persist the
-      // resulting hosted URL, swapping out the temporary data URL.
-      const formData = new FormData();
-      formData.append("avatar", file);
-      const res = await fetch("/api/profile/avatar", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-      const { url } = (await res.json()) as { url: string };
-      if (url) {
-        await updateProfile({ avatarUrl: url });
-      }
+      // Context handles: local preview, multipart upload to the real
+      // backend endpoint, auth header, and reconciling with the
+      // hosted URL the server returns.
+      await uploadAvatar(file);
     } catch {
       setUploadError(t("photoUploadFailed", lang));
     } finally {
@@ -410,6 +405,7 @@ export default function ProfilePage({
                   value={draft.email}
                   onChange={(v) => updateDraft("email", v)}
                   placeholder={t("emailPlaceholder", lang)}
+                  disabled
                 />
                 <FormRow
                   icon={Phone}
@@ -595,15 +591,6 @@ export default function ProfilePage({
       </p>
     </div>
   );
-}
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
 }
 
 function InfoRow({
