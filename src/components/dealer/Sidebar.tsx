@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Wrench, Settings } from 'lucide-react';
+import { LayoutDashboard, Wrench, Settings, Bell } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dealer', icon: LayoutDashboard },
   { name: 'Installations', href: '/dealer/installations', icon: Wrench },
+  { name: 'Notifications', href: '/dealer/notifications', icon: Bell },
 ];
 
 export default function Sidebar() {

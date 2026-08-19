@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wrench, CheckCircle, Home, User } from "lucide-react";
+import { Wrench, CheckCircle, Home, User, Bell } from "lucide-react";
 
 export default function TechnicianLayout({
   children,
@@ -37,6 +37,10 @@ export default function TechnicianLayout({
         <Link href="/technician/profile" className="flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
           <User className="h-5 w-5" />
           <span className="text-xs font-medium">Profile</span>
+        </Link>
+        <Link href="/technician/notifications" className="flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
+          <Bell className="h-5 w-5" />
+          <span className="text-xs font-medium">Alerts</span>
         </Link>
       </nav>
     </div>

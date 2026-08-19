@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Home, Settings, Package, LayoutDashboard, Briefcase, Wrench } from 'lucide-react';
+import { Users, Home, Settings, Package, LayoutDashboard, Briefcase, Wrench, Bell } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const navItems = [
   { name: 'Technician Management', href: '/admin/technicians', icon: Wrench },
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Installations', href: '/admin/installations', icon: Wrench },
+  { name: 'Notifications', href: '/admin/notifications', icon: Bell },
 ];
 
 export default function Sidebar() {
