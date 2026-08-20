@@ -294,16 +294,6 @@ export default function ProductPage() {
         />
      
 
-      {/* Product Table */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <ProductTable
-            products={products}
-            loading={loading}
-            onRefresh={loadProducts}
-          />
-        </div>
-      </div>
 
       {/* =================================================
           ADD PRODUCT MODAL

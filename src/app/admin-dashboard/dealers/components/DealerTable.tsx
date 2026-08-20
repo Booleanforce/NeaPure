@@ -1,3 +1,4 @@
+// app/admin-dashboard/dealers/components/DealerTable.tsx
 "use client";
 
 import { useState } from "react";
@@ -31,11 +32,19 @@ export default function DealerTable({
   loading,
   onRefresh,
 }: Props) {
+  /* =========================================================
+     VIEW MODAL
+  ========================================================= */
+
   const [isModalOpen, setIsModalOpen] =
     useState(false);
 
   const [selectedDealerId, setSelectedDealerId] =
     useState<string | null>(null);
+
+  /* =========================================================
+     EDIT MODAL
+  ========================================================= */
 
   const [isEditOpen, setIsEditOpen] =
     useState(false);
@@ -45,11 +54,19 @@ export default function DealerTable({
     setSelectedEditDealerId,
   ] = useState<string | null>(null);
 
+  /* =========================================================
+     DELETE MODAL
+  ========================================================= */
+
   const [deleteId, setDeleteId] =
     useState<string | null>(null);
 
   const [deleting, setDeleting] =
     useState(false);
+
+  /* =========================================================
+     STATUS BADGE
+  ========================================================= */
 
   const getStatusBadge = (
     status?: string
@@ -66,8 +83,14 @@ export default function DealerTable({
     }
   };
 
+  /* =========================================================
+     DELETE DEALER
+  ========================================================= */
+
   const handleDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteId) {
+      return;
+    }
 
     try {
       setDeleting(true);
@@ -80,13 +103,22 @@ export default function DealerTable({
 
       setDeleteId(null);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to delete dealer:",
+        error
+      );
 
-      alert("Failed to delete dealer.");
+      alert(
+        "Failed to delete dealer."
+      );
     } finally {
       setDeleting(false);
     }
   };
+
+  /* =========================================================
+     LOADING
+  ========================================================= */
 
   if (loading) {
     return (
@@ -96,6 +128,10 @@ export default function DealerTable({
     );
   }
 
+  /* =========================================================
+     EMPTY
+  ========================================================= */
+
   if (dealers.length === 0) {
     return (
       <div className="py-16 text-center text-sm text-blue-400">
@@ -104,11 +140,17 @@ export default function DealerTable({
     );
   }
 
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <>
-      {/* Mobile */}
-      <div className="grid grid-cols-1 gap-3 bg-blue-50/40 p-3 sm:grid-cols-2 md:hidden">
+      {/* =====================================================
+          MOBILE
+      ===================================================== */}
 
+      <div className="grid grid-cols-1 gap-3 bg-blue-50/40 p-3 sm:grid-cols-2 md:hidden">
         {dealers.map((dealer) => {
           const avatar =
             dealer.full_name
@@ -123,17 +165,15 @@ export default function DealerTable({
               key={dealer.id}
               className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm"
             >
+              {/* Header */}
 
               <div className="flex items-start justify-between gap-3">
-
                 <div className="flex min-w-0 items-center gap-3">
-
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
                     {avatar}
                   </div>
 
                   <div className="min-w-0">
-
                     <p className="truncate font-semibold text-slate-900">
                       {dealer.full_name}
                     </p>
@@ -142,7 +182,6 @@ export default function DealerTable({
                       {profile?.company_name ||
                         "Dealer"}
                     </p>
-
                   </div>
                 </div>
 
@@ -154,29 +193,29 @@ export default function DealerTable({
                   {profile?.status ||
                     "N/A"}
                 </span>
-
               </div>
 
-              <div className="mt-3 space-y-1.5 border-t border-blue-50 pt-3 text-sm">
+              {/* Dealer information */}
 
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Mail className="h-3.5 w-3.5 text-blue-300" />
+              <div className="mt-3 space-y-1.5 border-t border-blue-50 pt-3 text-sm">
+                <div className="flex min-w-0 items-center gap-2 text-slate-600">
+                  <Mail className="h-3.5 w-3.5 shrink-0 text-blue-300" />
 
                   <span className="truncate">
                     {dealer.email}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Phone className="h-3.5 w-3.5 text-blue-300" />
+                <div className="flex min-w-0 items-center gap-2 text-slate-600">
+                  <Phone className="h-3.5 w-3.5 shrink-0 text-blue-300" />
 
-                  <span>
+                  <span className="truncate">
                     {dealer.phone || "-"}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-slate-600">
-                  <Users className="h-3.5 w-3.5 text-blue-300" />
+                  <Users className="h-3.5 w-3.5 shrink-0 text-blue-300" />
 
                   <span>
                     {profile?.total_customers_registered ??
@@ -184,104 +223,119 @@ export default function DealerTable({
                     customers
                   </span>
                 </div>
-
               </div>
 
-              <div className="mt-3 flex items-center justify-between border-t border-blue-50 pt-3">
+              {/* Actions */}
 
+              <div className="mt-3 flex items-center justify-between border-t border-blue-50 pt-3">
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
                   Dealer
                 </span>
 
                 <div className="flex items-center gap-1">
+                  {/* View */}
 
                   <button
+                    type="button"
                     onClick={() => {
                       setSelectedDealerId(
                         dealer.id
                       );
+
                       setIsModalOpen(true);
                     }}
-                    className="rounded-lg p-2 hover:bg-blue-50"
+                    className="rounded-lg p-2 transition hover:bg-blue-50"
+                    aria-label="View dealer"
                   >
                     <Eye className="h-4 w-4 text-blue-600" />
                   </button>
 
+                  {/* Edit */}
+
                   <button
+                    type="button"
                     onClick={() => {
                       setSelectedEditDealerId(
                         dealer.id
                       );
+
                       setIsEditOpen(true);
                     }}
-                    className="rounded-lg p-2 hover:bg-sky-50"
+                    className="rounded-lg p-2 transition hover:bg-sky-50"
+                    aria-label="Edit dealer"
                   >
                     <Pencil className="h-4 w-4 text-sky-600" />
                   </button>
 
+                  {/* Delete */}
+
                   <button
+                    type="button"
                     onClick={() =>
-                      setDeleteId(dealer.id)
+                      setDeleteId(
+                        dealer.id
+                      )
                     }
-                    className="rounded-lg p-2 hover:bg-red-50"
+                    className="rounded-lg p-2 transition hover:bg-red-50"
+                    aria-label="Delete dealer"
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </button>
-
                 </div>
               </div>
-
             </div>
           );
         })}
-
       </div>
 
-      {/* Desktop */}
-      <div className="hidden overflow-x-auto md:block">
+      {/* =====================================================
+          DESKTOP
+      ===================================================== */}
 
-        <table className="w-full min-w-[1000px]">
+      <div className="hidden w-full md:block">
+        <table className="w-full table-fixed border-collapse">
+          {/* =================================================
+              TABLE HEADER
+          ================================================= */}
 
           <thead className="border-b border-blue-100 bg-blue-50">
-
             <tr>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold text-blue-900">
+              <th className="w-[23%] px-3 py-4 text-left text-sm font-semibold text-blue-900">
                 Dealer
               </th>
 
-              <th className="px-4 py-4 text-left text-sm font-semibold text-blue-900">
+              <th className="w-[14%] px-3 py-4 text-left text-sm font-semibold text-blue-900">
                 Company
               </th>
 
-              <th className="px-4 py-4 text-left text-sm font-semibold text-blue-900">
+              <th className="w-[19%] px-3 py-4 text-left text-sm font-semibold text-blue-900">
                 Email
               </th>
 
-              <th className="px-4 py-4 text-left text-sm font-semibold text-blue-900">
+              <th className="w-[15%] px-3 py-4 text-left text-sm font-semibold text-blue-900">
                 Phone
               </th>
 
-              <th className="px-4 py-4 text-center text-sm font-semibold text-blue-900">
+              <th className="w-[10%] px-3 py-4 text-center text-sm font-semibold text-blue-900">
                 Customers
               </th>
 
-              <th className="px-4 py-4 text-center text-sm font-semibold text-blue-900">
+              <th className="w-[10%] px-3 py-4 text-center text-sm font-semibold text-blue-900">
                 Status
               </th>
 
-              <th className="px-4 py-4 text-center text-sm font-semibold text-blue-900">
+              <th className="w-[9%] px-3 py-4 text-center text-sm font-semibold text-blue-900">
                 Actions
               </th>
-
             </tr>
-
           </thead>
 
+          {/* =================================================
+              TABLE BODY
+          ================================================= */}
+
           <tbody className="bg-white">
-
             {dealers.map((dealer) => {
-
               const avatar =
                 dealer.full_name
                   ?.charAt(0)
@@ -295,158 +349,204 @@ export default function DealerTable({
                   key={dealer.id}
                   className="border-b border-blue-50 transition hover:bg-blue-50/60"
                 >
+                  {/* =================================================
+                      DEALER
+                  ================================================= */}
 
-                  {/* Dealer */}
-                  <td className="px-4 py-4">
-
-                    <div className="flex items-center gap-3">
-
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
+                  <td className="px-3 py-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
                         {avatar}
                       </div>
 
                       <div className="min-w-0">
-
-                        <p className="truncate font-semibold text-slate-900">
+                        <p
+                          className="truncate font-semibold text-slate-900"
+                          title={
+                            dealer.full_name
+                          }
+                        >
                           {dealer.full_name}
                         </p>
 
-                        <p className="truncate text-xs text-blue-400">
+                        <p
+                          className="truncate text-xs text-blue-400"
+                          title={dealer.id}
+                        >
                           {dealer.id}
                         </p>
-
                       </div>
-
                     </div>
-
                   </td>
 
-                  {/* Company */}
-                  <td className="px-4 py-4">
+                  {/* =================================================
+                      COMPANY
+                  ================================================= */}
 
-                    <p className="truncate text-slate-600">
+                  <td className="min-w-0 px-3 py-4">
+                    <p
+                      className="truncate text-slate-600"
+                      title={
+                        profile?.company_name ||
+                        "-"
+                      }
+                    >
                       {profile?.company_name ||
                         "-"}
                     </p>
-
                   </td>
 
-                  {/* Email */}
-                  <td className="px-4 py-4">
+                  {/* =================================================
+                      EMAIL
+                  ================================================= */}
 
-                    <p className="truncate text-slate-600">
+                  <td className="min-w-0 px-3 py-4">
+                    <p
+                      className="truncate text-slate-600"
+                      title={dealer.email}
+                    >
                       {dealer.email}
                     </p>
-
                   </td>
 
-                  {/* Phone */}
-                  <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                    {dealer.phone || "-"}
+                  {/* =================================================
+                      PHONE
+                  ================================================= */}
+
+                  <td className="min-w-0 px-3 py-4">
+                    <p
+                      className="truncate text-slate-600"
+                      title={
+                        dealer.phone ||
+                        "-"
+                      }
+                    >
+                      {dealer.phone || "-"}
+                    </p>
                   </td>
 
-                  {/* Customers */}
-                  <td className="px-4 py-4 text-center">
+                  {/* =================================================
+                      CUSTOMERS
+                  ================================================= */}
 
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                      <Users className="h-3.5 w-3.5" />
+                  <td className="px-3 py-4 text-center">
+                    <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                      <Users className="h-3.5 w-3.5 shrink-0" />
 
-                      {profile?.total_customers_registered ??
-                        0}
+                      <span>
+                        {profile?.total_customers_registered ??
+                          0}
+                      </span>
                     </span>
-
                   </td>
 
-                  {/* Status */}
-                  <td className="px-4 py-4 text-center">
+                  {/* =================================================
+                      STATUS
+                  ================================================= */}
 
+                  <td className="px-3 py-4 text-center">
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusBadge(
+                      className={`inline-flex max-w-full truncate rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadge(
                         profile?.status
                       )}`}
                     >
                       {profile?.status ||
                         "N/A"}
                     </span>
-
                   </td>
 
-                  {/* Actions */}
-                  <td className="px-4 py-4">
+                  {/* =================================================
+                      ACTIONS
+                  ================================================= */}
 
-                    <div className="flex items-center justify-center gap-2">
+                  <td className="px-3 py-4">
+                    <div className="flex items-center justify-center gap-1">
+                      {/* View */}
 
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedDealerId(
                             dealer.id
                           );
+
                           setIsModalOpen(true);
                         }}
-                        className="rounded-lg p-2 hover:bg-blue-50"
+                        className="rounded-lg p-1.5 transition hover:bg-blue-50"
                         aria-label="View dealer"
                       >
                         <Eye className="h-4 w-4 text-blue-600" />
                       </button>
 
+                      {/* Edit */}
+
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedEditDealerId(
                             dealer.id
                           );
+
                           setIsEditOpen(true);
                         }}
-                        className="rounded-lg p-2 hover:bg-sky-50"
+                        className="rounded-lg p-1.5 transition hover:bg-sky-50"
                         aria-label="Edit dealer"
                       >
                         <Pencil className="h-4 w-4 text-sky-600" />
                       </button>
 
+                      {/* Delete */}
+
                       <button
+                        type="button"
                         onClick={() =>
-                          setDeleteId(dealer.id)
+                          setDeleteId(
+                            dealer.id
+                          )
                         }
-                        className="rounded-lg p-2 hover:bg-red-50"
+                        className="rounded-lg p-1.5 transition hover:bg-red-50"
                         aria-label="Delete dealer"
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </button>
-
                     </div>
-
                   </td>
-
                 </tr>
               );
             })}
-
           </tbody>
-
         </table>
-
       </div>
 
-      {/* View Modal */}
-        <Modal
+      {/* =====================================================
+          VIEW MODAL
+      ===================================================== */}
+
+      <Modal
         isOpen={isModalOpen}
         onClose={() => {
-            setIsModalOpen(false);
-            setSelectedDealerId(null);
+          setIsModalOpen(false);
+          setSelectedDealerId(null);
         }}
         dealerId={selectedDealerId}
         onEdit={() => {
-            if (!selectedDealerId) return;
+          if (!selectedDealerId) {
+            return;
+          }
 
-            setSelectedEditDealerId(
+          setSelectedEditDealerId(
             selectedDealerId
-            );
+          );
 
-            setIsEditOpen(true);
-            setIsModalOpen(false);
+          setIsEditOpen(true);
+          setIsModalOpen(false);
         }}
-        />
+      />
 
-      {/* Edit Modal */}
+      {/* =====================================================
+          EDIT MODAL
+      ===================================================== */}
+
       <EditDealerModal
         isOpen={isEditOpen}
         dealerId={selectedEditDealerId}
@@ -462,14 +562,18 @@ export default function DealerTable({
         }}
       />
 
-      {/* Delete Modal */}
+      {/* =====================================================
+          DELETE MODAL
+      ===================================================== */}
+
       <DeleteDealerModal
         isOpen={!!deleteId}
         loading={deleting}
-        onClose={() => setDeleteId(null)}
+        onClose={() =>
+          setDeleteId(null)
+        }
         onConfirm={handleDelete}
       />
-
     </>
   );
 }
