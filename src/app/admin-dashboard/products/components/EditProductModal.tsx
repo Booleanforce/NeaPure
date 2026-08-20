@@ -5,11 +5,11 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { Bounce, toast } from "react-toastify";
 
 import ImageUploader from "@/components/ui/ImageUploader";
 import { productService } from "@/services/product.service";
 import ProductForm from "./ProductForm";
-import { Bounce, toast } from "react-toastify";
 
 /* =========================================================
    TYPES
@@ -69,27 +69,27 @@ const initialForm: EditProductFormState = {
   slug: "",
   sku: "",
 
-    category_id: "",
+  category_id: "",
 
-    product_type: "FILTER",
+  product_type: "FILTER",
 
-    price: "",
+  price: "",
 
-    perfect_for: "",
+  perfect_for: "",
 
-    short_description: "",
+  short_description: "",
 
-    key_features: "",
+  key_features: "",
 
-    technical_specs: "",
+  technical_specs: "",
 
-    package_includes: "",
+  package_includes: "",
 
-    warranty_duration_months: "12",
+  warranty_duration_months: "12",
 
-    recommended_replacement_months: "6",
+  recommended_replacement_months: "6",
 
-    status: "ACTIVE",
+  status: "ACTIVE",
 
   is_featured: false,
 
@@ -170,37 +170,24 @@ export default function EditProductModal({
     try {
       setLoading(true);
 
-      const product =
-        await productService.getProduct(slug);
+      const product = await productService.getProduct(slug);
 
       /* -----------------------------------------------------
          FIND PRIMARY IMAGE
       ----------------------------------------------------- */
 
-      const primaryImage =
-        product.images?.find(
-          (img) => img.is_primary
-        );
+      const primaryImage = product.images?.find(
+        (img) => img.is_primary
+      );
 
       /* -----------------------------------------------------
          FALLBACK TO FIRST IMAGE
       ----------------------------------------------------- */
 
-      const firstImage =
-        product.images?.[0];
+      const firstImage = product.images?.[0];
 
       /* -----------------------------------------------------
          GET IMAGE URL
-         
-         Django ProductDetailSerializer returns:
-         
-         images: [
-           {
-             image,
-             image_url,
-             is_primary
-           }
-         ]
       ----------------------------------------------------- */
 
       const productImage =
@@ -225,14 +212,11 @@ export default function EditProductModal({
       ----------------------------------------------------- */
 
       setForm({
-        name:
-          product.name || "",
+        name: product.name || "",
 
-        slug:
-          product.slug || "",
+        slug: product.slug || "",
 
-        sku:
-          product.sku || "",
+        sku: product.sku || "",
 
         category_id:
           product.category?.id ||
@@ -267,27 +251,23 @@ export default function EditProductModal({
         warranty_duration_months:
           product.warranty_duration_months !==
             undefined &&
-          product.warranty_duration_months !==
-            null
+          product.warranty_duration_months !== null
             ? product.warranty_duration_months.toString()
             : "12",
 
         recommended_replacement_months:
           product.recommended_replacement_months !==
             undefined &&
-          product.recommended_replacement_months !==
-            null
+          product.recommended_replacement_months !== null
             ? product.recommended_replacement_months.toString()
             : "6",
 
-        status:
-          productStatus,
+        status: productStatus,
 
         is_featured:
           product.is_featured ?? false,
 
-        image_url:
-          productImage,
+        image_url: productImage,
       });
     } catch (error) {
       console.error(
@@ -313,9 +293,7 @@ export default function EditProductModal({
      HANDLE IMAGE
   ======================================================= */
 
-  const handleImage = (
-    file: File | null
-  ) => {
+  const handleImage = (file: File | null) => {
     /* -----------------------------------------------------
        Remove previous preview
     ----------------------------------------------------- */
@@ -339,8 +317,7 @@ export default function EditProductModal({
        Create new preview
     ----------------------------------------------------- */
 
-    const newPreview =
-      URL.createObjectURL(file);
+    const newPreview = URL.createObjectURL(file);
 
     setPreview(newPreview);
   };
@@ -416,9 +393,7 @@ export default function EditProductModal({
          DEBUG
       =================================================== */
 
-      console.log(
-        "Updating Product:"
-      );
+      console.log("Updating Product:");
 
       console.table(payload);
 
@@ -435,9 +410,6 @@ export default function EditProductModal({
       /* ===================================================
          STEP 2
          UPLOAD NEW IMAGE
-         
-         Only upload when the user selected
-         a new image.
       =================================================== */
 
       if (imageFile) {
@@ -464,32 +436,23 @@ export default function EditProductModal({
       toast.success(
         "Product updated successfully!",
         {
-          position:
-            "bottom-center",
+          position: "bottom-center",
 
-          autoClose:
-            5000,
+          autoClose: 5000,
 
-          hideProgressBar:
-            false,
+          hideProgressBar: false,
 
-          closeOnClick:
-            true,
+          closeOnClick: true,
 
-          pauseOnHover:
-            true,
+          pauseOnHover: true,
 
-          draggable:
-            true,
+          draggable: true,
 
-          progress:
-            undefined,
+          progress: undefined,
 
-          theme:
-            "light",
+          theme: "light",
 
-          transition:
-            Bounce,
+          transition: Bounce,
         }
       );
 
@@ -522,32 +485,23 @@ export default function EditProductModal({
           ? error.message
           : "Failed to update product.",
         {
-          position:
-            "bottom-center",
+          position: "bottom-center",
 
-          autoClose:
-            5000,
+          autoClose: 5000,
 
-          hideProgressBar:
-            false,
+          hideProgressBar: false,
 
-          closeOnClick:
-            true,
+          closeOnClick: true,
 
-          pauseOnHover:
-            true,
+          pauseOnHover: true,
 
-          draggable:
-            true,
+          draggable: true,
 
-          progress:
-            undefined,
+          progress: undefined,
 
-          theme:
-            "light",
+          theme: "light",
 
-          transition:
-            Bounce,
+          transition: Bounce,
         }
       );
     } finally {
@@ -565,7 +519,6 @@ export default function EditProductModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-
       <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
         {/* =================================================
@@ -573,7 +526,6 @@ export default function EditProductModal({
         ================================================= */}
 
         <div className="flex items-center justify-between border-b border-blue-100 bg-blue-50 px-8 py-5">
-
           <h2 className="text-2xl font-bold text-blue-900">
             Edit Product
           </h2>
@@ -597,11 +549,8 @@ export default function EditProductModal({
           <div className="flex h-96 items-center justify-center text-sm text-blue-500">
             Loading...
           </div>
-
         ) : (
-
           <>
-
             <div className="flex-1 overflow-y-auto bg-gray-50 p-8">
 
               {/* ===========================================
@@ -609,18 +558,14 @@ export default function EditProductModal({
               =========================================== */}
 
               <div className="mb-8">
-
                 <ImageUploader
                   preview={
                     preview ||
                     form.image_url ||
                     null
                   }
-                  onFileChange={
-                    handleImage
-                  }
+                  onFileChange={handleImage}
                 />
-
               </div>
 
               {/* ===========================================
@@ -631,7 +576,6 @@ export default function EditProductModal({
                 form={form}
                 setForm={setForm}
               />
-
             </div>
 
             {/* =============================================
@@ -662,13 +606,12 @@ export default function EditProductModal({
                 }
                 className="rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving
+                  ? "Saving..."
+                  : "Save Changes"}
               </button>
-
             </div>
-
           </>
-
         )}
       </div>
     </div>

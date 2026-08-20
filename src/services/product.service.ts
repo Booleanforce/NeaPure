@@ -74,14 +74,8 @@ export interface Product {
 
   category?: Category | null;
 
-  /**
-   * Used by create/update payloads.
-   */
   category_id?: string | null;
 
-  /**
-   * Used by ProductListSerializer.
-   */
   category_name?: string | null;
 
   /* ------------------------------------------------------------------------
@@ -114,24 +108,21 @@ export interface Product {
      Images
   ------------------------------------------------------------------------ */
 
-  /**
-   * Primary image returned by ProductListSerializer.
-   */
   primary_image?: string | null;
 
-  /**
-   * Complete image collection returned by ProductDetailSerializer.
-   */
   images?: ProductImage[];
 
   /* ------------------------------------------------------------------------
-     Optional inventory fields
-     
-     These are kept optional because your current Django
-     ProductListSerializer/ProductDetailSerializer do not return them.
+     Optional inventory / legacy fields
   ------------------------------------------------------------------------ */
 
   stock?: number;
+
+  featured?: boolean;
+
+  thumbnail?: string;
+
+  image?: string;
 
   /* ------------------------------------------------------------------------
      Timestamps
@@ -187,6 +178,23 @@ export interface CreateProductPayload {
   status?: "ACTIVE" | "INACTIVE";
 
   is_featured?: boolean;
+
+  /**
+   * Optional legacy / frontend fields.
+   */
+  featured?: boolean;
+
+  stock?: number;
+
+  thumbnail?: string;
+
+  image?: string;
+
+  images?: ProductImage[];
+
+  created_at?: string;
+
+  updated_at?: string;
 }
 
 /* ============================================================================
@@ -247,10 +255,16 @@ export const productService = {
     const params = new URLSearchParams();
 
     if (search.trim()) {
-      params.append("search", search.trim());
+      params.append(
+        "search",
+        search.trim()
+      );
     }
 
-    params.append("page", page.toString());
+    params.append(
+      "page",
+      page.toString()
+    );
 
     return apiClient.get<ProductListResponse>(
       `/api/products/products/?${params.toString()}`
@@ -262,8 +276,6 @@ export const productService = {
    *
    * GET
    * /api/products/products/{slug}/
-   *
-   * Returns ProductDetailSerializer.
    */
   async getProduct(
     slug: string
@@ -324,24 +336,19 @@ export const productService = {
 
   /**
    * Get all categories.
-   *
-   * Backend may return either:
-   * - Category[]
-   * - CategoryListResponse
    */
   async getCategories(): Promise<
     Category[] | CategoryListResponse
   > {
     return apiClient.get<
       Category[] | CategoryListResponse
-    >("/api/products/categories/");
+    >(
+      "/api/products/categories/"
+    );
   },
 
   /**
    * Get a single category by slug.
-   *
-   * GET
-   * /api/products/categories/{slug}/
    */
   async getCategory(
     slug: string
@@ -353,9 +360,6 @@ export const productService = {
 
   /**
    * Create category.
-   *
-   * POST
-   * /api/products/categories/
    */
   async createCategory(
     data: Pick<Category, "name" | "description">
@@ -368,9 +372,6 @@ export const productService = {
 
   /**
    * Update category.
-   *
-   * PATCH
-   * /api/products/categories/{slug}/
    */
   async updateCategory(
     slug: string,
@@ -386,9 +387,6 @@ export const productService = {
 
   /**
    * Delete category.
-   *
-   * DELETE
-   * /api/products/categories/{slug}/
    */
   async deleteCategory(
     slug: string
@@ -407,8 +405,6 @@ export const productService = {
    *
    * POST
    * /api/products/products/{slug}/upload_image/
-   *
-   * Uses multipart/form-data.
    */
   async uploadImage(
     slug: string,
@@ -433,11 +429,6 @@ export const productService = {
       String(is_primary)
     );
 
-    /**
-     * Your Django upload endpoint returns
-     * ProductDetailSerializer(product),
-     * not ProductImageSerializer.
-     */
     return apiClient.post<Product>(
       `/api/products/products/${slug}/upload_image/`,
       formData

@@ -6,14 +6,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { login } from "@/services/auth.service";
-import { toast, Bounce } from "react-toastify";
 
 export default function LoginPage() {
   const router = useRouter();
-
-  /* =========================================================
-     STATE
-  ========================================================= */
 
   const [showPassword, setShowPassword] =
     useState(false);
@@ -50,10 +45,6 @@ export default function LoginPage() {
     setError("");
 
     try {
-      /* -----------------------------------------------------
-         LOGIN API
-      ----------------------------------------------------- */
-
       const data = await login(
         email.trim(),
         password
@@ -64,22 +55,6 @@ export default function LoginPage() {
         data
       );
 
-      /* -----------------------------------------------------
-         GET USER ROLE
-
-         Expected:
-
-         {
-           access: "...",
-           refresh: "...",
-           user: {
-             id: "...",
-             email: "...",
-             role: "CUSTOMER"
-           }
-         }
-      ----------------------------------------------------- */
-
       const role =
         data.user?.role;
 
@@ -88,10 +63,6 @@ export default function LoginPage() {
         role
       );
 
-      /* -----------------------------------------------------
-         CUSTOMER
-      ----------------------------------------------------- */
-
       if (role === "CUSTOMER") {
         router.replace(
           "/Customer-Dashboard"
@@ -99,10 +70,6 @@ export default function LoginPage() {
 
         return;
       }
-
-      /* -----------------------------------------------------
-         ADMIN / SUPER ADMIN / OTHER
-      ----------------------------------------------------- */
 
       router.replace(
         "/admin-dashboard"
@@ -124,10 +91,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <main className="relative min-h-screen overflow-hidden">
@@ -164,28 +127,19 @@ export default function LoginPage() {
 
       <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-10 sm:px-8">
 
-        {/* ===================================================
-            LOGIN CARD
-        =================================================== */}
-
         <div className="w-full max-w-md">
 
           <div className="overflow-hidden rounded-3xl border border-white/15 bg-slate-950/55 shadow-2xl shadow-black/30 backdrop-blur-2xl">
 
-            {/* =================================================
-                CARD TOP ACCENT
-            ================================================= */}
+            {/* TOP ACCENT */}
 
             <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-300" />
 
             <div className="p-7 sm:p-9">
 
-              {/* ===============================================
-                  LOGO / BRAND
-              =============================================== */}
+              {/* LOGO */}
 
               <div className="mb-7 flex justify-center">
-
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 shadow-lg shadow-cyan-500/10">
 
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-blue-600">
@@ -197,23 +151,17 @@ export default function LoginPage() {
                   </div>
 
                 </div>
-
               </div>
 
-              {/* ===============================================
-                  TITLE
-              =============================================== */}
+              {/* TITLE */}
 
               <div className="text-center">
 
                 <h1 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-
                   Welcome to{" "}
-
                   <span className="text-cyan-300">
                     Neapure
                   </span>
-
                 </h1>
 
                 <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-white/55">
@@ -223,18 +171,14 @@ export default function LoginPage() {
 
               </div>
 
-              {/* ===============================================
-                  FORM
-              =============================================== */}
+              {/* FORM */}
 
               <form
                 className="mt-8 space-y-5"
                 onSubmit={handleLogin}
               >
 
-                {/* ===========================================
-                    EMAIL
-                =========================================== */}
+                {/* EMAIL */}
 
                 <label className="block">
 
@@ -266,9 +210,7 @@ export default function LoginPage() {
 
                 </label>
 
-                {/* ===========================================
-                    PASSWORD
-                =========================================== */}
+                {/* PASSWORD */}
 
                 <label className="block">
 
@@ -327,9 +269,7 @@ export default function LoginPage() {
 
                 </label>
 
-                {/* ===========================================
-                    ERROR
-                =========================================== */}
+                {/* ERROR */}
 
                 {error && (
                   <div
@@ -340,9 +280,7 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                {/* ===========================================
-                    REMEMBER / FORGOT
-                =========================================== */}
+                {/* REMEMBER / FORGOT */}
 
                 <div className="flex items-center justify-between gap-4">
 
@@ -378,31 +316,23 @@ export default function LoginPage() {
 
                 </div>
 
-                {/* ===========================================
-                    LOGIN BUTTON
-                =========================================== */}
+                {/* LOGIN BUTTON */}
 
                 <button
                   type="submit"
                   disabled={loading}
                   className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/10 transition-all duration-300 hover:from-cyan-300 hover:to-blue-500 hover:shadow-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-
                   <span className="relative z-10">
-
                     {loading
                       ? "Signing In..."
                       : "SIGN IN"}
-
                   </span>
-
                 </button>
 
               </form>
 
-              {/* ===============================================
-                  CREATE ACCOUNT
-              =============================================== */}
+              {/* CREATE ACCOUNT */}
 
               <p className="mt-7 text-center text-sm text-white/45">
 
@@ -418,11 +348,10 @@ export default function LoginPage() {
               </p>
 
             </div>
+
           </div>
 
-          {/* ===============================================
-              FOOTER
-          =============================================== */}
+          {/* FOOTER */}
 
           <p className="mt-5 text-center text-xs text-white/30">
             © {new Date().getFullYear()} Neapure.
@@ -430,6 +359,7 @@ export default function LoginPage() {
           </p>
 
         </div>
+
       </section>
     </main>
   );

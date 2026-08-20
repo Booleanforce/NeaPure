@@ -33,12 +33,10 @@ export default function Topbar({
   ========================================================================== */
 
   const userName =
-    profile.fullName ||
-    "User";
+    profile.fullName || "User";
 
   const userAvatar =
-    profile.avatarUrl ||
-    undefined;
+    profile.avatarUrl || undefined;
 
   /* ==========================================================================
      LOGOUT
@@ -47,20 +45,12 @@ export default function Topbar({
   const handleLogout = () => {
     /*
      * Clear the same authentication values
-     * used by apiClient.ts.
+     * used by the authentication flow.
      */
 
-    localStorage.removeItem(
-      "access"
-    );
-
-    localStorage.removeItem(
-      "refresh"
-    );
-
-    localStorage.removeItem(
-      "user"
-    );
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
 
     router.push("/login");
   };
@@ -72,13 +62,14 @@ export default function Topbar({
   return (
     <div className="flex w-full items-center justify-between gap-2">
 
-      {/* ==================================================================== */}
-      {/* LEFT SIDE                                                            */}
-      {/* ==================================================================== */}
+      {/* ====================================================================
+          LEFT SIDE
+      ==================================================================== */}
 
       <div className="flex min-w-0 items-center gap-2">
 
         {/* Mobile Menu */}
+
         <button
           type="button"
           onClick={onMenuClick}
@@ -89,14 +80,13 @@ export default function Topbar({
         </button>
 
         {/* Welcome */}
+
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-slate-800 sm:text-base">
             Welcome back,{" "}
-
             <span className="text-slate-900">
               {userName}
             </span>{" "}
-
             👋
           </p>
 
@@ -107,15 +97,15 @@ export default function Topbar({
         </div>
       </div>
 
-      {/* ==================================================================== */}
-      {/* RIGHT SIDE                                                           */}
-      {/* ==================================================================== */}
+      {/* ====================================================================
+          RIGHT SIDE
+      ==================================================================== */}
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
 
-        {/* ================================================================== */}
-        {/* SEARCH                                                             */}
-        {/* ================================================================== */}
+        {/* ==================================================================
+            SEARCH
+        ================================================================== */}
 
         <div className="relative hidden items-center rounded-lg bg-slate-50 px-3 py-1.5 md:flex">
           <Search className="h-4 w-4 text-slate-400" />
@@ -128,6 +118,7 @@ export default function Topbar({
         </div>
 
         {/* Mobile Search */}
+
         <button
           type="button"
           className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-500 transition hover:bg-slate-100 md:hidden"
@@ -136,9 +127,9 @@ export default function Topbar({
           <Search className="h-4 w-4" />
         </button>
 
-        {/* ================================================================== */}
-        {/* NOTIFICATION                                                       */}
-        {/* ================================================================== */}
+        {/* ==================================================================
+            NOTIFICATION
+        ================================================================== */}
 
         <button
           type="button"
@@ -150,9 +141,9 @@ export default function Topbar({
           <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-rose-500" />
         </button>
 
-        {/* ================================================================== */}
-        {/* MESSAGE                                                            */}
-        {/* ================================================================== */}
+        {/* ==================================================================
+            MESSAGE
+        ================================================================== */}
 
         <button
           type="button"
@@ -164,18 +155,18 @@ export default function Topbar({
           <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-rose-500" />
         </button>
 
-        {/* ================================================================== */}
-        {/* PROFILE                                                            */}
-        {/* ================================================================== */}
+        {/* ==================================================================
+            PROFILE
+        ================================================================== */}
 
         <UserProfile
           name={userName}
           avatarSrc={userAvatar}
         />
 
-        {/* ================================================================== */}
-        {/* LOGOUT                                                             */}
-        {/* ================================================================== */}
+        {/* ==================================================================
+            LOGOUT
+        ================================================================== */}
 
         <button
           type="button"
