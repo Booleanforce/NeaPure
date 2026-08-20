@@ -1,5 +1,16 @@
+"use client";
+
 import Card from "../common/Card";
 import SectionHeader from "../common/SectionHeader";
+
+import {
+  useAdmin,
+  type AdminLanguage,
+} from "../../context/AdminContext";
+
+/* =========================================================
+   SERVICE DATA
+========================================================= */
 
 const serviceData = [
   {
@@ -8,18 +19,21 @@ const serviceData = [
     pct: "(62.8%)",
     color: "bg-green-500",
   },
+
   {
     label: "In Progress",
     value: "540",
     pct: "(21.7%)",
     color: "bg-blue-500",
   },
+
   {
     label: "Pending",
     value: "264",
     pct: "(10.6%)",
     color: "bg-orange-500",
   },
+
   {
     label: "Cancelled",
     value: "122",
@@ -28,18 +42,150 @@ const serviceData = [
   },
 ];
 
-export default function ServiceOverview() {
-  return (
-    <Card className="col-span-3">
-      <SectionHeader title="Service Request Overview" />
+/* =========================================================
+   TRANSLATIONS
+========================================================= */
 
-      <div className="mb-4 flex justify-center">
-        <div className="relative h-40 w-40">
+const TRANSLATIONS = {
+  serviceRequestOverview: {
+    English: "Service Request Overview",
+    Bangla: "সার্ভিস অনুরোধের ওভারভিউ",
+  },
+
+  totalRequests: {
+    English: "TOTAL REQUESTS",
+    Bangla: "মোট অনুরোধ",
+  },
+
+  completed: {
+    English: "Completed",
+    Bangla: "সম্পন্ন",
+  },
+
+  inProgress: {
+    English: "In Progress",
+    Bangla: "চলমান",
+  },
+
+  pending: {
+    English: "Pending",
+    Bangla: "অপেক্ষমাণ",
+  },
+
+  cancelled: {
+    English: "Cancelled",
+    Bangla: "বাতিল",
+  },
+} as const;
+
+type TranslationKey =
+  keyof typeof TRANSLATIONS;
+
+/* =========================================================
+   TRANSLATION HELPER
+========================================================= */
+
+function t(
+  key: TranslationKey,
+  language: AdminLanguage
+): string {
+  return TRANSLATIONS[key][language];
+}
+
+/* =========================================================
+   SERVICE LABEL TRANSLATION
+========================================================= */
+
+function translateServiceLabel(
+  label: string,
+  language: AdminLanguage
+): string {
+  switch (label) {
+    case "Completed":
+      return t(
+        "completed",
+        language
+      );
+
+    case "In Progress":
+      return t(
+        "inProgress",
+        language
+      );
+
+    case "Pending":
+      return t(
+        "pending",
+        language
+      );
+
+    case "Cancelled":
+      return t(
+        "cancelled",
+        language
+      );
+
+    default:
+      return label;
+  }
+}
+
+/* =========================================================
+   COMPONENT
+========================================================= */
+
+export default function ServiceOverview() {
+  const { language } =
+    useAdmin();
+
+  return (
+    <Card
+      className="
+        col-span-1
+        min-w-0
+        overflow-hidden
+        sm:col-span-2
+        xl:col-span-3
+      "
+    >
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
+      <SectionHeader
+        title={t(
+          "serviceRequestOverview",
+          language
+        )}
+      />
+
+      {/* =====================================================
+          DONUT CHART
+      ===================================================== */}
+
+      <div className="mb-4 flex w-full justify-center">
+        <div
+          className="
+            relative
+            h-32 w-32
+            sm:h-36 sm:w-36
+            lg:h-40 lg:w-40
+          "
+        >
           <svg
             viewBox="0 0 100 100"
             className="h-full w-full -rotate-90"
+            preserveAspectRatio="xMidYMid meet"
+            aria-label={t(
+              "serviceRequestOverview",
+              language
+            )}
+            role="img"
           >
-            {/* Background */}
+            {/* =============================================
+                BACKGROUND
+            ============================================= */}
+
             <circle
               cx="50"
               cy="50"
@@ -49,7 +195,10 @@ export default function ServiceOverview() {
               strokeWidth="12"
             />
 
-            {/* Completed */}
+            {/* =============================================
+                COMPLETED
+            ============================================= */}
+
             <circle
               cx="50"
               cy="50"
@@ -61,7 +210,10 @@ export default function ServiceOverview() {
               strokeDashoffset="0"
             />
 
-            {/* In Progress */}
+            {/* =============================================
+                IN PROGRESS
+            ============================================= */}
+
             <circle
               cx="50"
               cy="50"
@@ -73,7 +225,10 @@ export default function ServiceOverview() {
               strokeDashoffset="-188"
             />
 
-            {/* Pending */}
+            {/* =============================================
+                PENDING
+            ============================================= */}
+
             <circle
               cx="50"
               cy="50"
@@ -85,7 +240,10 @@ export default function ServiceOverview() {
               strokeDashoffset="-242"
             />
 
-            {/* Cancelled */}
+            {/* =============================================
+                CANCELLED
+            ============================================= */}
+
             <circle
               cx="50"
               cy="50"
@@ -98,45 +256,86 @@ export default function ServiceOverview() {
             />
           </svg>
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <h2 className="text-2xl font-bold text-gray-900">
+          {/* ===============================================
+              CENTER VALUE
+          =============================================== */}
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-2 text-center">
+            <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
               2,486
             </h2>
 
-            <p className="text-[10px] text-gray-500">
-              TOTAL REQUESTS
+            <p className="mt-0.5 text-[8px] leading-tight text-gray-500 sm:text-[10px]">
+              {t(
+                "totalRequests",
+                language
+              )}
             </p>
           </div>
         </div>
       </div>
 
+      {/* =====================================================
+          SERVICE LIST
+      ===================================================== */}
+
       <div className="space-y-2">
-        {serviceData.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center justify-between text-xs"
-          >
-            <div className="flex items-center gap-2">
-              <div
-                className={`h-2 w-2 rounded-full ${item.color}`}
-              />
 
-              <span className="text-gray-600">
-                {item.label}
-              </span>
+        {serviceData.map(
+          (item) => (
+            <div
+              key={item.label}
+              className="
+                flex min-w-0
+                items-center
+                justify-between
+                gap-2
+                text-xs
+              "
+            >
+              {/* ===========================================
+                  LABEL
+              =========================================== */}
+
+              <div className="flex min-w-0 items-center gap-2">
+
+                <div
+                  className={`
+                    h-2 w-2
+                    shrink-0
+                    rounded-full
+                    ${item.color}
+                  `}
+                />
+
+                <span className="min-w-0 truncate text-gray-600">
+                  {translateServiceLabel(
+                    item.label,
+                    language
+                  )}
+                </span>
+
+              </div>
+
+              {/* ===========================================
+                  VALUE
+              =========================================== */}
+
+              <div className="flex shrink-0 items-center text-right">
+
+                <span className="font-semibold text-gray-900">
+                  {item.value}
+                </span>
+
+                <span className="ml-1 text-gray-400">
+                  {item.pct}
+                </span>
+
+              </div>
             </div>
+          )
+        )}
 
-            <div className="text-right">
-              <span className="font-semibold text-gray-900">
-                {item.value}
-              </span>
-
-              <span className="ml-1 text-gray-400">
-                {item.pct}
-              </span>
-            </div>
-          </div>
-        ))}
       </div>
     </Card>
   );

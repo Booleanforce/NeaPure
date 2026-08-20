@@ -1,7 +1,5 @@
 "use client";
 
-// import { useState } from "react";
-// import { useRouter } from "next/navigation";
 import StatsCards from "./components/cards/StatsCards";
 import SalesChart from "./components/charts/SalesChart";
 import ServiceOverview from "./components/charts/ServiceOverview";
@@ -12,54 +10,61 @@ import RevenueBreakdown from "./components/cards/RevenueBreakdown";
 import QuickStats from "./components/cards/QuickStats";
 
 export default function DashboardPage() {
-  // const router = useRouter();
-
-
-// const handleLogout = async () => {
-//   console.log("Logout clicked");
-
-//   await logout();
-
-//   console.log("Logout completed");
-
-//   router.replace("/login");
-//   router.refresh();
-// };
-
   return (
-    <div className="space-y-6">
-          {/* Stats */}
+    <div className="min-w-0 space-y-6">
 
-          <StatsCards />
+      {/* =========================================================
+          STATS
+      ========================================================= */}
 
-          {/* Analytics */}
+      <section className="min-w-0">
+        <StatsCards />
+      </section>
 
-          <div className="grid grid-cols-12 gap-4">
-            <SalesChart />
+      {/* =========================================================
+          ANALYTICS
 
-            <ServiceOverview />
+          Mobile  -> 1 column
+          Tablet  -> 2 columns
+          Desktop -> 12-column dashboard
+      ========================================================= */}
 
-            <InstallationOverview />
-          </div>
+      <section className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
 
-          {/* ---------------------------------------------------------------- */}
-          {/* KEEP THESE UNTIL WE REFACTOR THEM                                */}
-          {/* ---------------------------------------------------------------- */}
+        <SalesChart />
 
-          {/* Recent Service Requests */}
+        <ServiceOverview />
 
-          <div className="grid grid-cols-12 gap-4">
-            <RecentServiceRequests />
+        <InstallationOverview />
 
-            <TopTechnicians />
+      </section>
 
-            <RevenueBreakdown />
-          </div>
+      {/* =========================================================
+          RECENT REQUESTS / TOP TECHNICIANS / REVENUE
 
-          {/* Quick Stats */}
+          Mobile  -> 1 column
+          Tablet  -> 2 columns
+          Desktop -> 12-column dashboard
+      ========================================================= */}
 
-          <QuickStats />
-      
+      <section className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+
+        <RecentServiceRequests />
+
+        <TopTechnicians />
+
+        <RevenueBreakdown />
+
+      </section>
+
+      {/* =========================================================
+          QUICK STATS
+      ========================================================= */}
+
+      <section className="min-w-0">
+        <QuickStats />
+      </section>
+
     </div>
   );
 }

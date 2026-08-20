@@ -16,7 +16,24 @@ import {
   UserCircle,
 } from "lucide-react";
 
-export const navItems = [
+import type { ElementType } from "react";
+
+/* =========================================================
+   TYPE
+========================================================= */
+
+export interface AdminNavItem {
+  name: string;
+  href: string;
+  icon: ElementType;
+  badge?: number;
+}
+
+/* =========================================================
+   NAV ITEMS
+========================================================= */
+
+export const navItems: AdminNavItem[] = [
   {
     name: "Dashboard",
     href: "/admin-dashboard",
@@ -34,20 +51,17 @@ export const navItems = [
     href: "/admin-dashboard/products",
     icon: Package,
   },
-    {
+
+  {
     name: "Dealers",
     href: "/admin-dashboard/dealers",
     icon: UserCog,
-  }, 
+  },
+
   {
     name: "Technicians",
     href: "/admin-dashboard/technicians",
     icon: UserCog,
-  },
-  {
-    name: "Sales & Orders",
-    href: "/admin-dashboard/orders",
-    icon: ShoppingCart,
   },
 
   {
@@ -62,7 +76,11 @@ export const navItems = [
     icon: FileText,
   },
 
-
+  {
+    name: "Sales & Orders",
+    href: "/admin-dashboard/orders",
+    icon: ShoppingCart,
+  },
   {
     name: "Service Tracking",
     href: "/admin-dashboard/service-tracking",
@@ -97,6 +115,12 @@ export const navItems = [
     name: "Notifications",
     href: "/admin-dashboard/notifications",
     icon: Bell,
+    badge: 3,
+  },
+  {
+    name: "My Profile",
+    href: "/admin-dashboard/my-profile",
+    icon: UserCircle,
   },
 
   {
@@ -110,4 +134,4 @@ export const navItems = [
     href: "/admin-dashboard/users",
     icon: UserCircle,
   },
-] as const;
+];
