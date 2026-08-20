@@ -1,50 +1,219 @@
-import { Camera, History, MapPin, QrCode, Wrench } from "lucide-react";
+// ServiceOverview.tsx
+
+"use client";
+
+import {
+  Camera,
+  History,
+  MapPin,
+  QrCode,
+  Wrench,
+} from "lucide-react";
+
 import Card from "../common/Card";
 import SectionHeader from "../common/SectionHeader";
 import { ReminderBellIcon } from "../common/icons";
 
-/**
- * Renamed from the old `ServiceShortcuts` to fill the requested
- * charts/ServiceOverview.tsx slot — it's an overview grid rather than a
- * literal chart, but it's the closest match in your actual dashboard.
- * Content and classes are unchanged.
- */
+import {
+  useUser,
+  type CustomerLanguage,
+} from "../../context/UserContext";
+
+/* =========================================================
+   TRANSLATIONS
+========================================================= */
+
+const TRANSLATIONS = {
+  serviceShortcuts: {
+    English: "Service Shortcuts",
+    Bangla: "সার্ভিস শর্টকাট",
+  },
+
+  serviceRequests: {
+    English: "Service Requests",
+    Bangla: "সার্ভিস অনুরোধ",
+  },
+
+  installationTracking: {
+    English: "Installation Tracking",
+    Bangla: "ইনস্টলেশন ট্র্যাকিং",
+  },
+
+  beforeAfterSetup: {
+    English: "Before & After Setup",
+    Bangla: "আগে ও পরে সেটআপ",
+  },
+
+  qrCodeService: {
+    English: "QR Code Service",
+    Bangla: "QR কোড সার্ভিস",
+  },
+
+  serviceHistory: {
+    English: "Service History",
+    Bangla: "সার্ভিস ইতিহাস",
+  },
+
+  remindersAlerts: {
+    English: "Reminders & Alerts",
+    Bangla: "রিমাইন্ডার ও সতর্কতা",
+  },
+} as const;
+
+type TranslationKey =
+  keyof typeof TRANSLATIONS;
+
+/* =========================================================
+   TRANSLATION HELPER
+========================================================= */
+
+function t(
+  key: TranslationKey,
+  language: CustomerLanguage
+): string {
+  return TRANSLATIONS[key][language];
+}
+
+/* =========================================================
+   COMPONENT
+========================================================= */
+
 export default function ServiceOverview() {
+  const { language } = useUser();
+
   const items = [
-    { icon: <Wrench className="h-5 w-5" />, label: "Service Requests", bg: "bg-pink-50", color: "text-pink-500", badge: 2 },
-    { icon: <MapPin className="h-5 w-5" />, label: "Installation Tracking", bg: "bg-emerald-50", color: "text-emerald-500" },
-    { icon: <Camera className="h-5 w-5" />, label: "Before & After Setup", bg: "bg-blue-50", color: "text-blue-500" },
-    { icon: <QrCode className="h-5 w-5" />, label: "QR Code Service", bg: "bg-violet-50", color: "text-violet-500" },
-    { icon: <History className="h-5 w-5" />, label: "Service History", bg: "bg-amber-50", color: "text-amber-500" },
-    { icon: <ReminderBellIcon className="h-5 w-5" />, label: "Reminders & Alerts", bg: "bg-rose-50", color: "text-rose-500" },
+    {
+      icon: (
+        <Wrench className="h-5 w-5" />
+      ),
+      label: t(
+        "serviceRequests",
+        language
+      ),
+      bg: "bg-pink-50",
+      color: "text-pink-500",
+      badge: 2,
+    },
+
+    {
+      icon: (
+        <MapPin className="h-5 w-5" />
+      ),
+      label: t(
+        "installationTracking",
+        language
+      ),
+      bg: "bg-emerald-50",
+      color: "text-emerald-500",
+    },
+
+    {
+      icon: (
+        <Camera className="h-5 w-5" />
+      ),
+      label: t(
+        "beforeAfterSetup",
+        language
+      ),
+      bg: "bg-blue-50",
+      color: "text-blue-500",
+    },
+
+    {
+      icon: (
+        <QrCode className="h-5 w-5" />
+      ),
+      label: t(
+        "qrCodeService",
+        language
+      ),
+      bg: "bg-violet-50",
+      color: "text-violet-500",
+    },
+
+    {
+      icon: (
+        <History className="h-5 w-5" />
+      ),
+      label: t(
+        "serviceHistory",
+        language
+      ),
+      bg: "bg-amber-50",
+      color: "text-amber-500",
+    },
+
+    {
+      icon: (
+        <ReminderBellIcon className="h-5 w-5" />
+      ),
+      label: t(
+        "remindersAlerts",
+        language
+      ),
+      bg: "bg-rose-50",
+      color: "text-rose-500",
+    },
   ];
 
   return (
-    <Card rounded="rounded-xl" padding="p-4" className="flex h-full flex-col">
-      <SectionHeader title="Service Shortcuts" className="mb-3" />
-      <div className="grid flex-1 grid-cols-3 gap-0 sm:grid-cols-6">
-        {items.map((it) => (
+    <Card
+      rounded="rounded-xl"
+      padding="p-4"
+      className="flex h-full min-w-0 flex-col overflow-hidden"
+    >
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
+      <SectionHeader
+        title={t(
+          "serviceShortcuts",
+          language
+        )}
+        className="mb-3"
+      />
+
+      {/* =====================================================
+          SERVICE ITEMS
+      ===================================================== */}
+
+      <div className="grid flex-1 grid-cols-2 gap-y-5 sm:grid-cols-3 lg:grid-cols-6">
+
+        {items.map((item) => (
           <button
-            key={it.label}
-            className="flex flex-col items-center gap-2 text-center"
+            key={item.label}
+            type="button"
+            className="group flex min-w-0 flex-col items-center gap-2 px-1 text-center transition"
           >
-            <div className="relative">
+            {/* Icon */}
+
+            <div className="relative shrink-0">
+
               <div
-                className={`flex h-12 w-12 items-center justify-center rounded-2xl ${it.bg} ${it.color}`}
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:-translate-y-0.5 ${item.bg} ${item.color}`}
               >
-                {it.icon}
+                {item.icon}
               </div>
-              {it.badge && (
+
+              {/* Badge */}
+
+              {item.badge !== undefined && (
                 <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white">
-                  {it.badge}
+                  {item.badge}
                 </span>
               )}
+
             </div>
-            <span className="text-[11px] leading-tight text-slate-500">
-              {it.label}
+
+            {/* Label */}
+
+            <span className="w-full min-w-0 px-1 text-[10px] leading-[1.25] text-slate-500 sm:text-[11px]">
+              {item.label}
             </span>
           </button>
         ))}
+
       </div>
     </Card>
   );

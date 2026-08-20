@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 // app/error.tsx
 //
 // Next.js App Router renders this automatically for any runtime error

@@ -2,6 +2,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+/* ============================================================================
+   API BASE URL
+============================================================================ */
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://127.0.0.1:8000";
@@ -11,8 +15,13 @@ const API_BASE_URL =
 
    Public access is METHOD-SPECIFIC.
 
-   GET products/categories can be public,
-   but POST/PATCH/DELETE operations are protected.
+   GET products/categories can be public.
+
+   POST:
+   - login
+   - AI chat
+
+   Everything else requires authentication.
 ============================================================================ */
 
 const PUBLIC_GET_ENDPOINTS = [
@@ -36,9 +45,9 @@ function isPublicEndpoint(
   const normalizedMethod =
     method.toUpperCase();
 
-  /* ------------------------------------------------------------------------
+  /* --------------------------------------------------------------------------
      PUBLIC GET
-  ------------------------------------------------------------------------ */
+  -------------------------------------------------------------------------- */
 
   if (normalizedMethod === "GET") {
     return PUBLIC_GET_ENDPOINTS.some(
@@ -50,9 +59,9 @@ function isPublicEndpoint(
     );
   }
 
-  /* ------------------------------------------------------------------------
+  /* --------------------------------------------------------------------------
      PUBLIC POST
-  ------------------------------------------------------------------------ */
+  -------------------------------------------------------------------------- */
 
   if (normalizedMethod === "POST") {
     return PUBLIC_POST_ENDPOINTS.some(
@@ -81,14 +90,15 @@ export class ApiError extends Error {
       data?.error ||
       data?.message;
 
-    /* ----------------------------------------------------------------------
+    /* ------------------------------------------------------------------------
        Django REST Framework validation errors
-    ---------------------------------------------------------------------- */
+    ------------------------------------------------------------------------ */
 
     if (
       !message &&
       data &&
-      typeof data === "object"
+      typeof data === "object" &&
+      !Array.isArray(data)
     ) {
       const firstKey =
         Object.keys(data)[0];
@@ -162,9 +172,9 @@ function redirectToLogin(): void {
     return;
   }
 
-  /* ------------------------------------------------------------------------
+  /* --------------------------------------------------------------------------
      Prevent redirect loop
-  ------------------------------------------------------------------------ */
+  -------------------------------------------------------------------------- */
 
   if (
     window.location.pathname ===
@@ -228,7 +238,7 @@ async function request<T = unknown>(
   /*
    * Never manually set Content-Type for FormData.
    *
-   * The browser automatically sets:
+   * The browser automatically creates:
    *
    * multipart/form-data; boundary=...
    */
@@ -269,17 +279,15 @@ async function request<T = unknown>(
     );
 
   /*
-   * IMPORTANT:
-   *
-   * Only skip Authorization for genuinely
-   * public METHOD + ENDPOINT combinations.
+   * Only public METHOD + ENDPOINT combinations
+   * skip the Authorization header.
    *
    * Therefore:
    *
-   * GET  /api/products/products/    -> public
-   * POST /api/products/products/   -> protected
-   * PATCH /api/products/products/  -> protected
-   * DELETE /api/products/products/ -> protected
+   * GET    /api/products/products/  -> public
+   * POST   /api/products/products/  -> protected
+   * PATCH  /api/products/products/  -> protected
+   * DELETE /api/products/products/  -> protected
    */
 
   if (
@@ -293,7 +301,7 @@ async function request<T = unknown>(
   }
 
   /* ==========================================================================
-     DEBUG AUTH
+     DEBUG REQUEST
   ========================================================================== */
 
   if (
@@ -305,6 +313,7 @@ async function request<T = unknown>(
     console.log(
       "[API REQUEST]",
       {
+        url,
         method,
         endpoint,
         publicEndpoint,
@@ -344,55 +353,6 @@ async function request<T = unknown>(
     clearTimeout(timeout);
 
     /* ========================================================================
-       401 UNAUTHORIZED
-    ======================================================================== */
-
-    if (
-      response.status === 401
-    ) {
-      if (!publicEndpoint) {
-        clearAuthData();
-        redirectToLogin();
-      }
-
-      throw new ApiError(
-        401,
-        {
-          message:
-            publicEndpoint
-              ? "Unauthorized response from public endpoint."
-              : "Unauthorized. Please log in again.",
-        }
-      );
-    }
-
-    /* ========================================================================
-       403 FORBIDDEN
-    ======================================================================== */
-
-    if (
-      response.status === 403
-    ) {
-      throw new ApiError(
-        403,
-        {
-          message:
-            "Permission denied. You do not have permission to perform this action.",
-        }
-      );
-    }
-
-    /* ========================================================================
-       204 NO CONTENT
-    ======================================================================== */
-
-    if (
-      response.status === 204
-    ) {
-      return {} as T;
-    }
-
-    /* ========================================================================
        RESPONSE CONTENT TYPE
     ======================================================================== */
 
@@ -418,8 +378,10 @@ async function request<T = unknown>(
           );
       } catch {
         /*
-         * Backend returned plain text
-         * or HTML instead of JSON.
+         * Backend returned:
+         * - plain text
+         * - HTML
+         * - another non-JSON response
          */
 
         data = {
@@ -430,10 +392,105 @@ async function request<T = unknown>(
     }
 
     /* ========================================================================
+       401 UNAUTHORIZED
+    ======================================================================== */
+
+    if (
+      response.status === 401
+    ) {
+      console.error(
+        "[API 401]",
+        {
+          url,
+          method,
+          publicEndpoint,
+          response: data,
+          responseText,
+        }
+      );
+
+      if (!publicEndpoint) {
+        clearAuthData();
+        redirectToLogin();
+      }
+
+      throw new ApiError(
+        401,
+        {
+          message:
+            publicEndpoint
+              ? "Unauthorized response from public endpoint."
+              : "Unauthorized. Please log in again.",
+          response: data,
+        }
+      );
+    }
+
+    /* ========================================================================
+       403 FORBIDDEN
+    ======================================================================== */
+
+    if (
+      response.status === 403
+    ) {
+      console.error(
+        "[API 403]",
+        {
+          url,
+          method,
+          response: data,
+          responseText,
+        }
+      );
+
+      throw new ApiError(
+        403,
+        {
+          message:
+            data?.detail ||
+            data?.message ||
+            "Permission denied. You do not have permission to perform this action.",
+          response: data,
+        }
+      );
+    }
+
+    /* ========================================================================
        HTTP ERROR
     ======================================================================== */
 
     if (!response.ok) {
+      /*
+       * If the backend gives us no useful
+       * JSON response, preserve the raw text.
+       */
+
+      let errorData = data;
+
+      const isEmptyObject =
+        errorData &&
+        typeof errorData === "object" &&
+        !Array.isArray(errorData) &&
+        Object.keys(
+          errorData
+        ).length === 0;
+
+      if (
+        !errorData ||
+        isEmptyObject
+      ) {
+        errorData = {
+          message:
+            responseText ||
+            response.statusText ||
+            `Request failed with status ${response.status}.`,
+        };
+      }
+
+      /* ----------------------------------------------------------------------
+         Console diagnostics
+      ---------------------------------------------------------------------- */
+
       console.error(
         "API ERROR",
         {
@@ -441,15 +498,29 @@ async function request<T = unknown>(
           method,
           status:
             response.status,
+          statusText:
+            response.statusText,
           contentType,
-          response: data,
+          responseText,
+          responseData:
+            errorData,
         }
       );
 
       throw new ApiError(
         response.status,
-        data
+        errorData
       );
+    }
+
+    /* ========================================================================
+       204 NO CONTENT
+    ======================================================================== */
+
+    if (
+      response.status === 204
+    ) {
+      return {} as T;
     }
 
     /* ========================================================================
@@ -465,7 +536,7 @@ async function request<T = unknown>(
     ======================================================================== */
 
     /*
-     * Your Django API may return:
+     * Supports backend responses like:
      *
      * {
      *   success: true,
@@ -477,6 +548,7 @@ async function request<T = unknown>(
     if (
       data &&
       typeof data === "object" &&
+      !Array.isArray(data) &&
       "success" in data &&
       "data" in data
     ) {
@@ -499,6 +571,14 @@ async function request<T = unknown>(
       error?.name ===
       "AbortError"
     ) {
+      console.error(
+        "[API TIMEOUT]",
+        {
+          url,
+          method,
+        }
+      );
+
       throw new ApiError(
         408,
         {
@@ -524,7 +604,11 @@ async function request<T = unknown>(
 
     console.error(
       "Network/API request failed:",
-      error
+      {
+        url,
+        method,
+        error,
+      }
     );
 
     throw new ApiError(

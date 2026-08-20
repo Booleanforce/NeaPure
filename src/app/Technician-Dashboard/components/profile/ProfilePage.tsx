@@ -1,13 +1,8 @@
-// app/Customer-Dashboard/my-profile/ProfilePage.tsx
-
 /* eslint-disable @next/next/no-img-element */
 
 "use client";
 
-import {
-  useRef,
-  useState,
-} from "react";
+import { useRef, useState } from "react";
 
 import {
   User,
@@ -17,36 +12,43 @@ import {
   ShieldCheck,
   Camera,
   Lock,
-  Settings,
   Pencil,
   Check,
   X,
   Eye,
   EyeOff,
+  Wrench,
+  Activity,
 } from "lucide-react";
 
 import {
-  useUser,
-  type CustomerLanguage,
-  type CustomerProfile,
-} from "../context/UserContext";
+  Bounce,
+  toast,
+} from "react-toastify";
 
-/* ============================================================================
+import {
+  useTechnician,
+  type TechnicianLanguage,
+  type TechnicianUser,
+} from "../../context/TechnicianContext";
+
+/* =========================================================
    TYPES
-============================================================================ */
+========================================================= */
 
 type EditableField =
   | "fullName"
   | "email"
   | "phone"
-  | "location"
-  | "role";
+  | "region"
+  | "skills"
+  | "status";
 
 const MAX_AVATAR_SIZE_MB = 5;
 
-/* ============================================================================
+/* =========================================================
    TRANSLATIONS
-============================================================================ */
+========================================================= */
 
 const TRANSLATIONS = {
   pageTitle: {
@@ -56,9 +58,9 @@ const TRANSLATIONS = {
 
   pageSubtitle: {
     English:
-      "View and manage your personal information.",
+      "View and manage your technician profile information.",
     Bangla:
-      "আপনার ব্যক্তিগত তথ্য দেখুন এবং পরিচালনা করুন।",
+      "আপনার টেকনিশিয়ান প্রোফাইলের তথ্য দেখুন এবং পরিচালনা করুন।",
   },
 
   editProfile: {
@@ -106,9 +108,14 @@ const TRANSLATIONS = {
     Bangla: "ফোন",
   },
 
-  location: {
-    English: "Location",
-    Bangla: "অবস্থান",
+  region: {
+    English: "Region",
+    Bangla: "অঞ্চল",
+  },
+
+  skills: {
+    English: "Skills",
+    Bangla: "দক্ষতা",
   },
 
   role: {
@@ -116,29 +123,54 @@ const TRANSLATIONS = {
     Bangla: "ভূমিকা",
   },
 
-  fullNamePlaceholder: {
-    English: "Enter your full name",
-    Bangla: "আপনার পূর্ণ নাম লিখুন",
+  status: {
+    English: "Status",
+    Bangla: "স্ট্যাটাস",
   },
 
-  emailPlaceholder: {
-    English: "you@example.com",
-    Bangla: "you@example.com",
+  account: {
+    English: "Account",
+    Bangla: "অ্যাকাউন্ট",
   },
 
-  phonePlaceholder: {
-    English: "+880 1XX-XXXXXXX",
-    Bangla: "+৮৮০ ১XX-XXXXXXX",
+  active: {
+    English: "ACTIVE",
+    Bangla: "সক্রিয়",
   },
 
-  locationPlaceholder: {
-    English: "City, Country",
-    Bangla: "শহর, দেশ",
+  blocked: {
+    English: "BLOCKED",
+    Bangla: "ব্লক করা হয়েছে",
+  },
+
+  accountActive: {
+    English: "Active",
+    Bangla: "সক্রিয়",
+  },
+
+  accountInactive: {
+    English: "Inactive",
+    Bangla: "নিষ্ক্রিয়",
+  },
+
+  technician: {
+    English: "TECHNICIAN",
+    Bangla: "টেকনিশিয়ান",
+  },
+
+  technicianInformation: {
+    English: "Technician Information",
+    Bangla: "টেকনিশিয়ান তথ্য",
   },
 
   accountInformation: {
     English: "Account Information",
     Bangla: "অ্যাকাউন্ট তথ্য",
+  },
+
+  profilePhoto: {
+    English: "Profile Photo",
+    Bangla: "প্রোফাইল ছবি",
   },
 
   password: {
@@ -186,24 +218,26 @@ const TRANSLATIONS = {
     Bangla: "নতুন পাসওয়ার্ড নিশ্চিত করুন",
   },
 
-  preferences: {
-    English: "Preferences",
-    Bangla: "পছন্দসমূহ",
+  fullNamePlaceholder: {
+    English: "Enter your full name",
+    Bangla: "আপনার পূর্ণ নাম লিখুন",
   },
 
-  language: {
-    English: "Language",
-    Bangla: "ভাষা",
+  phonePlaceholder: {
+    English: "Enter your phone number",
+    Bangla: "আপনার ফোন নম্বর লিখুন",
   },
 
-  needHelp: {
-    English: "Need help? Visit our",
-    Bangla: "সাহায্য দরকার? আমাদের",
+  regionPlaceholder: {
+    English: "e.g. Dhaka",
+    Bangla: "যেমন: ঢাকা",
   },
 
-  supportCenter: {
-    English: "Support Center",
-    Bangla: "সাপোর্ট সেন্টার",
+  skillsPlaceholder: {
+    English:
+      "Installation, Maintenance, Repair...",
+    Bangla:
+      "ইনস্টলেশন, রক্ষণাবেক্ষণ, মেরামত...",
   },
 
   enterCurrentPassword: {
@@ -222,14 +256,14 @@ const TRANSLATIONS = {
     English:
       "New password and confirmation don't match.",
     Bangla:
-      "নতুন পাসওয়ার্ড ও নিশ্চিতকরণ মিলছে না।",
+      "নতুন পাসওয়ার্ড এবং নিশ্চিতকরণ মিলছে না।",
   },
 
   passwordSameAsCurrent: {
     English:
       "New password must be different from the current one.",
     Bangla:
-      "নতুন পাসওয়ার্ড বর্তমান পাসওয়ার্ড থেকে ভিন্ন হতে হবে।",
+      "নতুন পাসওয়ার্ড বর্তমান পাসওয়ার্ড থেকে আলাদা হতে হবে।",
   },
 
   passwordUpdateFailed: {
@@ -243,7 +277,7 @@ const TRANSLATIONS = {
     English:
       "Please choose an image file.",
     Bangla:
-      "অনুগ্রহ করে একটি ছবি ফাইল নির্বাচন করুন।",
+      "অনুগ্রহ করে একটি ছবি নির্বাচন করুন।",
   },
 
   photoTooLarge: {
@@ -256,6 +290,34 @@ const TRANSLATIONS = {
       "Couldn't upload that photo. Please try again.",
     Bangla:
       "ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।",
+  },
+
+  profileUpdated: {
+    English:
+      "Profile updated successfully!",
+    Bangla:
+      "প্রোফাইল সফলভাবে আপডেট হয়েছে!",
+  },
+
+  profileUpdateFailed: {
+    English:
+      "Failed to update profile.",
+    Bangla:
+      "প্রোফাইল আপডেট করা যায়নি।",
+  },
+
+  passwordUpdated: {
+    English:
+      "Password updated successfully!",
+    Bangla:
+      "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে!",
+  },
+
+  passwordHandlerMissing: {
+    English:
+      "Password update handler is not configured.",
+    Bangla:
+      "পাসওয়ার্ড আপডেট সিস্টেম কনফিগার করা হয়নি।",
   },
 
   ruleLength: {
@@ -283,51 +345,52 @@ const TRANSLATIONS = {
     Bangla: "একটি বিশেষ চিহ্ন",
   },
 
-  profileUpdated: {
-    English:
-      "Profile updated successfully!",
-    Bangla:
-      "প্রোফাইল সফলভাবে আপডেট হয়েছে!",
+  supportText: {
+    English: "Need help? Visit our",
+    Bangla: "সাহায্য দরকার? আমাদের",
   },
 
-  passwordUpdated: {
+  supportCenter: {
+    English: "Support Center",
+    Bangla: "সাপোর্ট সেন্টার",
+  },
+
+  cannotChangeStatus: {
     English:
-      "Password updated successfully!",
+      "Status can only be changed by an administrator.",
     Bangla:
-      "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে!",
+      "স্ট্যাটাস শুধুমাত্র অ্যাডমিন পরিবর্তন করতে পারবেন।",
   },
 } as const;
 
 type TranslationKey =
   keyof typeof TRANSLATIONS;
 
-/* ============================================================================
-   TRANSLATION
-============================================================================ */
+/* =========================================================
+   TRANSLATION HELPER
+========================================================= */
 
 function t(
   key: TranslationKey,
-  language: CustomerLanguage
+  language: TechnicianLanguage
 ): string {
   return TRANSLATIONS[key][language];
 }
 
-/* ============================================================================
+/* =========================================================
    PASSWORD RULES
-============================================================================ */
+========================================================= */
 
 function getPasswordRules(
-  language: CustomerLanguage
+  language: TechnicianLanguage
 ) {
   return [
     {
       key: "ruleLength" as TranslationKey,
-
       label: t(
         "ruleLength",
         language
       ),
-
       test: (value: string) =>
         value.length >= 8 &&
         value.length <= 16,
@@ -335,57 +398,63 @@ function getPasswordRules(
 
     {
       key: "ruleUppercase" as TranslationKey,
-
       label: t(
         "ruleUppercase",
         language
       ),
-
       test: (value: string) =>
         /[A-Z]/.test(value),
     },
 
     {
       key: "ruleLowercase" as TranslationKey,
-
       label: t(
         "ruleLowercase",
         language
       ),
-
       test: (value: string) =>
         /[a-z]/.test(value),
     },
 
     {
       key: "ruleNumber" as TranslationKey,
-
       label: t(
         "ruleNumber",
         language
       ),
-
       test: (value: string) =>
         /[0-9]/.test(value),
     },
 
     {
       key: "ruleSpecial" as TranslationKey,
-
       label: t(
         "ruleSpecial",
         language
       ),
-
       test: (value: string) =>
         /[^A-Za-z0-9]/.test(value),
     },
   ];
 }
 
-/* ============================================================================
+/* =========================================================
+   DRAFT TYPE
+========================================================= */
+
+type TechnicianDraft = {
+  fullName: string;
+  email: string;
+  phone: string;
+  region: string;
+  skills: string;
+  role: string;
+  status: string;
+};
+
+/* =========================================================
    COMPONENT
-============================================================================ */
+========================================================= */
 
 export default function ProfilePage({
   onChangePassword,
@@ -396,45 +465,46 @@ export default function ProfilePage({
   }) => Promise<void> | void;
 }) {
   const {
-    profile,
+    technician,
     language,
-    updateProfile,
-    uploadAvatar,
-    setLanguage,
+    updateTechnician,
+    uploadProfilePhoto,
+    loading,
     saving,
-  } = useUser();
+  } = useTechnician();
+
+  /* =======================================================
+     REF
+  ======================================================= */
 
   const fileInputRef =
     useRef<HTMLInputElement>(null);
 
-  const [
-    uploading,
-    setUploading,
-  ] = useState(false);
+  /* =======================================================
+     PHOTO
+  ======================================================= */
 
-  const [
-    uploadError,
-    setUploadError,
-  ] = useState<string | null>(
-    null
-  );
+  const [uploading, setUploading] =
+    useState(false);
 
-  const [
-    isEditing,
-    setIsEditing,
-  ] = useState(false);
+  const [uploadError, setUploadError] =
+    useState<string | null>(null);
 
-  const [
-    profileSaving,
-    setProfileSaving,
-  ] = useState(false);
+  /* =======================================================
+     EDIT
+  ======================================================= */
 
-  const [
-    draft,
-    setDraft,
-  ] = useState<CustomerProfile>(
-    profile
-  );
+  const [isEditing, setIsEditing] =
+    useState(false);
+
+  const [draft, setDraft] =
+    useState<TechnicianDraft>(() =>
+      technicianToDraft(technician)
+    );
+
+  /* =======================================================
+     PASSWORD
+  ======================================================= */
 
   const [
     isChangingPassword,
@@ -449,9 +519,7 @@ export default function ProfilePage({
   const [
     passwordError,
     setPasswordError,
-  ] = useState<string | null>(
-    null
-  );
+  ] = useState<string | null>(null);
 
   const [
     showPasswords,
@@ -474,13 +542,11 @@ export default function ProfilePage({
   ] = useState("");
 
   const passwordRules =
-    getPasswordRules(
-      language
-    );
+    getPasswordRules(language);
 
-  /* ========================================================================
-     PHOTO
-  ======================================================================== */
+  /* =======================================================
+     PHOTO CHANGE
+  ======================================================= */
 
   async function handlePhotoChange(
     event: React.ChangeEvent<HTMLInputElement>
@@ -496,26 +562,19 @@ export default function ProfilePage({
 
     setUploadError(null);
 
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
+    if (!file.type.startsWith("image/")) {
       setUploadError(
         t(
           "photoInvalidType",
           language
         )
       );
-
       return;
     }
 
     if (
       file.size >
-      MAX_AVATAR_SIZE_MB *
-        1024 *
-        1024
+      MAX_AVATAR_SIZE_MB * 1024 * 1024
     ) {
       setUploadError(
         t(
@@ -523,14 +582,13 @@ export default function ProfilePage({
           language
         )
       );
-
       return;
     }
 
     setUploading(true);
 
     try {
-      await uploadAvatar(file);
+      await uploadProfilePhoto(file);
     } catch {
       setUploadError(
         t(
@@ -543,76 +601,100 @@ export default function ProfilePage({
     }
   }
 
-  /* ========================================================================
-     EDIT
-  ======================================================================== */
+  /* =======================================================
+     START EDITING
+  ======================================================= */
 
   function startEditing() {
-    setDraft(profile);
+    setDraft(
+      technicianToDraft(technician)
+    );
+
     setIsEditing(true);
   }
 
+  /* =======================================================
+     CANCEL EDITING
+  ======================================================= */
+
   function cancelEditing() {
-    setDraft(profile);
+    setDraft(
+      technicianToDraft(technician)
+    );
+
     setIsEditing(false);
   }
+
+  /* =======================================================
+     UPDATE DRAFT
+  ======================================================= */
 
   function updateDraft(
     field: EditableField,
     value: string
   ) {
-    setDraft(
-      (previous) => ({
-        ...previous,
-        [field]: value,
-      })
-    );
+    setDraft((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
   }
 
+  /* =======================================================
+     SAVE PROFILE
+
+     IMPORTANT:
+     Status is intentionally NOT sent.
+     Technicians cannot change their own status.
+  ======================================================= */
+
   async function saveProfile() {
-    setProfileSaving(true);
-
     try {
-      await updateProfile({
-        fullName:
-          draft.fullName.trim(),
-
-        phone:
-          draft.phone.trim(),
-
-        location:
-          draft.location.trim(),
+      await updateTechnician({
+        fullName: draft.fullName.trim(),
+        phone: draft.phone.trim(),
+        region: draft.region.trim(),
+        skills: draft.skills.trim(),
       });
 
       setIsEditing(false);
-    } finally {
-      setProfileSaving(false);
+
+      toast.success(
+        t(
+          "profileUpdated",
+          language
+        ),
+        {
+          position: "bottom-center",
+          autoClose: 4000,
+          theme: "light",
+          transition: Bounce,
+        }
+      );
+    } catch (error) {
+      console.error(
+        "Failed to update technician profile:",
+        error
+      );
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t(
+              "profileUpdateFailed",
+              language
+            ),
+        {
+          position: "bottom-center",
+          autoClose: 5000,
+          theme: "light",
+        }
+      );
     }
   }
 
-  /* ========================================================================
-     LANGUAGE
-  ======================================================================== */
-
-  async function handleLanguageChange(
-    nextLanguage: CustomerLanguage
-  ) {
-    await setLanguage(
-      nextLanguage
-    );
-
-    setDraft(
-      (previous) => ({
-        ...previous,
-        language:
-          nextLanguage,
-      })
-    );
-  }
-
-  /* ========================================================================
-     PASSWORD
-  ======================================================================== */
+  /* =======================================================
+     START PASSWORD CHANGE
+  ======================================================= */
 
   function startChangingPassword() {
     setCurrentPassword("");
@@ -622,10 +704,18 @@ export default function ProfilePage({
     setIsChangingPassword(true);
   }
 
+  /* =======================================================
+     CANCEL PASSWORD CHANGE
+  ======================================================= */
+
   function cancelChangingPassword() {
     setIsChangingPassword(false);
     setPasswordError(null);
   }
+
+  /* =======================================================
+     PASSWORD CHANGE
+  ======================================================= */
 
   async function submitPasswordChange() {
     setPasswordError(null);
@@ -637,16 +727,12 @@ export default function ProfilePage({
           language
         )
       );
-
       return;
     }
 
     const failedRule =
       passwordRules.find(
-        (rule) =>
-          !rule.test(
-            newPassword
-          )
+        (rule) => !rule.test(newPassword)
       );
 
     if (failedRule) {
@@ -656,7 +742,6 @@ export default function ProfilePage({
           language
         )} ${failedRule.label}.`
       );
-
       return;
     }
 
@@ -670,7 +755,6 @@ export default function ProfilePage({
           language
         )
       );
-
       return;
     }
 
@@ -684,7 +768,6 @@ export default function ProfilePage({
           language
         )
       );
-
       return;
     }
 
@@ -694,7 +777,7 @@ export default function ProfilePage({
       if (!onChangePassword) {
         throw new Error(
           t(
-            "passwordUpdateFailed",
+            "passwordHandlerMissing",
             language
           )
         );
@@ -705,31 +788,48 @@ export default function ProfilePage({
         newPassword,
       });
 
-      setIsChangingPassword(
-        false
+      toast.success(
+        t(
+          "passwordUpdated",
+          language
+        ),
+        {
+          position: "bottom-center",
+          autoClose: 4000,
+          theme: "light",
+          transition: Bounce,
+        }
       );
 
+      setIsChangingPassword(false);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch {
+    } catch (error) {
+      console.error(
+        "Password update error:",
+        error
+      );
+
       setPasswordError(
-        t(
-          "passwordUpdateFailed",
-          language
-        )
+        error instanceof Error
+          ? error.message
+          : t(
+              "passwordUpdateFailed",
+              language
+            )
       );
     } finally {
       setPasswordSaving(false);
     }
   }
 
-  /* ========================================================================
-     INITIAL
-  ======================================================================== */
+  /* =======================================================
+     INITIALS
+  ======================================================= */
 
-  const initials =
-    profile.fullName
+  const userInitials =
+    technician.fullName
       .trim()
       .split(/\s+/)
       .filter(Boolean)
@@ -739,24 +839,69 @@ export default function ProfilePage({
       )
       .join("")
       .slice(0, 2)
-      .toUpperCase() ||
-    "C";
+      .toUpperCase() || "T";
 
-  /* ========================================================================
+  /* =======================================================
+     STATUS TRANSLATION
+  ======================================================= */
+
+  function translateStatus(
+    status: string
+  ) {
+    const normalized =
+      status.toUpperCase();
+
+    if (normalized === "ACTIVE") {
+      return t(
+        "active",
+        language
+      );
+    }
+
+    if (normalized === "BLOCKED") {
+      return t(
+        "blocked",
+        language
+      );
+    }
+
+    return status;
+  }
+
+  /* =======================================================
+     ROLE TRANSLATION
+  ======================================================= */
+
+  function translateRole(
+    role: string
+  ) {
+    if (
+      role.toUpperCase() ===
+      "TECHNICIAN"
+    ) {
+      return t(
+        "technician",
+        language
+      );
+    }
+
+    return role;
+  }
+
+  /* =======================================================
      RENDER
-  ======================================================================== */
+  ======================================================= */
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-5xl">
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
+      {/* ===================================================
+          PAGE HEADER
+      =================================================== */}
 
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
         <div>
-
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
             {t(
               "pageTitle",
@@ -770,16 +915,14 @@ export default function ProfilePage({
               language
             )}
           </p>
-
         </div>
 
         {!isEditing ? (
           <button
             type="button"
-            onClick={
-              startEditing
-            }
-            className="flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
+            onClick={startEditing}
+            disabled={loading}
+            className="flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Pencil className="h-4 w-4" />
 
@@ -793,12 +936,9 @@ export default function ProfilePage({
 
             <button
               type="button"
-              onClick={
-                cancelEditing
-              }
+              onClick={cancelEditing}
               disabled={
-                profileSaving ||
-                saving
+                saving || loading
               }
               className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
             >
@@ -812,18 +952,15 @@ export default function ProfilePage({
 
             <button
               type="button"
-              onClick={
-                saveProfile
-              }
+              onClick={saveProfile}
               disabled={
-                profileSaving ||
-                saving
+                saving || loading
               }
-              className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Check className="h-4 w-4" />
 
-              {profileSaving
+              {saving
                 ? t(
                     "saving",
                     language
@@ -836,14 +973,13 @@ export default function ProfilePage({
 
           </div>
         )}
-
       </div>
 
-      {/* =====================================================
+      {/* ===================================================
           PROFILE CARD
-      ===================================================== */}
+      =================================================== */}
 
-      <section className="mb-4 rounded-2xl bg-white p-5 shadow-sm sm:p-6">
+      <section className="mb-5 rounded-2xl bg-white p-5 shadow-sm sm:p-6">
 
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-10">
 
@@ -851,28 +987,26 @@ export default function ProfilePage({
 
           <div className="flex shrink-0 flex-col items-center gap-3">
 
-            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-slate-200 ring-1 ring-slate-100">
+            <div className="relative h-28 w-28 overflow-hidden rounded-full bg-blue-100 ring-1 ring-slate-100">
 
-              {profile.avatarUrl ? (
+              {technician.profile.profilePhoto ? (
                 <img
                   src={
-                    profile.avatarUrl
+                    technician.profile.profilePhoto
                   }
                   alt={
-                    profile.fullName ||
-                    "Profile"
+                    technician.fullName ||
+                    "Technician"
                   }
                   className="h-full w-full object-cover"
-                  onError={(
-                    event
-                  ) => {
+                  onError={(event) => {
                     event.currentTarget.style.display =
                       "none";
                   }}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-600 to-cyan-500 text-3xl font-bold text-white">
-                  {initials}
+                  {userInitials}
                 </div>
               )}
 
@@ -885,9 +1019,9 @@ export default function ProfilePage({
               }
               disabled={
                 uploading ||
-                saving
+                loading
               }
-              className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Camera className="h-3.5 w-3.5" />
 
@@ -905,7 +1039,7 @@ export default function ProfilePage({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={
                 handlePhotoChange
@@ -913,7 +1047,7 @@ export default function ProfilePage({
             />
 
             {uploadError && (
-              <p className="max-w-[9rem] text-center text-xs text-red-500">
+              <p className="max-w-[10rem] text-center text-xs text-red-500">
                 {uploadError}
               </p>
             )}
@@ -933,7 +1067,7 @@ export default function ProfilePage({
                     language
                   )}
                   value={
-                    profile.fullName ||
+                    technician.fullName ||
                     "-"
                   }
                 />
@@ -945,7 +1079,7 @@ export default function ProfilePage({
                     language
                   )}
                   value={
-                    profile.email ||
+                    technician.email ||
                     "-"
                   }
                 />
@@ -957,7 +1091,7 @@ export default function ProfilePage({
                     language
                   )}
                   value={
-                    profile.phone ||
+                    technician.phone ||
                     "-"
                   }
                 />
@@ -965,12 +1099,24 @@ export default function ProfilePage({
                 <InfoRow
                   icon={MapPin}
                   label={t(
-                    "location",
+                    "region",
                     language
                   )}
                   value={
-                    profile.location ||
-                    "-"
+                    technician.profile
+                      .region || "-"
+                  }
+                />
+
+                <InfoRow
+                  icon={Wrench}
+                  label={t(
+                    "skills",
+                    language
+                  )}
+                  value={
+                    technician.profile
+                      .skills || "-"
                   }
                 />
 
@@ -980,14 +1126,37 @@ export default function ProfilePage({
                     "role",
                     language
                   )}
-                  value={
-                    profile.role ||
-                    "CUSTOMER"
+                  value={translateRole(
+                    technician.role ||
+                      "TECHNICIAN"
+                  )}
+                />
+
+                <StatusRow
+                  label={t(
+                    "status",
+                    language
+                  )}
+                  value={translateStatus(
+                    technician.profile
+                      .status ||
+                      "ACTIVE"
+                  )}
+                  isActive={
+                    (
+                      technician
+                        .profile
+                        .status ||
+                      "ACTIVE"
+                    ).toUpperCase() ===
+                    "ACTIVE"
                   }
                 />
               </>
             ) : (
               <>
+                {/* Full Name */}
+
                 <FormRow
                   icon={User}
                   label={t(
@@ -1008,7 +1177,12 @@ export default function ProfilePage({
                     "fullNamePlaceholder",
                     language
                   )}
+                  disabled={
+                    saving
+                  }
                 />
+
+                {/* Email - cannot edit */}
 
                 <FormRow
                   icon={Mail}
@@ -1021,18 +1195,11 @@ export default function ProfilePage({
                   value={
                     draft.email
                   }
-                  onChange={(value) =>
-                    updateDraft(
-                      "email",
-                      value
-                    )
-                  }
-                  placeholder={t(
-                    "emailPlaceholder",
-                    language
-                  )}
+                  onChange={() => {}}
                   disabled
                 />
+
+                {/* Phone */}
 
                 <FormRow
                   icon={Phone}
@@ -1055,29 +1222,66 @@ export default function ProfilePage({
                     "phonePlaceholder",
                     language
                   )}
+                  disabled={
+                    saving
+                  }
                 />
+
+                {/* Region */}
 
                 <FormRow
                   icon={MapPin}
                   label={t(
-                    "location",
+                    "region",
                     language
                   )}
-                  name="location"
+                  name="region"
                   value={
-                    draft.location
+                    draft.region
                   }
                   onChange={(value) =>
                     updateDraft(
-                      "location",
+                      "region",
                       value
                     )
                   }
                   placeholder={t(
-                    "locationPlaceholder",
+                    "regionPlaceholder",
                     language
                   )}
+                  disabled={
+                    saving
+                  }
                 />
+
+                {/* Skills */}
+
+                <TextAreaRow
+                  icon={Wrench}
+                  label={t(
+                    "skills",
+                    language
+                  )}
+                  name="skills"
+                  value={
+                    draft.skills
+                  }
+                  onChange={(value) =>
+                    updateDraft(
+                      "skills",
+                      value
+                    )
+                  }
+                  placeholder={t(
+                    "skillsPlaceholder",
+                    language
+                  )}
+                  disabled={
+                    saving
+                  }
+                />
+
+                {/* Role - cannot edit */}
 
                 <FormRow
                   icon={ShieldCheck}
@@ -1086,24 +1290,142 @@ export default function ProfilePage({
                     language
                   )}
                   name="role"
-                  value={
+                  value={translateRole(
                     draft.role
-                  }
+                  )}
                   onChange={() => {}}
                   disabled
                 />
+
+                {/* Status - READ ONLY */}
+
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
+
+                  <div className="flex w-28 shrink-0 items-center gap-2 text-sm text-slate-400">
+                    <Activity className="h-4 w-4 text-slate-300" />
+
+                    {t(
+                      "status",
+                      language
+                    )}
+                  </div>
+
+                  <div className="flex flex-1 items-center gap-3">
+
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        draft.status
+                          .toUpperCase() ===
+                        "ACTIVE"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {translateStatus(
+                        draft.status
+                      )}
+                    </span>
+
+                    <span className="text-xs text-slate-400">
+                      {t(
+                        "cannotChangeStatus",
+                        language
+                      )}
+                    </span>
+
+                  </div>
+                </div>
               </>
             )}
-
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          ACCOUNT INFORMATION
-      ===================================================== */}
+      {/* ===================================================
+          TECHNICIAN INFORMATION
+      =================================================== */}
 
-      <section className="mb-4 rounded-2xl bg-white shadow-sm">
+      <section className="mb-5 rounded-2xl bg-white shadow-sm">
+
+        <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3.5 sm:px-6">
+
+          <Activity className="h-4 w-4 text-slate-700" />
+
+          <h2 className="text-sm font-semibold text-slate-900">
+            {t(
+              "technicianInformation",
+              language
+            )}
+          </h2>
+
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 px-5 py-4 sm:grid-cols-2 sm:px-6">
+
+          <InfoCard
+            label={t(
+              "region",
+              language
+            )}
+            value={
+              technician.profile
+                .region || "-"
+            }
+            icon={MapPin}
+          />
+
+          <InfoCard
+            label={t(
+              "status",
+              language
+            )}
+            value={translateStatus(
+              technician.profile
+                .status ||
+                "ACTIVE"
+            )}
+            icon={Activity}
+          />
+
+          <InfoCard
+            label={t(
+              "role",
+              language
+            )}
+            value={translateRole(
+              technician.role ||
+                "TECHNICIAN"
+            )}
+            icon={ShieldCheck}
+          />
+
+          <InfoCard
+            label={t(
+              "account",
+              language
+            )}
+            value={
+              technician.isActive
+                ? t(
+                    "accountActive",
+                    language
+                  )
+                : t(
+                    "accountInactive",
+                    language
+                  )
+            }
+            icon={User}
+          />
+
+        </div>
+      </section>
+
+      {/* ===================================================
+          ACCOUNT INFORMATION
+      =================================================== */}
+
+      <section className="mb-5 rounded-2xl bg-white shadow-sm">
 
         <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3.5 sm:px-6">
 
@@ -1122,7 +1444,6 @@ export default function ProfilePage({
           <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
 
             <div>
-
               <p className="text-xs text-slate-400">
                 {t(
                   "password",
@@ -1133,7 +1454,6 @@ export default function ProfilePage({
               <p className="mt-2 tracking-widest text-slate-500">
                 ••••••••••••
               </p>
-
             </div>
 
             <button
@@ -1150,7 +1470,6 @@ export default function ProfilePage({
                 language
               )}
             </button>
-
           </div>
         ) : (
           <div className="space-y-4 px-5 py-4 sm:px-6">
@@ -1168,11 +1487,11 @@ export default function ProfilePage({
                 type="button"
                 onClick={() =>
                   setShowPasswords(
-                    (value) =>
-                      !value
+                    (previous) =>
+                      !previous
                   )
                 }
-                className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-600"
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-400 transition hover:text-slate-600"
               >
                 {showPasswords ? (
                   <EyeOff className="h-3.5 w-3.5" />
@@ -1190,7 +1509,6 @@ export default function ProfilePage({
                       language
                     )}
               </button>
-
             </div>
 
             <PasswordField
@@ -1244,7 +1562,7 @@ export default function ProfilePage({
               autoComplete="new-password"
             />
 
-            {/* Rules */}
+            {/* Password Rules */}
 
             <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
 
@@ -1257,14 +1575,15 @@ export default function ProfilePage({
 
                   return (
                     <li
-                      key={rule.key}
+                      key={
+                        rule.key
+                      }
                       className={`flex items-center gap-1.5 text-xs ${
                         passed
                           ? "text-emerald-600"
                           : "text-slate-400"
                       }`}
                     >
-
                       <Check
                         className={`h-3.5 w-3.5 ${
                           passed
@@ -1274,7 +1593,6 @@ export default function ProfilePage({
                       />
 
                       {rule.label}
-
                     </li>
                   );
                 }
@@ -1332,86 +1650,18 @@ export default function ProfilePage({
               </button>
 
             </div>
-
           </div>
         )}
-
       </section>
 
-      {/* =====================================================
-          PREFERENCES
-      ===================================================== */}
-
-      <section className="mb-4 rounded-2xl bg-white shadow-sm">
-
-        <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-3.5 sm:px-6">
-
-          <Settings className="h-4 w-4 text-slate-700" />
-
-          <h2 className="text-sm font-semibold text-slate-900">
-            {t(
-              "preferences",
-              language
-            )}
-          </h2>
-
-        </div>
-
-        <div className="flex items-center justify-between px-5 py-3.5 sm:px-6">
-
-          <span className="text-sm text-slate-400">
-            {t(
-              "language",
-              language
-            )}
-          </span>
-
-          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1">
-
-            {(
-              [
-                "English",
-                "Bangla",
-              ] as const
-            ).map(
-              (option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() =>
-                    handleLanguageChange(
-                      option
-                    )
-                  }
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                    language ===
-                    option
-                      ? "bg-white text-blue-600 shadow-sm"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
-                >
-                  {option ===
-                  "English"
-                    ? "English"
-                    : "বাংলা"}
-                </button>
-              )
-            )}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
+      {/* ===================================================
+          SUPPORT
+      =================================================== */}
 
       <p className="pb-2 text-center text-sm text-slate-400">
 
         {t(
-          "needHelp",
+          "supportText",
           language
         )}{" "}
 
@@ -1426,14 +1676,46 @@ export default function ProfilePage({
         </a>
 
       </p>
-
     </div>
   );
 }
 
-/* ============================================================================
+/* =========================================================
+   TECHNICIAN -> DRAFT
+========================================================= */
+
+function technicianToDraft(
+  technician: TechnicianUser
+): TechnicianDraft {
+  return {
+    fullName:
+      technician.fullName || "",
+
+    email:
+      technician.email || "",
+
+    phone:
+      technician.phone || "",
+
+    region:
+      technician.profile.region || "",
+
+    skills:
+      technician.profile.skills || "",
+
+    role:
+      technician.role ||
+      "TECHNICIAN",
+
+    status:
+      technician.profile.status ||
+      "ACTIVE",
+  };
+}
+
+/* =========================================================
    INFO ROW
-============================================================================ */
+========================================================= */
 
 function InfoRow({
   icon: Icon,
@@ -1447,15 +1729,15 @@ function InfoRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 sm:gap-4">
+    <div className="flex items-start gap-3 sm:items-center sm:gap-4">
 
-      <Icon className="h-4 w-4 shrink-0 text-slate-300" />
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 sm:mt-0" />
 
       <span className="w-20 shrink-0 text-sm text-slate-400 sm:w-28">
         {label}
       </span>
 
-      <span className="text-sm font-medium text-slate-800">
+      <span className="min-w-0 break-words text-sm font-medium text-slate-800">
         {value}
       </span>
 
@@ -1463,9 +1745,9 @@ function InfoRow({
   );
 }
 
-/* ============================================================================
+/* =========================================================
    FORM ROW
-============================================================================ */
+========================================================= */
 
 function FormRow({
   icon: Icon,
@@ -1480,21 +1762,14 @@ function FormRow({
   icon: React.ComponentType<{
     className?: string;
   }>;
-
   label: string;
-
   name: string;
-
   value: string;
-
   onChange: (
     value: string
   ) => void;
-
   type?: string;
-
   placeholder?: string;
-
   disabled?: boolean;
 }) {
   return (
@@ -1504,7 +1779,7 @@ function FormRow({
         htmlFor={name}
         className="flex w-28 shrink-0 items-center gap-2 text-sm text-slate-400"
       >
-        <Icon className="h-4 w-4 text-slate-300" />
+        <Icon className="h-4 w-4 shrink-0 text-slate-300" />
 
         {label}
       </label>
@@ -1528,9 +1803,135 @@ function FormRow({
   );
 }
 
-/* ============================================================================
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+function TextAreaRow({
+  icon: Icon,
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  disabled,
+}: {
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
+  label: string;
+  name: string;
+  value: string;
+  onChange: (
+    value: string
+  ) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-4">
+
+      <label
+        htmlFor={name}
+        className="flex w-28 shrink-0 items-center gap-2 pt-2 text-sm text-slate-400"
+      >
+        <Icon className="h-4 w-4 shrink-0 text-slate-300" />
+
+        {label}
+      </label>
+
+      <textarea
+        id={name}
+        name={name}
+        rows={4}
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
+        }
+        className="w-full flex-1 resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+      />
+
+    </div>
+  );
+}
+
+/* =========================================================
+   STATUS ROW
+========================================================= */
+
+function StatusRow({
+  label,
+  value,
+  isActive,
+}: {
+  label: string;
+  value: string;
+  isActive: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3 sm:gap-4">
+
+      <Activity className="h-4 w-4 shrink-0 text-slate-300" />
+
+      <span className="w-20 shrink-0 text-sm text-slate-400 sm:w-28">
+        {label}
+      </span>
+
+      <span
+        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+          isActive
+            ? "bg-emerald-100 text-emerald-700"
+            : "bg-red-100 text-red-700"
+        }`}
+      >
+        {value}
+      </span>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   INFO CARD
+========================================================= */
+
+function InfoCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+
+      <div className="flex items-center gap-2 text-xs text-slate-400">
+
+        <Icon className="h-4 w-4 text-blue-500" />
+
+        {label}
+
+      </div>
+
+      <p className="mt-2 break-words text-sm font-semibold text-slate-800">
+        {value}
+      </p>
+
+    </div>
+  );
+}
+
+/* =========================================================
    PASSWORD FIELD
-============================================================================ */
+========================================================= */
 
 function PasswordField({
   label,
@@ -1549,10 +1950,7 @@ function PasswordField({
 }) {
   const id =
     `password-${label
-      .replace(
-        /\s+/g,
-        "-"
-      )
+      .replace(/\s+/g, "-")
       .toLowerCase()}`;
 
   return (

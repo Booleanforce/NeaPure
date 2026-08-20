@@ -3,7 +3,7 @@
 import {
   useEffect,
   useState,
-  ChangeEvent,
+  type ChangeEvent,
 } from "react";
 
 import {
@@ -65,6 +65,79 @@ const initialForm: FormState = {
 };
 
 /* =========================================================
+   NORMALIZE API VALUE
+========================================================= */
+
+/**
+ * Converts API values into safe strings.
+ *
+ * This prevents:
+ *
+ * form.skills.trim is not a function
+ *
+ * when the backend returns an array/object.
+ */
+function normalizeText(
+  value: unknown
+): string {
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (
+          item === null ||
+          item === undefined
+        ) {
+          return "";
+        }
+
+        if (
+          typeof item === "string" ||
+          typeof item === "number" ||
+          typeof item === "boolean"
+        ) {
+          return String(item);
+        }
+
+        try {
+          return JSON.stringify(item);
+        } catch {
+          return String(item);
+        }
+      })
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+
+  return "";
+}
+
+/* =========================================================
    PHOTO URL HELPER
 ========================================================= */
 
@@ -75,7 +148,8 @@ function getProfilePhotoUrl(
     return null;
   }
 
-  const value = photo.trim();
+  const value =
+    normalizeText(photo).trim();
 
   if (!value) {
     return null;
@@ -122,7 +196,9 @@ export default function EditTechnicianModal({
   ======================================================= */
 
   const [form, setForm] =
-    useState<FormState>(initialForm);
+    useState<FormState>(
+      initialForm
+    );
 
   /* =======================================================
      LOADING / SAVING
@@ -174,94 +250,106 @@ export default function EditTechnicianModal({
   ======================================================= */
 
   useEffect(() => {
-    if (!isOpen || !technicianId) {
+    if (
+      !isOpen ||
+      !technicianId
+    ) {
       return;
     }
 
-    const loadTechnician = async () => {
-      try {
-        setLoading(true);
+    const loadTechnician =
+      async () => {
+        try {
+          setLoading(true);
 
-        const technician =
-          await technicianService.getTechnician(
-            technicianId
+          const technician =
+            await technicianService.getTechnician(
+              technicianId
+            );
+
+          const profile =
+            technician.technician_profile;
+
+          /* -------------------------------------------------
+             NORMALIZE PROFILE DATA
+          ------------------------------------------------- */
+
+          setForm({
+            full_name:
+              normalizeText(
+                technician.full_name
+              ).trim(),
+
+            email:
+              normalizeText(
+                technician.email
+              ).trim(),
+
+            phone:
+              normalizeText(
+                technician.phone
+              ).trim(),
+
+            region:
+              normalizeText(
+                profile?.region
+              ).trim(),
+
+            skills:
+              normalizeText(
+                profile?.skills
+              ).trim(),
+
+            status:
+              normalizeText(
+                profile?.status
+              ).toUpperCase() ===
+              "BLOCKED"
+                ? "BLOCKED"
+                : "ACTIVE",
+          });
+
+          /* -------------------------------------------------
+             EXISTING PHOTO
+          ------------------------------------------------- */
+
+          setExistingPhoto(
+            getProfilePhotoUrl(
+              profile?.profile_photo
+            )
           );
 
-        /* -----------------------------------------------
-           FORM
-        ----------------------------------------------- */
+          /* -------------------------------------------------
+             RESET PHOTO STATES
+          ------------------------------------------------- */
 
-        setForm({
-          full_name:
-            technician.full_name || "",
+          setProfilePhoto(null);
+          setPhotoPreview(null);
+          setRemovePhoto(false);
+          setPhotoError(false);
+        } catch (error) {
+          console.error(
+            "Failed to load technician:",
+            error
+          );
 
-          email:
-            technician.email || "",
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to load technician.",
+            {
+              position:
+                "bottom-center",
+              autoClose: 5000,
+              theme: "light",
+            }
+          );
 
-          phone:
-            technician.phone || "",
-
-          region:
-            technician.technician_profile
-              ?.region || "",
-
-          skills:
-            technician.technician_profile
-              ?.skills || "",
-
-          status:
-            technician.technician_profile
-              ?.status === "BLOCKED"
-              ? "BLOCKED"
-              : "ACTIVE",
-        });
-
-        /* -----------------------------------------------
-           EXISTING PHOTO
-
-           IMPORTANT:
-           Convert /media/... into backend URL.
-        ----------------------------------------------- */
-
-        setExistingPhoto(
-          getProfilePhotoUrl(
-            technician
-              .technician_profile
-              ?.profile_photo
-          )
-        );
-
-        /* -----------------------------------------------
-           RESET NEW PHOTO
-        ----------------------------------------------- */
-
-        setProfilePhoto(null);
-        setPhotoPreview(null);
-        setRemovePhoto(false);
-        setPhotoError(false);
-
-      } catch (error) {
-        console.error(
-          "Failed to load technician:",
-          error
-        );
-
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Failed to load technician.",
-          {
-            position: "bottom-center",
-            autoClose: 5000,
-            theme: "light",
-          }
-        );
-
-        onClose();
-      } finally {
-        setLoading(false);
-      }
-    };
+          onClose();
+        } finally {
+          setLoading(false);
+        }
+      };
 
     loadTechnician();
   }, [
@@ -288,7 +376,10 @@ export default function EditTechnicianModal({
      RETURN NULL
   ======================================================= */
 
-  if (!isOpen || !technicianId) {
+  if (
+    !isOpen ||
+    !technicianId
+  ) {
     return null;
   }
 
@@ -320,9 +411,9 @@ export default function EditTechnicianModal({
       return;
     }
 
-    /* -----------------------------------------------
-       Validate type
-    ----------------------------------------------- */
+    /* -----------------------------------------------------
+       VALIDATE TYPE
+    ----------------------------------------------------- */
 
     const allowedTypes = [
       "image/jpeg",
@@ -331,13 +422,17 @@ export default function EditTechnicianModal({
     ];
 
     if (
-      !allowedTypes.includes(file.type)
+      !allowedTypes.includes(
+        file.type
+      )
     ) {
       toast.error(
         "Please select a JPG, PNG or WebP image.",
         {
-          position: "bottom-center",
+          position:
+            "bottom-center",
           autoClose: 4000,
+          theme: "light",
         }
       );
 
@@ -345,9 +440,9 @@ export default function EditTechnicianModal({
       return;
     }
 
-    /* -----------------------------------------------
-       Validate size
-    ----------------------------------------------- */
+    /* -----------------------------------------------------
+       VALIDATE SIZE
+    ----------------------------------------------------- */
 
     const maxSize =
       5 * 1024 * 1024;
@@ -356,8 +451,10 @@ export default function EditTechnicianModal({
       toast.error(
         "Profile photo must be smaller than 5 MB.",
         {
-          position: "bottom-center",
+          position:
+            "bottom-center",
           autoClose: 4000,
+          theme: "light",
         }
       );
 
@@ -365,9 +462,9 @@ export default function EditTechnicianModal({
       return;
     }
 
-    /* -----------------------------------------------
-       Remove old preview
-    ----------------------------------------------- */
+    /* -----------------------------------------------------
+       REMOVE OLD PREVIEW
+    ----------------------------------------------------- */
 
     if (photoPreview) {
       URL.revokeObjectURL(
@@ -375,9 +472,9 @@ export default function EditTechnicianModal({
       );
     }
 
-    /* -----------------------------------------------
-       Create new preview
-    ----------------------------------------------- */
+    /* -----------------------------------------------------
+       CREATE NEW PREVIEW
+    ----------------------------------------------------- */
 
     const previewUrl =
       URL.createObjectURL(file);
@@ -385,9 +482,9 @@ export default function EditTechnicianModal({
     setProfilePhoto(file);
     setPhotoPreview(previewUrl);
 
-    /* -----------------------------------------------
-       Reset states
-    ----------------------------------------------- */
+    /* -----------------------------------------------------
+       RESET STATES
+    ----------------------------------------------------- */
 
     setRemovePhoto(false);
     setPhotoError(false);
@@ -426,181 +523,238 @@ export default function EditTechnicianModal({
      UPDATE TECHNICIAN
   ======================================================= */
 
-  const handleUpdate = async () => {
-    /* -----------------------------------------------
-       Validation
-    ----------------------------------------------- */
+  const handleUpdate =
+    async () => {
+      /* ---------------------------------------------------
+         SAFE FORM VALUES
+      --------------------------------------------------- */
 
-    if (!form.full_name.trim()) {
-      toast.error(
-        "Full name is required.",
-        {
-          position: "bottom-center",
-        }
-      );
+      const fullName =
+        normalizeText(
+          form.full_name
+        ).trim();
 
-      return;
-    }
+      const email =
+        normalizeText(
+          form.email
+        ).trim();
 
-    if (!form.email.trim()) {
-      toast.error(
-        "Email is required.",
-        {
-          position: "bottom-center",
-        }
-      );
+      const phone =
+        normalizeText(
+          form.phone
+        ).trim();
 
-      return;
-    }
+      const region =
+        normalizeText(
+          form.region
+        ).trim();
 
-    try {
-      setSaving(true);
+      const skills =
+        normalizeText(
+          form.skills
+        ).trim();
 
-      /* ---------------------------------------------
-         FormData
-      --------------------------------------------- */
+      const status =
+        normalizeText(
+          form.status
+        ).toUpperCase() ===
+        "BLOCKED"
+          ? "BLOCKED"
+          : "ACTIVE";
 
-      const formData =
-        new FormData();
+      /* ---------------------------------------------------
+         VALIDATION
+      --------------------------------------------------- */
 
-      /* ---------------------------------------------
-         User fields
-      --------------------------------------------- */
-
-      formData.append(
-        "full_name",
-        form.full_name.trim()
-      );
-
-      formData.append(
-        "email",
-        form.email.trim()
-      );
-
-      formData.append(
-        "phone",
-        form.phone.trim()
-      );
-
-      /* ---------------------------------------------
-         Technician profile
-      --------------------------------------------- */
-
-      formData.append(
-        "technician_profile",
-        JSON.stringify({
-          region:
-            form.region.trim(),
-
-          skills:
-            form.skills.trim(),
-
-          status:
-            form.status,
-        })
-      );
-
-      /* ---------------------------------------------
-         PROFILE PHOTO
-      --------------------------------------------- */
-
-      if (profilePhoto) {
-        formData.append(
-          "profile_photo",
-          profilePhoto,
-          profilePhoto.name
+      if (!fullName) {
+        toast.error(
+          "Full name is required.",
+          {
+            position:
+              "bottom-center",
+          }
         );
+
+        return;
       }
 
-      /* ---------------------------------------------
-         REMOVE PHOTO
-      --------------------------------------------- */
-
-      if (
-        removePhoto &&
-        !profilePhoto
-      ) {
-        formData.append(
-          "remove_profile_photo",
-          "true"
+      if (!email) {
+        toast.error(
+          "Email is required.",
+          {
+            position:
+              "bottom-center",
+          }
         );
+
+        return;
       }
 
-      /* ---------------------------------------------
-         DEBUG
-      --------------------------------------------- */
+      try {
+        setSaving(true);
 
-      console.log(
-        "Updating technician:",
-        technicianId
-      );
+        /* ---------------------------------------------
+           FORM DATA
+        --------------------------------------------- */
 
-      console.log(
-        "Photo selected:",
-        profilePhoto?.name || "No new photo"
-      );
+        const formData =
+          new FormData();
 
-      /* ---------------------------------------------
-         API REQUEST
-      --------------------------------------------- */
+        /* ---------------------------------------------
+           USER FIELDS
+        --------------------------------------------- */
 
-      const updatedTechnician =
-        await technicianService.updateTechnician(
-          technicianId,
-          formData
+        formData.append(
+          "full_name",
+          fullName
         );
 
-      console.log(
-        "Technician updated:",
-        updatedTechnician
-      );
+        formData.append(
+          "email",
+          email
+        );
 
-      /* ---------------------------------------------
-         REFRESH LIST
-      --------------------------------------------- */
+        formData.append(
+          "phone",
+          phone
+        );
 
-      await onUpdated();
+        /* ---------------------------------------------
+           TECHNICIAN PROFILE
 
-      /* ---------------------------------------------
-         SUCCESS
-      --------------------------------------------- */
+           Send flat fields so the backend
+           can safely handle multipart/form-data.
+        --------------------------------------------- */
 
-      toast.success(
-        "Technician updated successfully!",
-        {
-          position: "bottom-center",
-          autoClose: 4000,
-          theme: "light",
-          transition: Bounce,
+        formData.append(
+          "region",
+          region
+        );
+
+        formData.append(
+          "skills",
+          skills
+        );
+
+        formData.append(
+          "status",
+          status
+        );
+
+        /* ---------------------------------------------
+           PROFILE PHOTO
+        --------------------------------------------- */
+
+        if (profilePhoto) {
+          formData.append(
+            "profile_photo",
+            profilePhoto,
+            profilePhoto.name
+          );
         }
-      );
 
-      /* ---------------------------------------------
-         CLOSE
-      --------------------------------------------- */
+        /* ---------------------------------------------
+           REMOVE PHOTO
+        --------------------------------------------- */
 
-      onClose();
-
-    } catch (error) {
-      console.error(
-        "Update technician error:",
-        error
-      );
-
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to update technician.",
-        {
-          position: "bottom-center",
-          autoClose: 5000,
-          theme: "light",
+        if (
+          removePhoto &&
+          !profilePhoto
+        ) {
+          formData.append(
+            "remove_profile_photo",
+            "true"
+          );
         }
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
+
+        /* ---------------------------------------------
+           DEBUG
+        --------------------------------------------- */
+
+        console.log(
+          "Updating technician:",
+          technicianId
+        );
+
+        console.log(
+          "Update values:",
+          {
+            full_name:
+              fullName,
+            email,
+            phone,
+            region,
+            skills,
+            status,
+            photo:
+              profilePhoto?.name ||
+              null,
+            removePhoto,
+          }
+        );
+
+        /* ---------------------------------------------
+           API
+        --------------------------------------------- */
+
+        const updatedTechnician =
+          await technicianService.updateTechnician(
+            technicianId,
+            formData
+          );
+
+        console.log(
+          "Technician updated:",
+          updatedTechnician
+        );
+
+        /* ---------------------------------------------
+           REFRESH LIST
+        --------------------------------------------- */
+
+        await onUpdated();
+
+        /* ---------------------------------------------
+           SUCCESS
+        --------------------------------------------- */
+
+        toast.success(
+          "Technician updated successfully!",
+          {
+            position:
+              "bottom-center",
+            autoClose: 4000,
+            theme: "light",
+            transition: Bounce,
+          }
+        );
+
+        /* ---------------------------------------------
+           CLOSE
+        --------------------------------------------- */
+
+        onClose();
+      } catch (error) {
+        console.error(
+          "Update technician error:",
+          error
+        );
+
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to update technician.",
+          {
+            position:
+              "bottom-center",
+            autoClose: 5000,
+            theme: "light",
+          }
+        );
+      } finally {
+        setSaving(false);
+      }
+    };
 
   /* =======================================================
      PHOTO TO DISPLAY
@@ -620,9 +774,12 @@ export default function EditTechnicianModal({
   ======================================================= */
 
   const initial =
-    form.full_name
-      ?.charAt(0)
-      ?.toUpperCase() || "T";
+    normalizeText(
+      form.full_name
+    )
+      .charAt(0)
+      .toUpperCase() ||
+    "T";
 
   /* =======================================================
      STYLES
@@ -640,17 +797,7 @@ export default function EditTechnicianModal({
 
   return (
     <div
-      className="
-        fixed
-        inset-0
-        z-[180]
-        flex
-        items-center
-        justify-center
-        bg-slate-950/50
-        p-4
-        backdrop-blur-sm
-      "
+      className="fixed inset-0 z-[180] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"
       onMouseDown={(event) => {
         if (
           event.target ===
@@ -661,39 +808,13 @@ export default function EditTechnicianModal({
         }
       }}
     >
-      {/* ===================================================
-          MODAL
-      =================================================== */}
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-      <div
-        className="
-          flex
-          max-h-[90vh]
-          w-full
-          max-w-2xl
-          flex-col
-          overflow-hidden
-          rounded-2xl
-          bg-white
-          shadow-2xl
-        "
-      >
         {/* =================================================
             HEADER
         ================================================= */}
 
-        <div
-          className="
-            flex
-            items-center
-            justify-between
-            border-b
-            border-blue-100
-            px-5
-            py-4
-            sm:px-6
-          "
-        >
+        <div className="flex items-center justify-between border-b border-blue-100 px-5 py-4 sm:px-6">
           <div>
             <h2 className="text-lg font-semibold text-blue-950">
               Edit Technician
@@ -708,15 +829,8 @@ export default function EditTechnicianModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="
-              rounded-lg
-              p-2
-              text-slate-400
-              transition
-              hover:bg-slate-100
-              hover:text-slate-700
-              disabled:opacity-50
-            "
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+            aria-label="Close"
           >
             <X size={20} />
           </button>
@@ -726,16 +840,8 @@ export default function EditTechnicianModal({
             CONTENT
         ================================================= */}
 
-        <div
-          className="
-            flex-1
-            overflow-y-auto
-            bg-blue-50/30
-            px-5
-            py-5
-            sm:px-6
-          "
-        >
+        <div className="flex-1 overflow-y-auto bg-blue-50/30 px-5 py-5 sm:px-6">
+
           {loading ? (
             <div className="flex min-h-[400px] items-center justify-center">
               <div className="flex flex-col items-center gap-3">
@@ -751,62 +857,45 @@ export default function EditTechnicianModal({
             </div>
           ) : (
             <div className="space-y-5">
-              {/* =================================================
+
+              {/* =========================================
                   PROFILE PHOTO
-              ================================================= */}
+              ========================================= */}
 
               <div className="rounded-xl border border-blue-100 bg-white p-5 shadow-sm">
+
                 <h3 className="mb-5 text-sm font-semibold text-blue-950">
                   Profile Photo
                 </h3>
 
                 <div className="flex flex-col items-center gap-5 sm:flex-row">
+
                   {/* IMAGE */}
 
                   <div className="relative">
+
                     {displayedPhoto ? (
                       <img
                         src={displayedPhoto}
                         alt={
-                          form.full_name ||
-                          "Technician"
+                          full_name_placeholder(
+                            form.full_name
+                          )
                         }
-                        className="
-                          h-28
-                          w-28
-                          rounded-full
-                          border-4
-                          border-blue-50
-                          object-cover
-                          shadow-md
-                        "
+                        className="h-28 w-28 rounded-full border-4 border-blue-50 object-cover shadow-md"
                         onError={() => {
                           console.error(
                             "Failed to load profile photo:",
                             displayedPhoto
                           );
 
-                          setPhotoError(true);
+                          setPhotoError(
+                            true
+                          );
                         }}
                       />
                     ) : (
-                      <div
-                        className="
-                          flex
-                          h-28
-                          w-28
-                          items-center
-                          justify-center
-                          rounded-full
-                          border-4
-                          border-blue-50
-                          bg-blue-100
-                          text-3xl
-                          font-semibold
-                          text-blue-600
-                          shadow-md
-                        "
-                      >
+                      <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-blue-50 bg-blue-100 text-3xl font-semibold text-blue-600 shadow-md">
                         {initial}
                       </div>
                     )}
@@ -815,25 +904,7 @@ export default function EditTechnicianModal({
 
                     <label
                       htmlFor="technician-profile-photo"
-                      className="
-                        absolute
-                        bottom-1
-                        right-1
-                        flex
-                        h-9
-                        w-9
-                        cursor-pointer
-                        items-center
-                        justify-center
-                        rounded-full
-                        border-2
-                        border-white
-                        bg-blue-600
-                        text-white
-                        shadow-md
-                        transition
-                        hover:bg-blue-700
-                      "
+                      className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-600 text-white shadow-md transition hover:bg-blue-700"
                       title="Change profile photo"
                     >
                       <Camera size={17} />
@@ -847,12 +918,16 @@ export default function EditTechnicianModal({
                       onChange={
                         handlePhotoChange
                       }
+                      disabled={
+                        saving
+                      }
                     />
                   </div>
 
                   {/* INFORMATION */}
 
                   <div className="flex-1 text-center sm:text-left">
+
                     <h4 className="text-sm font-semibold text-slate-800">
                       Technician Profile Photo
                     </h4>
@@ -862,37 +937,11 @@ export default function EditTechnicianModal({
                       image. Maximum size 5 MB.
                     </p>
 
-                    <div
-                      className="
-                        mt-3
-                        flex
-                        flex-wrap
-                        justify-center
-                        gap-2
-                        sm:justify-start
-                      "
-                    >
-                      {/* UPLOAD */}
+                    <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
 
                       <label
                         htmlFor="technician-profile-photo"
-                        className="
-                          inline-flex
-                          cursor-pointer
-                          items-center
-                          gap-2
-                          rounded-lg
-                          border
-                          border-blue-200
-                          bg-white
-                          px-3
-                          py-2
-                          text-xs
-                          font-medium
-                          text-blue-700
-                          transition
-                          hover:bg-blue-50
-                        "
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-medium text-blue-700 transition hover:bg-blue-50"
                       >
                         <Camera size={15} />
 
@@ -901,8 +950,6 @@ export default function EditTechnicianModal({
                           : "Upload Photo"}
                       </label>
 
-                      {/* REMOVE */}
-
                       {displayedPhoto &&
                         !removePhoto && (
                           <button
@@ -910,32 +957,18 @@ export default function EditTechnicianModal({
                             onClick={
                               handleRemovePhoto
                             }
-                            disabled={saving}
-                            className="
-                              inline-flex
-                              items-center
-                              gap-2
-                              rounded-lg
-                              border
-                              border-red-100
-                              bg-white
-                              px-3
-                              py-2
-                              text-xs
-                              font-medium
-                              text-red-600
-                              transition
-                              hover:bg-red-50
-                              disabled:opacity-50
-                            "
+                            disabled={
+                              saving
+                            }
+                            className="inline-flex items-center gap-2 rounded-lg border border-red-100 bg-white px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                           >
-                            <Trash2 size={15} />
+                            <Trash2
+                              size={15}
+                            />
 
                             Remove Photo
                           </button>
                         )}
-
-                      {/* KEEP */}
 
                       {removePhoto && (
                         <button
@@ -943,26 +976,14 @@ export default function EditTechnicianModal({
                           onClick={
                             handleKeepPhoto
                           }
-                          disabled={saving}
-                          className="
-                            inline-flex
-                            items-center
-                            gap-2
-                            rounded-lg
-                            border
-                            border-green-100
-                            bg-white
-                            px-3
-                            py-2
-                            text-xs
-                            font-medium
-                            text-green-600
-                            transition
-                            hover:bg-green-50
-                            disabled:opacity-50
-                          "
+                          disabled={
+                            saving
+                          }
+                          className="inline-flex items-center gap-2 rounded-lg border border-green-100 bg-white px-3 py-2 text-xs font-medium text-green-600 transition hover:bg-green-50 disabled:opacity-50"
                         >
-                          <UserRound size={15} />
+                          <UserRound
+                            size={15}
+                          />
 
                           Keep Photo
                         </button>
@@ -980,21 +1001,25 @@ export default function EditTechnicianModal({
                 </div>
               </div>
 
-              {/* =================================================
+              {/* =========================================
                   BASIC INFORMATION
-              ================================================= */}
+              ========================================= */}
 
               <div className="rounded-xl border border-blue-100 bg-white p-5 shadow-sm">
+
                 <h3 className="mb-5 text-sm font-semibold text-blue-950">
                   Basic Information
                 </h3>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
                   {/* NAME */}
 
                   <div>
                     <label
-                      className={labelClass}
+                      className={
+                        labelClass
+                      }
                     >
                       Full Name
                     </label>
@@ -1003,14 +1028,22 @@ export default function EditTechnicianModal({
                       value={
                         form.full_name
                       }
-                      onChange={(event) =>
+                      onChange={(
+                        event
+                      ) =>
                         handleChange(
                           "full_name",
-                          event.target.value
+                          event.target
+                            .value
                         )
                       }
-                      className={inputClass}
+                      className={
+                        inputClass
+                      }
                       placeholder="Full name"
+                      disabled={
+                        saving
+                      }
                     />
                   </div>
 
@@ -1018,22 +1051,34 @@ export default function EditTechnicianModal({
 
                   <div>
                     <label
-                      className={labelClass}
+                      className={
+                        labelClass
+                      }
                     >
                       Email
                     </label>
 
                     <input
                       type="email"
-                      value={form.email}
-                      onChange={(event) =>
+                      value={
+                        form.email
+                      }
+                      onChange={(
+                        event
+                      ) =>
                         handleChange(
                           "email",
-                          event.target.value
+                          event.target
+                            .value
                         )
                       }
-                      className={inputClass}
+                      className={
+                        inputClass
+                      }
                       placeholder="Email"
+                      disabled={
+                        saving
+                      }
                     />
                   </div>
 
@@ -1041,55 +1086,81 @@ export default function EditTechnicianModal({
 
                   <div>
                     <label
-                      className={labelClass}
+                      className={
+                        labelClass
+                      }
                     >
                       Phone
                     </label>
 
                     <input
-                      value={form.phone}
-                      onChange={(event) =>
+                      value={
+                        form.phone
+                      }
+                      onChange={(
+                        event
+                      ) =>
                         handleChange(
                           "phone",
-                          event.target.value
+                          event.target
+                            .value
                         )
                       }
-                      className={inputClass}
+                      className={
+                        inputClass
+                      }
                       placeholder="Phone number"
+                      disabled={
+                        saving
+                      }
                     />
                   </div>
                 </div>
               </div>
 
-              {/* =================================================
+              {/* =========================================
                   TECHNICIAN INFORMATION
-              ================================================= */}
+              ========================================= */}
 
               <div className="rounded-xl border border-blue-100 bg-white p-5 shadow-sm">
+
                 <h3 className="mb-5 text-sm font-semibold text-blue-950">
                   Technician Information
                 </h3>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
                   {/* REGION */}
 
                   <div>
                     <label
-                      className={labelClass}
+                      className={
+                        labelClass
+                      }
                     >
                       Region
                     </label>
 
                     <input
-                      value={form.region}
-                      onChange={(event) =>
+                      value={
+                        form.region
+                      }
+                      onChange={(
+                        event
+                      ) =>
                         handleChange(
                           "region",
-                          event.target.value
+                          event.target
+                            .value
                         )
                       }
-                      className={inputClass}
+                      className={
+                        inputClass
+                      }
                       placeholder="e.g. Dhaka"
+                      disabled={
+                        saving
+                      }
                     />
                   </div>
 
@@ -1097,20 +1168,32 @@ export default function EditTechnicianModal({
 
                   <div>
                     <label
-                      className={labelClass}
+                      className={
+                        labelClass
+                      }
                     >
                       Status
                     </label>
 
                     <select
-                      value={form.status}
-                      onChange={(event) =>
+                      value={
+                        form.status
+                      }
+                      onChange={(
+                        event
+                      ) =>
                         handleChange(
                           "status",
-                          event.target.value
+                          event.target
+                            .value
                         )
                       }
-                      className={inputClass}
+                      className={
+                        inputClass
+                      }
+                      disabled={
+                        saving
+                      }
                     >
                       <option value="ACTIVE">
                         ACTIVE
@@ -1125,24 +1208,36 @@ export default function EditTechnicianModal({
                   {/* SKILLS */}
 
                   <div className="sm:col-span-2">
+
                     <label
-                      className={labelClass}
+                      className={
+                        labelClass
+                      }
                     >
                       Skills
                     </label>
 
                     <textarea
                       rows={4}
-                      value={form.skills}
-                      onChange={(event) =>
+                      value={
+                        form.skills
+                      }
+                      onChange={(
+                        event
+                      ) =>
                         handleChange(
                           "skills",
-                          event.target.value
+                          event.target
+                            .value
                         )
                       }
                       className={`${inputClass} resize-none`}
                       placeholder="Installation, Maintenance, Repair..."
+                      disabled={
+                        saving
+                      }
                     />
+
                   </div>
                 </div>
               </div>
@@ -1154,70 +1249,27 @@ export default function EditTechnicianModal({
             FOOTER
         ================================================= */}
 
-        <div
-          className="
-            flex
-            flex-col-reverse
-            gap-3
-            border-t
-            border-blue-100
-            bg-white
-            px-5
-            py-4
-            sm:flex-row
-            sm:justify-end
-            sm:px-6
-          "
-        >
+        <div className="flex flex-col-reverse gap-3 border-t border-blue-100 bg-white px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="
-              w-full
-              rounded-lg
-              border
-              border-slate-200
-              px-5
-              py-2.5
-              text-sm
-              font-medium
-              text-slate-700
-              transition
-              hover:bg-slate-50
-              disabled:opacity-50
-              sm:w-auto
-            "
+            className="w-full rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 sm:w-auto"
           >
             Cancel
           </button>
 
           <button
             type="button"
-            onClick={handleUpdate}
+            onClick={
+              handleUpdate
+            }
             disabled={
               loading ||
               saving
             }
-            className="
-              flex
-              w-full
-              items-center
-              justify-center
-              gap-2
-              rounded-lg
-              bg-blue-600
-              px-6
-              py-2.5
-              text-sm
-              font-medium
-              text-white
-              transition
-              hover:bg-blue-700
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-              sm:w-auto
-            "
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {saving && (
               <Loader2
@@ -1234,4 +1286,17 @@ export default function EditTechnicianModal({
       </div>
     </div>
   );
+}
+
+/* =========================================================
+   PHOTO ALT TEXT HELPER
+========================================================= */
+
+function full_name_placeholder(
+  value: unknown
+): string {
+  const name =
+    normalizeText(value).trim();
+
+  return name || "Technician";
 }

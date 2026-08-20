@@ -6,10 +6,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { login } from "@/services/auth.service";
-import { toast, Bounce } from "react-toastify";
 
 export default function LoginPage() {
   const router = useRouter();
+
+  /* =========================================================
+     STATE
+  ========================================================= */
 
   const [showPassword, setShowPassword] =
     useState(false);
@@ -46,6 +49,10 @@ export default function LoginPage() {
     setError("");
 
     try {
+      /* =====================================================
+         LOGIN API
+      ===================================================== */
+
       const data = await login(
         email.trim(),
         password
@@ -56,25 +63,115 @@ export default function LoginPage() {
         data
       );
 
+      /* =====================================================
+         VALIDATE USER
+      ===================================================== */
+
+      const user = data?.user;
+
+      if (!user) {
+        throw new Error(
+          "Invalid login response."
+        );
+      }
+
+      /* =====================================================
+         CHECK ACCOUNT STATUS
+      ===================================================== */
+
+      const isActive = (
+        user as {
+          is_active?: boolean;
+        }
+      ).is_active;
+
+      if (isActive === false) {
+        throw new Error(
+          "Your account is inactive. Please contact an administrator."
+        );
+      }
+
+      /* =====================================================
+         GET ROLE
+      ===================================================== */
+
       const role =
-        data.user?.role;
+        typeof user.role === "string"
+          ? user.role
+              .trim()
+              .toUpperCase()
+          : "";
 
       console.log(
         "Logged-in role:",
         role
       );
 
-      if (role === "CUSTOMER") {
-        router.replace(
-          "/Customer-Dashboard"
-        );
+      /* =====================================================
+         SECURE ROLE ROUTING
+         
+         IMPORTANT:
+         Never send unknown roles to admin.
+         Unknown roles fail closed.
+      ===================================================== */
 
-        return;
+      switch (role) {
+        /* ===================================================
+           CUSTOMER
+        =================================================== */
+
+        case "CUSTOMER":
+          router.replace(
+            "/Customer-Dashboard"
+          );
+          return;
+
+        /* ===================================================
+           TECHNICIAN
+        =================================================== */
+
+        case "TECHNICIAN":
+          router.replace(
+            "/Technician-Dashboard"
+          );
+          return;
+
+        /* ===================================================
+           ADMIN
+        =================================================== */
+
+        case "ADMIN":
+          router.replace(
+            "/admin-dashboard"
+          );
+          return;
+
+        /* ===================================================
+           SUPER ADMIN
+        =================================================== */
+
+        case "SUPER_ADMIN":
+          router.replace(
+            "/admin-dashboard"
+          );
+          return;
+
+        /* ===================================================
+           UNKNOWN / UNSUPPORTED ROLE
+        =================================================== */
+
+        default:
+          console.error(
+            "Unsupported user role:",
+            user.role
+          );
+
+          setError(
+            "Your account is not authorized to access this application."
+          );
+
+          return;
       }
-
-      router.replace(
-        "/admin-dashboard"
-      );
     } catch (err: unknown) {
       console.error(
         "Login error:",
@@ -82,7 +179,10 @@ export default function LoginPage() {
       );
 
       if (err instanceof Error) {
-        setError(err.message);
+        setError(
+          err.message ||
+            "Invalid email or password."
+        );
       } else {
         setError(
           "Invalid email or password."
@@ -92,6 +192,10 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
     <main className="relative min-h-screen overflow-hidden">
@@ -132,13 +236,17 @@ export default function LoginPage() {
 
           <div className="overflow-hidden rounded-3xl border border-white/15 bg-slate-950/55 shadow-2xl shadow-black/30 backdrop-blur-2xl">
 
-            {/* TOP ACCENT */}
+            {/* =================================================
+                TOP ACCENT
+            ================================================= */}
 
             <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-300" />
 
             <div className="p-7 sm:p-9">
 
-              {/* LOGO */}
+              {/* =================================================
+                  LOGO
+              ================================================= */}
 
               <div className="mb-7 flex justify-center">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 shadow-lg shadow-cyan-500/10">
@@ -150,11 +258,12 @@ export default function LoginPage() {
                     </span>
 
                   </div>
-
                 </div>
               </div>
 
-              {/* TITLE */}
+              {/* =================================================
+                  TITLE
+              ================================================= */}
 
               <div className="text-center">
 
@@ -172,14 +281,18 @@ export default function LoginPage() {
 
               </div>
 
-              {/* FORM */}
+              {/* =================================================
+                  FORM
+              ================================================= */}
 
               <form
                 className="mt-8 space-y-5"
                 onSubmit={handleLogin}
               >
 
-                {/* EMAIL */}
+                {/* =================================================
+                    EMAIL
+                ================================================= */}
 
                 <label className="block">
 
@@ -211,7 +324,9 @@ export default function LoginPage() {
 
                 </label>
 
-                {/* PASSWORD */}
+                {/* =================================================
+                    PASSWORD
+                ================================================= */}
 
                 <label className="block">
 
@@ -270,7 +385,9 @@ export default function LoginPage() {
 
                 </label>
 
-                {/* ERROR */}
+                {/* =================================================
+                    ERROR
+                ================================================= */}
 
                 {error && (
                   <div
@@ -281,7 +398,9 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                {/* REMEMBER / FORGOT */}
+                {/* =================================================
+                    REMEMBER / FORGOT
+                ================================================= */}
 
                 <div className="flex items-center justify-between gap-4">
 
@@ -317,7 +436,9 @@ export default function LoginPage() {
 
                 </div>
 
-                {/* LOGIN BUTTON */}
+                {/* =================================================
+                    LOGIN BUTTON
+                ================================================= */}
 
                 <button
                   type="submit"
@@ -333,11 +454,12 @@ export default function LoginPage() {
 
               </form>
 
-              {/* CREATE ACCOUNT */}
+              {/* =================================================
+                  CREATE ACCOUNT
+              ================================================= */}
 
               <p className="mt-7 text-center text-sm text-white/45">
-
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
 
                 <button
                   type="button"
@@ -345,14 +467,15 @@ export default function LoginPage() {
                 >
                   Create One
                 </button>
-
               </p>
 
             </div>
 
           </div>
 
-          {/* FOOTER */}
+          {/* =================================================
+              FOOTER
+          ================================================= */}
 
           <p className="mt-5 text-center text-xs text-white/30">
             © {new Date().getFullYear()} Neapure.

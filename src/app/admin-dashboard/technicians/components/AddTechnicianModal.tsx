@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Camera, UserRound } from "lucide-react";
-import { Bounce, toast } from "react-toastify";
+import {
+  X,
+  Camera,
+  UserRound,
+} from "lucide-react";
+import {
+  Bounce,
+  toast,
+} from "react-toastify";
 
-import { technicianService } from "@/services/technician.service";
+import {
+  technicianService,
+} from "@/services/technician.service";
 
 interface Props {
   isOpen: boolean;
@@ -17,7 +26,8 @@ export default function AddTechnicianModal({
   onClose,
   onCreated,
 }: Props) {
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
   const [profilePhoto, setProfilePhoto] =
     useState<File | null>(null);
@@ -35,19 +45,27 @@ export default function AddTechnicianModal({
     status: "ACTIVE",
   });
 
-  /*
-   * Clean up preview URL when component unmounts
-   * or when preview changes.
-   */
+  /* =========================================================
+     CLEANUP PREVIEW
+  ========================================================= */
+
   useEffect(() => {
     return () => {
       if (photoPreview) {
-        URL.revokeObjectURL(photoPreview);
+        URL.revokeObjectURL(
+          photoPreview
+        );
       }
     };
   }, [photoPreview]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
+
+  /* =========================================================
+     HANDLE TEXT CHANGE
+  ========================================================= */
 
   const handleChange = (
     field: keyof typeof form,
@@ -59,19 +77,20 @@ export default function AddTechnicianModal({
     }));
   };
 
-  /*
-   * Profile photo handler
-   */
+  /* =========================================================
+     PHOTO CHANGE
+  ========================================================= */
+
   const handlePhotoChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = event.target.files?.[0];
+    const file =
+      event.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
-    /*
-     * Validate file type
-     */
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -80,147 +99,274 @@ export default function AddTechnicianModal({
 
     if (!allowedTypes.includes(file.type)) {
       toast.error(
-        "Please select a JPG, PNG, or WebP image."
+        "Please select a JPG, PNG, or WebP image.",
+        {
+          position: "bottom-center",
+          autoClose: 4000,
+          theme: "light",
+        }
       );
 
       event.target.value = "";
       return;
     }
 
-    /*
-     * Validate file size
-     * Maximum 5MB
-     */
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize =
+      5 * 1024 * 1024;
 
     if (file.size > maxSize) {
       toast.error(
-        "Profile photo must be smaller than 5MB."
+        "Profile photo must be smaller than 5MB.",
+        {
+          position: "bottom-center",
+          autoClose: 4000,
+          theme: "light",
+        }
       );
 
       event.target.value = "";
       return;
     }
 
-    /*
-     * Remove old preview URL
-     */
     if (photoPreview) {
-      URL.revokeObjectURL(photoPreview);
+      URL.revokeObjectURL(
+        photoPreview
+      );
     }
 
-    /*
-     * Save file
-     */
     setProfilePhoto(file);
 
-    /*
-     * Create preview
-     */
     const previewUrl =
       URL.createObjectURL(file);
 
     setPhotoPreview(previewUrl);
   };
 
-  /*
-   * Remove selected photo
-   */
+  /* =========================================================
+     REMOVE PHOTO
+  ========================================================= */
+
   const handleRemovePhoto = () => {
     if (photoPreview) {
-      URL.revokeObjectURL(photoPreview);
+      URL.revokeObjectURL(
+        photoPreview
+      );
     }
 
     setProfilePhoto(null);
     setPhotoPreview(null);
+
+    const input =
+      document.getElementById(
+        "technician-profile-photo"
+      ) as HTMLInputElement | null;
+
+    if (input) {
+      input.value = "";
+    }
   };
 
-  /*
-   * Create technician
-   */
+  /* =========================================================
+     RESET FORM
+  ========================================================= */
+
+  const resetForm = () => {
+    setForm({
+      full_name: "",
+      email: "",
+      password: "",
+      phone: "",
+      region: "",
+      skills: "",
+      status: "ACTIVE",
+    });
+
+    handleRemovePhoto();
+  };
+
+  /* =========================================================
+     CREATE TECHNICIAN
+  ========================================================= */
+
   const handleSave = async () => {
+    const fullName =
+      form.full_name.trim();
+
+    const email =
+      form.email.trim();
+
+    const password =
+      form.password;
+
+    const phone =
+      form.phone.trim();
+
+    const region =
+      form.region.trim();
+
+    const skills =
+      form.skills.trim();
+
+    /* ---------------------------------------------------------
+       REQUIRED VALIDATION
+    --------------------------------------------------------- */
+
     if (
-      !form.full_name.trim() ||
-      !form.email.trim() ||
-      !form.password.trim()
+      !fullName ||
+      !email ||
+      !password
     ) {
       toast.error(
-        "Name, email and password are required."
+        "Name, email and password are required.",
+        {
+          position: "bottom-center",
+          autoClose: 4000,
+          theme: "light",
+        }
       );
+
+      return;
+    }
+
+    /* ---------------------------------------------------------
+       PASSWORD VALIDATION
+    --------------------------------------------------------- */
+
+    if (password.length < 8) {
+      toast.error(
+        "Password must be at least 8 characters.",
+        {
+          position: "bottom-center",
+          autoClose: 4000,
+          theme: "light",
+        }
+      );
+
+      return;
+    }
+
+    /* ---------------------------------------------------------
+       EMAIL VALIDATION
+    --------------------------------------------------------- */
+
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      !emailPattern.test(email)
+    ) {
+      toast.error(
+        "Please enter a valid email address.",
+        {
+          position: "bottom-center",
+          autoClose: 4000,
+          theme: "light",
+        }
+      );
+
       return;
     }
 
     try {
       setSaving(true);
 
-      /*
-       * ==========================================
-       * CREATE FORM DATA
-       * ==========================================
-       */
+      /* =======================================================
+         FORM DATA
+      ======================================================= */
 
-      const formData = new FormData();
+      const formData =
+        new FormData();
 
       formData.append(
         "full_name",
-        form.full_name.trim()
+        fullName
       );
 
       formData.append(
         "email",
-        form.email.trim()
+        email
       );
 
       formData.append(
         "password",
-        form.password
+        password
       );
 
       formData.append(
         "phone",
-        form.phone.trim()
+        phone
       );
 
       /*
-       * Django receives this as JSON string.
+       * Send technician profile fields
+       * as normal multipart fields.
+       *
+       * This avoids nested multipart parsing issues.
        */
       formData.append(
-        "technician_profile",
-        JSON.stringify({
-          region: form.region.trim(),
-          skills: form.skills.trim(),
-          status: form.status,
-        })
+        "region",
+        region
       );
 
-      /*
-       * Profile photo
-       */
+      formData.append(
+        "skills",
+        skills
+      );
+
+      formData.append(
+        "status",
+        form.status
+      );
+
+      /* =======================================================
+         PROFILE PHOTO
+      ======================================================= */
+
       if (profilePhoto) {
         formData.append(
           "profile_photo",
-          profilePhoto
+          profilePhoto,
+          profilePhoto.name
         );
       }
 
-      /*
-       * ==========================================
-       * CREATE TECHNICIAN
-       * ==========================================
-       */
+      /* =======================================================
+         DEBUG
+      ======================================================= */
+
+      console.log(
+        "Creating technician..."
+      );
+
+      console.log({
+        full_name: fullName,
+        email,
+        phone,
+        region,
+        skills,
+        status: form.status,
+        hasProfilePhoto:
+          Boolean(profilePhoto),
+      });
+
+      /* =======================================================
+         API
+      ======================================================= */
 
       await technicianService.createTechnician(
         formData
       );
 
-      /*
-       * Refresh technician table
-       */
+      /* =======================================================
+         REFRESH TABLE
+      ======================================================= */
+
       await onCreated();
 
-      /*
-       * Success message
-       */
+      /* =======================================================
+         SUCCESS
+      ======================================================= */
+
       toast.success(
         "Technician created successfully!",
         {
@@ -231,29 +377,17 @@ export default function AddTechnicianModal({
         }
       );
 
-      /*
-       * ==========================================
-       * RESET FORM
-       * ==========================================
-       */
+      /* =======================================================
+         RESET
+      ======================================================= */
 
-      setForm({
-        full_name: "",
-        email: "",
-        password: "",
-        phone: "",
-        region: "",
-        skills: "",
-        status: "ACTIVE",
-      });
+      resetForm();
 
-      handleRemovePhoto();
+      /* =======================================================
+         CLOSE
+      ======================================================= */
 
-      /*
-       * Close modal
-       */
       onClose();
-
     } catch (error) {
       console.error(
         "Create technician error:",
@@ -275,18 +409,27 @@ export default function AddTechnicianModal({
     }
   };
 
+  /* =========================================================
+     STYLES
+  ========================================================= */
+
   const labelClass =
     "mb-1.5 block text-xs font-medium text-blue-900 sm:mb-2 sm:text-sm";
 
   const inputClass =
     "w-full rounded-lg border border-blue-100 bg-white p-2.5 text-sm text-slate-900 placeholder:text-blue-400 transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 sm:p-3 sm:text-base";
 
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"
       onMouseDown={(event) => {
         if (
-          event.target === event.currentTarget &&
+          event.target ===
+            event.currentTarget &&
           !saving
         ) {
           onClose();
@@ -295,9 +438,9 @@ export default function AddTechnicianModal({
     >
       <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-        {/* ================================================== */}
-        {/* HEADER */}
-        {/* ================================================== */}
+        {/* ===================================================
+            HEADER
+        =================================================== */}
 
         <div className="flex items-center justify-between border-b border-blue-100 bg-white px-4 py-3.5 sm:px-6 sm:py-4">
           <div>
@@ -315,21 +458,22 @@ export default function AddTechnicianModal({
             onClick={onClose}
             disabled={saving}
             className="rounded-full p-1.5 text-blue-400 transition hover:bg-blue-50 hover:text-blue-900 disabled:opacity-50"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* ================================================== */}
-        {/* CONTENT */}
-        {/* ================================================== */}
+        {/* ===================================================
+            CONTENT
+        =================================================== */}
 
         <div className="flex-1 overflow-y-auto bg-blue-50/40 px-4 py-5 sm:px-6">
           <div className="space-y-5 pb-4">
 
-            {/* ================================================== */}
-            {/* BASIC INFORMATION */}
-            {/* ================================================== */}
+            {/* =================================================
+                BASIC INFORMATION
+            ================================================= */}
 
             <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-6">
 
@@ -337,9 +481,7 @@ export default function AddTechnicianModal({
                 Basic Information
               </h3>
 
-              {/* ============================================ */}
               {/* PROFILE PHOTO */}
-              {/* ============================================ */}
 
               <div className="mb-6">
                 <label className={labelClass}>
@@ -348,11 +490,8 @@ export default function AddTechnicianModal({
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
 
-                  {/* Photo preview */}
                   <div className="relative shrink-0">
-
                     <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-blue-100 bg-blue-50">
-
                       {photoPreview ? (
                         <img
                           src={photoPreview}
@@ -364,27 +503,24 @@ export default function AddTechnicianModal({
                           className="h-10 w-10 text-blue-300"
                         />
                       )}
-
                     </div>
 
-                    {/* Camera badge */}
                     <label
                       htmlFor="technician-profile-photo"
                       className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-blue-600 text-white shadow-md transition hover:bg-blue-700"
                     >
                       <Camera className="h-4 w-4" />
                     </label>
-
                   </div>
 
-                  {/* Upload section */}
                   <div className="flex-1">
-
                     <input
                       id="technician-profile-photo"
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
-                      onChange={handlePhotoChange}
+                      onChange={
+                        handlePhotoChange
+                      }
                       disabled={saving}
                       className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700 disabled:opacity-50"
                     />
@@ -396,33 +532,37 @@ export default function AddTechnicianModal({
                     {profilePhoto && (
                       <button
                         type="button"
-                        onClick={handleRemovePhoto}
+                        onClick={
+                          handleRemovePhoto
+                        }
                         disabled={saving}
                         className="mt-2 text-xs font-medium text-red-500 transition hover:text-red-700 disabled:opacity-50"
                       >
                         Remove photo
                       </button>
                     )}
-
                   </div>
 
                 </div>
               </div>
 
-              {/* ============================================ */}
               {/* BASIC FIELDS */}
-              {/* ============================================ */}
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
 
-                {/* Full Name */}
+                {/* FULL NAME */}
+
                 <div>
-                  <label className={labelClass}>
+                  <label
+                    className={labelClass}
+                  >
                     Full Name *
                   </label>
 
                   <input
-                    value={form.full_name}
+                    value={
+                      form.full_name
+                    }
                     onChange={(e) =>
                       handleChange(
                         "full_name",
@@ -430,20 +570,27 @@ export default function AddTechnicianModal({
                       )
                     }
                     placeholder="Enter full name"
-                    className={inputClass}
+                    className={
+                      inputClass
+                    }
                     disabled={saving}
                   />
                 </div>
 
-                {/* Email */}
+                {/* EMAIL */}
+
                 <div>
-                  <label className={labelClass}>
+                  <label
+                    className={labelClass}
+                  >
                     Email *
                   </label>
 
                   <input
                     type="email"
-                    value={form.email}
+                    value={
+                      form.email
+                    }
                     onChange={(e) =>
                       handleChange(
                         "email",
@@ -451,40 +598,54 @@ export default function AddTechnicianModal({
                       )
                     }
                     placeholder="Enter email"
-                    className={inputClass}
+                    className={
+                      inputClass
+                    }
                     disabled={saving}
                   />
                 </div>
 
-                {/* Password */}
+                {/* PASSWORD */}
+
                 <div>
-                  <label className={labelClass}>
+                  <label
+                    className={labelClass}
+                  >
                     Password *
                   </label>
 
                   <input
                     type="password"
-                    value={form.password}
+                    value={
+                      form.password
+                    }
                     onChange={(e) =>
                       handleChange(
                         "password",
                         e.target.value
                       )
                     }
-                    placeholder="Temporary password"
-                    className={inputClass}
+                    placeholder="Minimum 8 characters"
+                    className={
+                      inputClass
+                    }
                     disabled={saving}
                   />
                 </div>
 
-                {/* Phone */}
+                {/* PHONE */}
+
                 <div>
-                  <label className={labelClass}>
+                  <label
+                    className={labelClass}
+                  >
                     Phone
                   </label>
 
                   <input
-                    value={form.phone}
+                    value={
+                      form.phone
+                    }
                     onChange={(e) =>
                       handleChange(
                         "phone",
@@ -492,7 +653,9 @@ export default function AddTechnicianModal({
                       )
                     }
                     placeholder="Phone number"
-                    className={inputClass}
+                    className={
+                      inputClass
+                    }
                     disabled={saving}
                   />
                 </div>
@@ -500,9 +663,9 @@ export default function AddTechnicianModal({
               </div>
             </div>
 
-            {/* ================================================== */}
-            {/* TECHNICIAN INFORMATION */}
-            {/* ================================================== */}
+            {/* =================================================
+                TECHNICIAN INFORMATION
+            ================================================= */}
 
             <div className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm sm:p-6">
 
@@ -512,14 +675,19 @@ export default function AddTechnicianModal({
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
 
-                {/* Region */}
+                {/* REGION */}
+
                 <div>
-                  <label className={labelClass}>
+                  <label
+                    className={labelClass}
+                  >
                     Region
                   </label>
 
                   <input
-                    value={form.region}
+                    value={
+                      form.region
+                    }
                     onChange={(e) =>
                       handleChange(
                         "region",
@@ -527,26 +695,35 @@ export default function AddTechnicianModal({
                       )
                     }
                     placeholder="e.g. Dhaka"
-                    className={inputClass}
+                    className={
+                      inputClass
+                    }
                     disabled={saving}
                   />
                 </div>
 
-                {/* Status */}
+                {/* STATUS */}
+
                 <div>
-                  <label className={labelClass}>
+                  <label
+                    className={labelClass}
+                  >
                     Status
                   </label>
 
                   <select
-                    value={form.status}
+                    value={
+                      form.status
+                    }
                     onChange={(e) =>
                       handleChange(
                         "status",
                         e.target.value
                       )
                     }
-                    className={inputClass}
+                    className={
+                      inputClass
+                    }
                     disabled={saving}
                   >
                     <option value="ACTIVE">
@@ -559,15 +736,20 @@ export default function AddTechnicianModal({
                   </select>
                 </div>
 
-                {/* Skills */}
+                {/* SKILLS */}
+
                 <div className="sm:col-span-2">
-                  <label className={labelClass}>
+                  <label
+                    className={labelClass}
+                  >
                     Skills
                   </label>
 
                   <textarea
                     rows={4}
-                    value={form.skills}
+                    value={
+                      form.skills
+                    }
                     onChange={(e) =>
                       handleChange(
                         "skills",
@@ -586,9 +768,9 @@ export default function AddTechnicianModal({
           </div>
         </div>
 
-        {/* ================================================== */}
-        {/* FOOTER */}
-        {/* ================================================== */}
+        {/* ===================================================
+            FOOTER
+        =================================================== */}
 
         <div className="flex flex-col-reverse gap-3 border-t border-blue-100 bg-white px-4 py-3.5 sm:flex-row sm:justify-end sm:px-6 sm:py-4">
 
@@ -613,7 +795,6 @@ export default function AddTechnicianModal({
           </button>
 
         </div>
-
       </div>
     </div>
   );

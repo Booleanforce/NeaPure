@@ -1,15 +1,83 @@
-// StatCard.tsx
+"use client";
+
 import { CheckCircle2 } from "lucide-react";
+
 import Card from "../common/Card";
 
-/**
- * Mobile: added min-w-0 to the Card so this can actually shrink inside a
- * flex/grid parent (StatsCards sits in a grid that goes to 2 columns at sm,
- * and without min-w-0 a flex/grid item won't shrink below its content's
- * intrinsic width, which can cause the row to overflow). Icon box got
- * shrink-0 for the same reason. Text/button already wrap naturally
- * (no whitespace-nowrap), so no other changes needed.
- */
+import {
+  useUser,
+  type CustomerLanguage,
+} from "../../context/UserContext";
+
+/* =========================================================
+   TRANSLATIONS
+========================================================= */
+
+const TRANSLATIONS = {
+  activeProducts: {
+    English: "Active Products",
+    Bangla: "সক্রিয় পণ্য",
+  },
+
+  products: {
+    English: "Products",
+    Bangla: "পণ্য",
+  },
+
+  warranty: {
+    English: "Warranty",
+    Bangla: "ওয়ারেন্টি",
+  },
+
+  active: {
+    English: "Active",
+    Bangla: "সক্রিয়",
+  },
+
+  services: {
+    English: "Services",
+    Bangla: "সেবা",
+  },
+
+  pending: {
+    English: "Pending",
+    Bangla: "অপেক্ষমাণ",
+  },
+
+  completed: {
+    English: "Completed",
+    Bangla: "সম্পন্ন",
+  },
+
+  view: {
+    English: "View",
+    Bangla: "দেখুন",
+  },
+
+  viewAll: {
+    English: "View All",
+    Bangla: "সব দেখুন",
+  },
+} as const;
+
+type TranslationKey =
+  keyof typeof TRANSLATIONS;
+
+/* =========================================================
+   TRANSLATION HELPER
+========================================================= */
+
+function t(
+  key: TranslationKey,
+  language: CustomerLanguage
+): string {
+  return TRANSLATIONS[key][language];
+}
+
+/* =========================================================
+   COMPONENT
+========================================================= */
+
 export default function StatCard({
   icon,
   iconBg,
@@ -31,29 +99,74 @@ export default function StatCard({
   sub: string;
   action: string;
 }) {
+  const { language } = useUser();
+
   return (
     <Card className="flex min-w-0 flex-1 flex-col items-start gap-3">
+
+      {/* =====================================================
+          ICON
+      ===================================================== */}
+
       <div className="flex w-full items-start justify-between">
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBg}`}
         >
-          <div className={iconColor}>{icon}</div>
+          <div className={iconColor}>
+            {icon}
+          </div>
         </div>
       </div>
+
+      {/* =====================================================
+          VALUE
+      ===================================================== */}
 
       <div className="min-w-0 w-full">
-        <p className="text-xs text-slate-400">{label}</p>
+
+        <p className="text-xs text-slate-400">
+          {label}
+        </p>
+
         <div className="mt-1 flex items-center gap-1.5">
-          <span className={`text-base font-bold ${valueColor}`}>{value}</span>
-          {badge && <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />}
+
+          <span
+            className={`text-base font-bold ${valueColor}`}
+          >
+            {value}
+          </span>
+
+          {badge && (
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+          )}
+
         </div>
+
       </div>
 
-      <p className="text-[11px] text-slate-400">{sub}</p>
+      {/* =====================================================
+          SUB TEXT
+      ===================================================== */}
 
-      <button className="text-xs font-medium text-blue-600 hover:underline">
-        {action} <span className="ml-0.5">›</span>
+      <p className="text-[11px] text-slate-400">
+        {sub}
+      </p>
+
+      {/* =====================================================
+          ACTION
+      ===================================================== */}
+
+      <button
+        type="button"
+        className="text-xs font-medium text-blue-600 transition hover:underline"
+      >
+        {action}
+
+        <span className="ml-0.5">
+          ›
+        </span>
       </button>
+
     </Card>
   );
 }
