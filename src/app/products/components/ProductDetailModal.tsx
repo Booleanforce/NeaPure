@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -27,20 +28,22 @@ interface Props {
 /*                              Helper Functions                              */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Safely converts API values into something React can render.
- *
- * This prevents errors like:
- * "Objects are not valid as a React child"
- */
-function renderValue(value: unknown): React.ReactNode {
-  if (value === null || value === undefined) {
+function renderValue(
+  value: unknown
+): React.ReactNode {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
     return null;
   }
 
-  if (typeof value === "string" ||
-      typeof value === "number" ||
-      typeof value === "boolean") {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
     return String(value);
   }
 
@@ -49,7 +52,8 @@ function renderValue(value: unknown): React.ReactNode {
       <ul className="space-y-1">
         {value.map((item, index) => (
           <li key={index}>
-            {typeof item === "object" && item !== null
+            {typeof item === "object" &&
+            item !== null
               ? JSON.stringify(item)
               : String(item)}
           </li>
@@ -63,6 +67,16 @@ function renderValue(value: unknown): React.ReactNode {
   }
 
   return String(value);
+}
+
+function isRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
 }
 
 export default function ProductDetailModal({
@@ -84,7 +98,9 @@ export default function ProductDetailModal({
   /* -------------------------------------------------------------------------- */
 
   const loadProduct = useCallback(async () => {
-    if (!slug) return;
+    if (!slug) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -153,10 +169,6 @@ export default function ProductDetailModal({
         }
       }
 
-      /* ---------------------------------------------------------------------- */
-      /* Set Product                                                            */
-      /* ---------------------------------------------------------------------- */
-
       setProduct({
         ...data,
         images: normalizedImages,
@@ -166,6 +178,7 @@ export default function ProductDetailModal({
         "Failed to load product:",
         error
       );
+
       setProduct(null);
     } finally {
       setLoading(false);
@@ -217,6 +230,25 @@ export default function ProductDetailModal({
     : [];
 
   /* -------------------------------------------------------------------------- */
+  /*                        Technical Specifications                             */
+  /* -------------------------------------------------------------------------- */
+
+  const technicalSpecs =
+    product?.technical_specs;
+
+  const technicalSpecsObject =
+    isRecord(technicalSpecs)
+      ? technicalSpecs
+      : null;
+
+  const technicalSpecEntries =
+    technicalSpecsObject
+      ? Object.entries(
+          technicalSpecsObject
+        )
+      : [];
+
+  /* -------------------------------------------------------------------------- */
   /*                                Render                                      */
   /* -------------------------------------------------------------------------- */
 
@@ -226,14 +258,15 @@ export default function ProductDetailModal({
       onClose={onClose}
       size="xl"
     >
-      {/* ====================================================================== */}
-      {/* LOADING                                                                 */}
-      {/* ====================================================================== */}
+      {/* ====================================================================== */
+      /* LOADING                                                                 */
+      /* ====================================================================== */}
 
       {loading ? (
         <div className="flex min-h-[500px] items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+
             <p className="text-sm text-blue-500">
               Loading Product...
             </p>
@@ -249,6 +282,7 @@ export default function ProductDetailModal({
             <p className="text-lg font-semibold text-gray-800">
               Product not found.
             </p>
+
             <p className="mt-1 text-sm text-gray-500">
               Unable to load product information.
             </p>
@@ -261,21 +295,21 @@ export default function ProductDetailModal({
 
         <div className="p-6">
 
-          {/* ================================================================== */}
-          {/* TOP: IMAGE + BASIC INFO                                            */}
-          {/* ================================================================== */}
+          {/* ================================================================== */
+          /* TOP: IMAGE + BASIC INFO                                            */
+          /* ================================================================== */}
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
 
-            {/* ================================================================= */}
-            {/* IMAGE GALLERY                                                      */}
-            {/* ================================================================= */}
+            {/* ================================================================= */
+            /* IMAGE GALLERY                                                      */
+            /* ================================================================= */}
 
             <div className="space-y-4">
 
               {/* Main Image */}
-              <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-50">
 
+              <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-50">
                 {galleryImages.length > 0 ? (
                   <Image
                     src={
@@ -301,9 +335,9 @@ export default function ProductDetailModal({
                 )}
 
                 {/* Navigation Arrows */}
+
                 {galleryImages.length > 1 && (
                   <>
-                    {/* Previous */}
                     <button
                       type="button"
                       onClick={() =>
@@ -315,11 +349,11 @@ export default function ProductDetailModal({
                         )
                       }
                       className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md transition hover:bg-white"
+                      aria-label="Previous image"
                     >
                       <ChevronLeft className="h-5 w-5 text-gray-700" />
                     </button>
 
-                    {/* Next */}
                     <button
                       type="button"
                       onClick={() =>
@@ -332,6 +366,7 @@ export default function ProductDetailModal({
                         )
                       }
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md transition hover:bg-white"
+                      aria-label="Next image"
                     >
                       <ChevronRight className="h-5 w-5 text-gray-700" />
                     </button>
@@ -339,9 +374,7 @@ export default function ProductDetailModal({
                 )}
               </div>
 
-              {/* ================================================================= */}
-              {/* THUMBNAILS                                                        */}
-              {/* ================================================================= */}
+              {/* Thumbnails */}
 
               {galleryImages.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-1">
@@ -378,13 +411,14 @@ export default function ProductDetailModal({
               )}
             </div>
 
-            {/* ================================================================= */}
-            {/* PRODUCT INFORMATION                                                */}
-            {/* ================================================================= */}
+            {/* ================================================================= */
+            /* PRODUCT INFORMATION                                                */
+            /* ================================================================= */}
 
             <div className="space-y-6">
 
               {/* Category */}
+
               {product.category?.name && (
                 <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
                   {product.category.name}
@@ -392,16 +426,19 @@ export default function ProductDetailModal({
               )}
 
               {/* Product Name */}
+
               <h2 className="text-2xl font-bold text-gray-900 lg:text-3xl">
                 {product.name}
               </h2>
 
               {/* Price */}
+
               <div className="text-3xl font-bold text-blue-600">
                 ৳ {product.price}
               </div>
 
               {/* Short Description */}
+
               {product.short_description && (
                 <p className="leading-relaxed text-gray-600">
                   {renderValue(
@@ -411,6 +448,7 @@ export default function ProductDetailModal({
               )}
 
               {/* Perfect For */}
+
               {product.perfect_for && (
                 <div>
                   <h4 className="mb-1 text-sm font-semibold text-gray-900">
@@ -426,6 +464,7 @@ export default function ProductDetailModal({
               )}
 
               {/* Warranty */}
+
               {product.warranty_duration_months !==
                 undefined && (
                 <div className="flex items-center gap-2 text-sm text-gray-700">
@@ -440,7 +479,8 @@ export default function ProductDetailModal({
                 </div>
               )}
 
-              {/* Featured Badge */}
+              {/* Featured */}
+
               {product.is_featured && (
                 <span className="inline-block rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
                   Featured
@@ -449,19 +489,16 @@ export default function ProductDetailModal({
             </div>
           </div>
 
-          {/* ================================================================== */}
-          {/* BOTTOM: DETAILS                                                     */}
-          {/* ================================================================== */}
+          {/* ================================================================== */
+          /* BOTTOM: DETAILS                                                     */
+          /* ================================================================== */}
 
           <div className="mt-10 space-y-6">
 
-            {/* ================================================================= */}
-            {/* KEY FEATURES                                                       */}
-            {/* ================================================================= */}
+            {/* KEY FEATURES */}
 
             {product.key_features && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
-
                 <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900">
                   <CheckCircle className="h-5 w-5 text-blue-500" />
                   Key Features
@@ -475,9 +512,7 @@ export default function ProductDetailModal({
               </div>
             )}
 
-            {/* ================================================================= */}
-            {/* TECHNICAL SPECIFICATIONS                                           */}
-            {/* ================================================================= */}
+            {/* TECHNICAL SPECIFICATIONS */}
 
             {product.technical_specs && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
@@ -486,31 +521,15 @@ export default function ProductDetailModal({
                   Technical Specifications
                 </h3>
 
-                {typeof product.technical_specs ===
-                "object" &&
-                product.technical_specs !== null &&
-                !Array.isArray(
-                  product.technical_specs
-                ) ? (
+                {technicalSpecsObject ? (
                   <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-
-                    {Object.entries(
-                      product.technical_specs as Record<
-                        string,
-                        unknown
-                      >
-                    ).map(
+                    {technicalSpecEntries.map(
                       ([key, value], index) => (
                         <div
                           key={key}
                           className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
                             index !==
-                            Object.keys(
-                              product.technical_specs as Record<
-                                string,
-                                unknown
-                              >
-                            ).length - 1
+                            technicalSpecEntries.length - 1
                               ? "border-b border-gray-200"
                               : ""
                           }`}
@@ -536,16 +555,13 @@ export default function ProductDetailModal({
               </div>
             )}
 
-            {/* ================================================================= */}
-            {/* PACKAGE INCLUDES                                                   */}
-            {/* ================================================================= */}
+            {/* PACKAGE INCLUDES */}
 
             {product.package_includes && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
 
                 <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900">
                   <Package className="h-5 w-5 text-blue-500" />
-
                   What&apos;s in the Box
                 </h3>
 
@@ -557,20 +573,16 @@ export default function ProductDetailModal({
               </div>
             )}
 
-            {/* ================================================================= */}
-            {/* REPLACEMENT INFO                                                   */}
-            {/* ================================================================= */}
+            {/* REPLACEMENT INFO */}
 
             {product.recommended_replacement_months !=
               null &&
-              product.recommended_replacement_months !=
+              product.recommended_replacement_months !==
                 undefined && (
                 <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
-
                   <p className="text-sm text-blue-700">
                     Recommended filter replacement
                     every{" "}
-
                     <strong>
                       {
                         product.recommended_replacement_months

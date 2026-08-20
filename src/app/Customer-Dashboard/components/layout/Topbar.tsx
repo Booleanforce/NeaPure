@@ -14,10 +14,6 @@ import UserProfile from "./UserProfile";
 import { useUser } from "../../context/UserContext";
 
 interface TopbarProps {
-  /**
-   * Opens the mobile sidebar drawer.
-   * Button only shows below lg.
-   */
   onMenuClick?: () => void;
 }
 
@@ -36,18 +32,14 @@ export default function Topbar({
     profile.fullName || "User";
 
   const userAvatar =
-    profile.avatarUrl || undefined;
+    profile.avatarUrl ||
+    "https://i.pravatar.cc/72?img=12";
 
   /* ==========================================================================
      LOGOUT
   ========================================================================== */
 
   const handleLogout = () => {
-    /*
-     * Clear the same authentication values
-     * used by the authentication flow.
-     */
-
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
     localStorage.removeItem("user");
@@ -103,9 +95,7 @@ export default function Topbar({
 
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
 
-        {/* ==================================================================
-            SEARCH
-        ================================================================== */}
+        {/* Search */}
 
         <div className="relative hidden items-center rounded-lg bg-slate-50 px-3 py-1.5 md:flex">
           <Search className="h-4 w-4 text-slate-400" />
@@ -127,9 +117,7 @@ export default function Topbar({
           <Search className="h-4 w-4" />
         </button>
 
-        {/* ==================================================================
-            NOTIFICATION
-        ================================================================== */}
+        {/* Notifications */}
 
         <button
           type="button"
@@ -141,9 +129,7 @@ export default function Topbar({
           <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-rose-500" />
         </button>
 
-        {/* ==================================================================
-            MESSAGE
-        ================================================================== */}
+        {/* Messages */}
 
         <button
           type="button"
@@ -155,18 +141,14 @@ export default function Topbar({
           <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-rose-500" />
         </button>
 
-        {/* ==================================================================
-            PROFILE
-        ================================================================== */}
+        {/* Profile */}
 
         <UserProfile
           name={userName}
           avatarSrc={userAvatar}
         />
 
-        {/* ==================================================================
-            LOGOUT
-        ================================================================== */}
+        {/* Logout */}
 
         <button
           type="button"
@@ -179,6 +161,7 @@ export default function Topbar({
 
           <LogOut className="h-4 w-4 sm:hidden" />
         </button>
+
       </div>
     </div>
   );

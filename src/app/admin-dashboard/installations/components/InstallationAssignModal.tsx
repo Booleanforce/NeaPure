@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -192,7 +193,7 @@ export default function InstallationAssignModal({
                         technician.id
                       )}
                     >
-                      {technician.name ||
+                      {technician.full_name ||
                         technician.email}
                     </option>
                   )
