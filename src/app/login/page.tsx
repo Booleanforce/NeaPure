@@ -4,91 +4,71 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useLoginMutation } from "@/features/auth/api/authApi";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/features/auth/slices/authSlice";
 
-import { login } from "@/services/auth.service";
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional(),
+});
+
+type LoginSchemaType = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [globalError, setGlobalError] = useState("");
 
-  const [rememberMe, setRememberMe] =
-    useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginSchemaType>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+    mode: "onTouched",
+  });
 
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
+  const [loginApi] = useLoginMutation();
 
   /* =========================================================
      LOGIN
   ========================================================= */
 
-  const handleLogin = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
-    if (loading) {
-      return;
-    }
-
-    setLoading(true);
-    setError("");
+  const onSubmit = async (data: LoginSchemaType) => {
+    setGlobalError("");
 
     try {
-      const data = await login(
-        email.trim(),
-        password
-      );
+      // NOTE: Using unwrap() to extract payload or catch the error
+      const response = await loginApi({ email: data.email, password: data.password }).unwrap();
 
-      console.log(
-        "Login response:",
-        data
-      );
+      console.log("Login response:", response);
 
-      const role =
-        data.user?.role;
+      // Save to Redux store
+      dispatch(setCredentials({ user: response.user, token: response.access_token || response.token }));
 
-      console.log(
-        "Logged-in role:",
-        role
-      );
+      const role = response.user?.role;
+      console.log("Logged-in role:", role);
 
-      if (role === "CUSTOMER") {
-        router.replace(
-          "/Customer-Dashboard"
-        );
-
-        return;
-      }
-
-      router.replace(
-        "/admin-dashboard"
-      );
-    } catch (err: unknown) {
-      console.error(
-        "Login error:",
-        err
-      );
-
-      if (err instanceof Error) {
-        setError(err.message);
+      if (role === "CUSTOMER" || role === "customer") {
+        router.replace("/Customer-Dashboard");
       } else {
-        setError(
-          "Invalid email or password."
-        );
+        router.replace("/admin-dashboard");
       }
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setGlobalError(err.data?.detail || err.message || "Invalid email or password.");
     }
   };
 
@@ -175,7 +155,8 @@ export default function LoginPage() {
 
               <form
                 className="mt-8 space-y-5"
-                onSubmit={handleLogin}
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
               >
 
                 {/* EMAIL */}
@@ -192,21 +173,20 @@ export default function LoginPage() {
 
                     <input
                       type="email"
-                      name="email"
                       placeholder="Enter your email"
                       autoComplete="email"
-                      value={email}
-                      onChange={(e) =>
-                        setEmail(
-                          e.target.value
-                        )
-                      }
-                      required
-                      disabled={loading}
+                      {...register("email")}
+                      disabled={isSubmitting}
+                      aria-invalid={!!errors.email}
                       className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-50"
                     />
 
                   </div>
+                  {errors.email && (
+                    <span className="mt-1 block text-xs text-red-400" role="alert">
+                      {errors.email.message}
+                    </span>
+                  )}
 
                 </label>
 
@@ -223,40 +203,21 @@ export default function LoginPage() {
                     <LockIcon className="h-5 w-5 shrink-0 text-white/35 transition group-focus-within:text-cyan-300" />
 
                     <input
-                      type={
-                        showPassword
-                          ? "text"
-                          : "password"
-                      }
-                      name="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       autoComplete="current-password"
-                      value={password}
-                      onChange={(e) =>
-                        setPassword(
-                          e.target.value
-                        )
-                      }
-                      required
-                      disabled={loading}
+                      {...register("password")}
+                      disabled={isSubmitting}
+                      aria-invalid={!!errors.password}
                       className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-50"
                     />
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword(
-                          (value) =>
-                            !value
-                        )
-                      }
-                      disabled={loading}
+                      onClick={() => setShowPassword((value) => !value)}
+                      disabled={isSubmitting}
                       className="shrink-0 text-white/35 transition hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
-                      aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
-                      }
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? (
                         <EyeOffIcon className="h-5 w-5" />
@@ -266,17 +227,22 @@ export default function LoginPage() {
                     </button>
 
                   </div>
+                  {errors.password && (
+                    <span className="mt-1 block text-xs text-red-400" role="alert">
+                      {errors.password.message}
+                    </span>
+                  )}
 
                 </label>
 
                 {/* ERROR */}
 
-                {error && (
+                {globalError && (
                   <div
                     role="alert"
                     className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-300"
                   >
-                    {error}
+                    {globalError}
                   </div>
                 )}
 
@@ -288,15 +254,8 @@ export default function LoginPage() {
 
                     <input
                       type="checkbox"
-                      checked={
-                        rememberMe
-                      }
-                      onChange={(e) =>
-                        setRememberMe(
-                          e.target.checked
-                        )
-                      }
-                      disabled={loading}
+                      {...register("rememberMe")}
+                      disabled={isSubmitting}
                       className="h-4 w-4 cursor-pointer accent-cyan-400"
                     />
 
@@ -308,7 +267,7 @@ export default function LoginPage() {
 
                   <button
                     type="button"
-                    disabled={loading}
+                    disabled={isSubmitting}
                     className="text-sm font-medium text-cyan-300 transition hover:text-white disabled:opacity-50"
                   >
                     Forgot Password?
@@ -320,11 +279,11 @@ export default function LoginPage() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitting}
                   className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/10 transition-all duration-300 hover:from-cyan-300 hover:to-blue-500 hover:shadow-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="relative z-10">
-                    {loading
+                    {isSubmitting
                       ? "Signing In..."
                       : "SIGN IN"}
                   </span>

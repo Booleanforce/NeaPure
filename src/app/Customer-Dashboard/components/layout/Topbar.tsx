@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import UserProfile from "./UserProfile";
-import { useUser } from "../../context/UserContext";
+import { useGetProfileQuery } from "@/features/customer_dashboard/api/customerDashboardApi";
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -22,17 +22,17 @@ export default function Topbar({
 }: TopbarProps) {
   const router = useRouter();
 
-  const { profile } = useUser();
+  const { data: profile } = useGetProfileQuery();
 
   /* ==========================================================================
      USER INFORMATION
   ========================================================================== */
 
   const userName =
-    profile.fullName || "User";
+    profile?.fullName || "User";
 
   const userAvatar =
-    profile.avatarUrl ||
+    profile?.avatarUrl ||
     "https://i.pravatar.cc/72?img=12";
 
   /* ==========================================================================
