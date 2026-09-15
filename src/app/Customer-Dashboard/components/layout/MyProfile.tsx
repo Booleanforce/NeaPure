@@ -1,7 +1,7 @@
 // app/dashboard/Customer-Dashboard/my-profile/ProfilePage.tsx
 "use client";
 
-import { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   User,
   Mail,
@@ -17,20 +17,18 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { useUser, type CustomerProfile } from "../../context/UserContext";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
-// Fields the "Edit Profile" form exposes. Role is included as a field
-// per the design, but is rendered as a disabled input since role changes
-// normally go through an admin flow, not self-service.
-type EditableField = "fullName" | "email" | "phone" | "location" | "role";
+import {
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useUploadAvatarMutation,
+} from "@/features/customer_dashboard/api/customerDashboardApi";
 
 const MAX_AVATAR_SIZE_MB = 5;
 
-// ---------------------------------------------------------------------
-// i18n: every string on this page is looked up through t(key) below,
-// keyed off profile.language. Add more languages by adding another
-// column to TRANSLATIONS.
-// ---------------------------------------------------------------------
 const TRANSLATIONS = {
   pageTitle: { English: "My Profile", Bangla: "আমার প্রোফাইল" },
   pageSubtitle: {
@@ -129,8 +127,6 @@ function t(key: TranslationKey, language: "English" | "Bangla"): string {
   return TRANSLATIONS[key][language];
 }
 
-// Password rules: 8-16 chars, at least one uppercase, one lowercase,
-// one digit, one special character.
 function getPasswordRules(
   language: "English" | "Bangla"
 ): { key: TranslationKey; label: string; test: (v: string) => boolean }[] {
@@ -143,39 +139,49 @@ function getPasswordRules(
   ];
 }
 
-// NOTE: outer page padding (px/py) and background now come from
-// app/dashboard/layout.tsx's <main>. This component only handles
-// its own internal layout so every dashboard page gets consistent
-// spacing "for free" instead of re-declaring it per page.
-//
-// Profile data now comes from the shared UserContext (see
-// app/dashboard/context/UserContext.tsx) instead of local component
-// state, so any change here (e.g. a new avatar) is immediately visible
-// everywhere else that reads the context, like Topbar. The context is
-// also responsible for actually persisting changes to the backend, so
-// they survive a refresh.
-//
-// Avatar uploads go through the context's uploadAvatar() — do NOT
-// re-implement the upload fetch here. uploadAvatar() already:
-//   - shows an instant local preview (via a blob URL)
-//   - posts to {API_URL}/api/auth/avatar/ with field name "photo"
-//     (must match what the Django serializer/view expects)
-//   - attaches the Authorization header from the stored access token
-//   - swaps the preview for the real hosted URL once the backend responds
-// Duplicating that logic here previously caused uploads to silently
-// fail (wrong field name, no auth header, wrong endpoint).
+const profileSchema = z.object({
+  fullName: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(1, "Phone is required"),
+  location: z.string().min(1, "Location is required"),
+  role: z.string().optional(),
+});
+
+type ProfileFormData = z.infer<typeof profileSchema>;
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(16, "Password must be at most 16 characters")
+    .regex(/[A-Z]/, "Needs uppercase letter")
+    .regex(/[a-z]/, "Needs lowercase letter")
+    .regex(/[0-9]/, "Needs number")
+    .regex(/[^A-Za-z0-9]/, "Needs special character"),
+  confirmPassword: z.string().min(1, "Confirm password is required")
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+}).refine((data) => data.newPassword !== data.currentPassword, {
+  message: "New password must be different",
+  path: ["newPassword"],
+});
+
+type PasswordFormData = z.infer<typeof passwordSchema>;
+
 export default function ProfilePage({
   onChangePassword,
 }: {
-  // Called with { currentPassword, newPassword } when the user submits
-  // a valid new password. Wire this to your auth API.
   onChangePassword?: (payload: {
     currentPassword: string;
     newPassword: string;
   }) => Promise<void> | void;
 }) {
-  const { profile, updateProfile, uploadAvatar } = useUser();
-  const lang = profile.language;
+  const { data: profile, isLoading } = useGetProfileQuery();
+  const [updateProfile] = useUpdateProfileMutation();
+  const [uploadAvatar] = useUploadAvatarMutation();
+  
+  const lang = profile?.language || "English";
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -183,21 +189,54 @@ export default function ProfilePage({
 
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [draft, setDraft] = useState<CustomerProfile>(profile);
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [showPasswords, setShowPasswords] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   const passwordRules = getPasswordRules(lang);
 
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      location: "",
+      role: "",
+    }
+  });
+
+  const { register: registerPwd, handleSubmit: handleSubmitPwd, reset: resetPwd, watch: watchPwd, formState: { errors: errorsPwd } } = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    }
+  });
+
+  const newPasswordVal = watchPwd("newPassword");
+
+  useEffect(() => {
+    if (profile) {
+      reset({
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone,
+        location: profile.location,
+        role: profile.role,
+      });
+    }
+  }, [profile, reset]);
+
+  if (isLoading || !profile) {
+    return <div className="p-8 text-center text-slate-500">Loading...</div>;
+  }
+
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    // Reset the input so selecting the same file again still fires onChange.
     e.target.value = "";
     if (!file) return;
 
@@ -214,10 +253,7 @@ export default function ProfilePage({
 
     setUploading(true);
     try {
-      // Context handles: local preview, multipart upload to the real
-      // backend endpoint, auth header, and reconciling with the
-      // hosted URL the server returns.
-      await uploadAvatar(file);
+      await uploadAvatar(file).unwrap();
     } catch {
       setUploadError(t("photoUploadFailed", lang));
     } finally {
@@ -226,37 +262,40 @@ export default function ProfilePage({
   }
 
   function startEditing() {
-    setDraft(profile);
     setIsEditing(true);
   }
 
   function cancelEditing() {
     setIsEditing(false);
-  }
-
-  function updateDraft(field: EditableField, value: string) {
-    setDraft((prev) => ({ ...prev, [field]: value }));
-  }
-
-  async function saveProfile() {
-    setSaving(true);
-    try {
-      await updateProfile(draft);
-      setIsEditing(false);
-    } finally {
-      setSaving(false);
+    if (profile) {
+      reset({
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone,
+        location: profile.location,
+        role: profile.role,
+      });
     }
   }
 
+  const saveProfile = async (data: ProfileFormData) => {
+    setSaving(true);
+    try {
+      await updateProfile(data).unwrap();
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   function handleLanguageChange(language: "English" | "Bangla") {
-    updateProfile({ language });
-    setDraft((prev) => ({ ...prev, language }));
+    updateProfile({ language }).unwrap();
   }
 
   function startChangingPassword() {
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    resetPwd();
     setPasswordError(null);
     setIsChangingPassword(true);
   }
@@ -265,40 +304,19 @@ export default function ProfilePage({
     setIsChangingPassword(false);
   }
 
-  async function submitPasswordChange() {
+  const submitPasswordChange = async (data: PasswordFormData) => {
     setPasswordError(null);
-
-    if (!currentPassword) {
-      setPasswordError(t("enterCurrentPassword", lang));
-      return;
-    }
-    const failedRule = passwordRules.find((rule) => !rule.test(newPassword));
-    if (failedRule) {
-      setPasswordError(`${t("passwordNeeds", lang)} ${failedRule.label}.`);
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError(t("passwordsDontMatch", lang));
-      return;
-    }
-    if (newPassword === currentPassword) {
-      setPasswordError(t("passwordSameAsCurrent", lang));
-      return;
-    }
-
     setPasswordSaving(true);
     try {
-      await onChangePassword?.({ currentPassword, newPassword });
+      await onChangePassword?.({ currentPassword: data.currentPassword, newPassword: data.newPassword });
       setIsChangingPassword(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      resetPwd();
     } catch {
       setPasswordError(t("passwordUpdateFailed", lang));
     } finally {
       setPasswordSaving(false);
     }
-  }
+  };
 
   return (
     <div className="mx-auto w-full max-w-4xl">
@@ -331,7 +349,7 @@ export default function ProfilePage({
               {t("cancel", lang)}
             </button>
             <button
-              onClick={saveProfile}
+              onClick={handleSubmit(saveProfile)}
               disabled={saving}
               className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-50"
             >
@@ -388,51 +406,46 @@ export default function ProfilePage({
                 <InfoRow icon={ShieldCheck} label={t("role", lang)} value={profile.role} />
               </>
             ) : (
-              <>
+              <form id="profile-form" onSubmit={handleSubmit(saveProfile)} className="space-y-4">
                 <FormRow
                   icon={User}
                   label={t("fullName", lang)}
-                  name="fullName"
-                  value={draft.fullName}
-                  onChange={(v) => updateDraft("fullName", v)}
+                  {...register("fullName")}
                   placeholder={t("fullNamePlaceholder", lang)}
+                  error={errors.fullName?.message}
                 />
                 <FormRow
                   icon={Mail}
                   label={t("email", lang)}
-                  name="email"
                   type="email"
-                  value={draft.email}
-                  onChange={(v) => updateDraft("email", v)}
+                  {...register("email")}
                   placeholder={t("emailPlaceholder", lang)}
                   disabled
+                  error={errors.email?.message}
                 />
                 <FormRow
                   icon={Phone}
                   label={t("phone", lang)}
-                  name="phone"
                   type="tel"
-                  value={draft.phone}
-                  onChange={(v) => updateDraft("phone", v)}
+                  {...register("phone")}
                   placeholder={t("phonePlaceholder", lang)}
+                  error={errors.phone?.message}
                 />
                 <FormRow
                   icon={MapPin}
                   label={t("location", lang)}
-                  name="location"
-                  value={draft.location}
-                  onChange={(v) => updateDraft("location", v)}
+                  {...register("location")}
                   placeholder={t("locationPlaceholder", lang)}
+                  error={errors.location?.message}
                 />
                 <FormRow
                   icon={ShieldCheck}
                   label={t("role", lang)}
-                  name="role"
-                  value={draft.role}
-                  onChange={(v) => updateDraft("role", v)}
+                  {...register("role")}
                   disabled
+                  error={errors.role?.message}
                 />
-              </>
+              </form>
             )}
           </div>
         </div>
@@ -464,7 +477,7 @@ export default function ProfilePage({
             </button>
           </div>
         ) : (
-          <div className="space-y-4 px-5 py-4 sm:px-6">
+          <form id="password-form" onSubmit={handleSubmitPwd(submitPasswordChange)} className="space-y-4 px-5 py-4 sm:px-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-slate-700">
                 {t("changePassword", lang)}
@@ -485,30 +498,30 @@ export default function ProfilePage({
 
             <PasswordField
               label={t("currentPassword", lang)}
-              value={currentPassword}
-              onChange={setCurrentPassword}
+              {...registerPwd("currentPassword")}
               show={showPasswords}
               autoComplete="current-password"
+              error={errorsPwd.currentPassword?.message}
             />
             <PasswordField
               label={t("newPassword", lang)}
-              value={newPassword}
-              onChange={setNewPassword}
+              {...registerPwd("newPassword")}
               show={showPasswords}
               autoComplete="new-password"
+              error={errorsPwd.newPassword?.message}
             />
             <PasswordField
               label={t("confirmNewPassword", lang)}
-              value={confirmPassword}
-              onChange={setConfirmPassword}
+              {...registerPwd("confirmPassword")}
               show={showPasswords}
               autoComplete="new-password"
+              error={errorsPwd.confirmPassword?.message}
             />
 
             {/* Live rule checklist */}
             <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
               {passwordRules.map((rule) => {
-                const passed = rule.test(newPassword);
+                const passed = rule.test(newPasswordVal || "");
                 return (
                   <li
                     key={rule.key}
@@ -533,6 +546,7 @@ export default function ProfilePage({
 
             <div className="flex items-center gap-2 pt-1">
               <button
+                type="button"
                 onClick={cancelChangingPassword}
                 disabled={passwordSaving}
                 className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
@@ -541,7 +555,7 @@ export default function ProfilePage({
                 {t("cancel", lang)}
               </button>
               <button
-                onClick={submitPasswordChange}
+                type="submit"
                 disabled={passwordSaving}
                 className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-50"
               >
@@ -549,7 +563,7 @@ export default function ProfilePage({
                 {passwordSaving ? t("updating", lang) : t("updatePassword", lang)}
               </button>
             </div>
-          </div>
+          </form>
         )}
       </section>
 
@@ -613,25 +627,18 @@ function InfoRow({
   );
 }
 
-function FormRow({
-  icon: Icon,
-  label,
-  name,
-  value,
-  onChange,
-  type = "text",
-  placeholder,
-  disabled,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  placeholder?: string;
-  disabled?: boolean;
-}) {
+const FormRow = React.forwardRef<
+  HTMLInputElement,
+  {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    name: string;
+    type?: string;
+    placeholder?: string;
+    disabled?: boolean;
+    error?: string;
+  } & React.InputHTMLAttributes<HTMLInputElement>
+>(({ icon: Icon, label, name, type = "text", placeholder, disabled, error, ...rest }, ref) => {
   return (
     <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
       <label
@@ -641,33 +648,34 @@ function FormRow({
         <Icon className="h-4 w-4 shrink-0 text-slate-300" />
         {label}
       </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
-      />
+      <div className="w-full flex-1 flex flex-col">
+        <input
+          id={name}
+          name={name}
+          type={type}
+          placeholder={placeholder}
+          disabled={disabled}
+          ref={ref}
+          {...rest}
+          className="w-full flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+        />
+        {error && <span className="text-xs text-red-500 mt-1">{error}</span>}
+      </div>
     </div>
   );
-}
+});
+FormRow.displayName = "FormRow";
 
-function PasswordField({
-  label,
-  value,
-  onChange,
-  show,
-  autoComplete,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  show: boolean;
-  autoComplete: string;
-}) {
+const PasswordField = React.forwardRef<
+  HTMLInputElement,
+  {
+    label: string;
+    show: boolean;
+    autoComplete: string;
+    name: string;
+    error?: string;
+  } & React.InputHTMLAttributes<HTMLInputElement>
+>(({ label, show, autoComplete, name, error, ...rest }, ref) => {
   const id = `pwd-${label.replace(/\s+/g, "-")}`;
   return (
     <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
@@ -677,14 +685,19 @@ function PasswordField({
       >
         {label}
       </label>
-      <input
-        id={id}
-        type={show ? "text" : "password"}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete={autoComplete}
-        className="w-full flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-      />
+      <div className="w-full flex-1 flex flex-col">
+        <input
+          id={id}
+          name={name}
+          type={show ? "text" : "password"}
+          autoComplete={autoComplete}
+          ref={ref}
+          {...rest}
+          className="w-full flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+        />
+        {error && <span className="text-xs text-red-500 mt-1">{error}</span>}
+      </div>
     </div>
   );
-}
+});
+PasswordField.displayName = "PasswordField";
