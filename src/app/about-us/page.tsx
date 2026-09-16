@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Droplets,
   Heart,
@@ -74,9 +75,9 @@ export default function AboutPage() {
 
   const brandImages = [
     { title: 'Our Showroom', color: 'from-gray-200 to-gray-300', image: '/images/showroom.png' },
-    { title: 'Our Service Team', color: 'from-blue-200 to-blue-300' },
-    { title: 'Professional Installation', color: 'from-gray-300 to-gray-400' },
-    { title: 'NeaPure Customer App', color: 'from-blue-300 to-blue-400' }
+    { title: 'Our Service Team', color: 'from-blue-200 to-blue-300', image: '/images/family.png' },
+    { title: 'Professional Installation', color: 'from-gray-300 to-gray-400', image: '/images/kit.png' },
+    { title: 'NeaPure Customer App', color: 'from-blue-300 to-blue-400', image: '/images/neaPureFilter.png' }
   ];
 
   return (
@@ -374,20 +375,27 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {brandImages.map((img, idx) => (
-              <div key={idx} className="group cursor-pointer">
-                <div className={`bg-gradient-to-br ${img.color} rounded-2xl h-48 flex items-center justify-center mb-3 overflow-hidden relative`}>
-                  {img.image ? (
-                    <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-white font-bold text-sm opacity-50">{img.title}</div>
-                  )}
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity"></div>
+          <div className="overflow-hidden">
+            <div 
+              className="flex transition-transform duration-300 ease-in-out"
+              style={{ transform: `translateX(-${currentSlide * 25}%)` }}
+            >
+              {brandImages.map((img, idx) => (
+                <div key={idx} className="w-full md:w-1/2 lg:w-1/4 flex-shrink-0 px-2">
+                  <div className="group cursor-pointer">
+                    <div className={`bg-gradient-to-br ${img.color} rounded-2xl h-48 flex items-center justify-center mb-3 overflow-hidden relative`}>
+                      {img.image ? (
+                        <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-white font-bold text-sm opacity-50">{img.title}</div>
+                      )}
+                      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                    </div>
+                    <div className="text-center font-semibold text-gray-900 text-sm">{img.title}</div>
+                  </div>
                 </div>
-                <div className="text-center font-semibold text-gray-900 text-sm">{img.title}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -410,10 +418,10 @@ export default function AboutPage() {
               <p className="text-sm text-blue-200">Join us in our mission to make every drop of water pure and every home healthier.</p>
             </div>
           </div>
-          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-full font-semibold transition-colors shadow-lg">
+          <Link href="/products" className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-full font-semibold transition-colors shadow-lg">
             <span>Explore Products</span>
             <ArrowRight className="w-5 h-5" />
-          </button>
+          </Link>
         </div>
       </section>
 
