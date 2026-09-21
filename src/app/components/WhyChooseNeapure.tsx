@@ -16,97 +16,78 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+// Static content (no API call, no store)
+const features = [
+  {
+    icon: Sparkles,
+    title: "THE NEAPURE GUARANTEE",
+    description:
+      "We promise safe water or full refund. Over 99% uptime with immediate technician response.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Genuine Products",
+    description:
+      "100% original cartridges, food-grade pipes, certified RO membranes & parts.",
+  },
+  {
+    icon: Wrench,
+    title: "Free Installation",
+    description:
+      "Professional installation by certified technicians across Bangladesh.",
+  },
+  {
+    icon: FileText,
+    title: "Digital Warranty",
+    description:
+      "Paperless warranty registration with instant online verification.",
+  },
+  {
+    icon: Smartphone,
+    title: "Smart Care App",
+    description:
+      "Track filter life, service history and request maintenance anytime.",
+  },
+  {
+    icon: Headphones,
+    title: "24/7 Customer Support",
+    description:
+      "Live chat, WhatsApp and phone support whenever you need help.",
+  },
+];
+
+const chapters = [
+  { number: "01", title: "Contaminated Water Sources", thumbnail: "/images/chapter1.jpg", duration: "0:45" },
+  { number: "02", title: "Harmful Chemicals", thumbnail: "/images/chapter2.jpg", duration: "0:42" },
+  { number: "03", title: "Suspended Particles", thumbnail: "/images/chapter3.jpg", duration: "0:38" },
+  { number: "04", title: "Bacterial Contamination", thumbnail: "/images/chapter4.jpg", duration: "0:51" },
+  { number: "05", title: "Heavy Metal Presence", thumbnail: "/images/chapter5.jpg", duration: "0:46" },
+  { number: "06", title: "Bad Taste & Odor", thumbnail: "/images/chapter6.jpg", duration: "0:39" },
+];
+
+// ------------------------------------------------------------------
+// BRAND VIDEO
+// TODO (before go-live): replace the placeholder with the final,
+// approved NeaPure brand video.
+//   1. Put the approved file in  /public/videos/neapure-brand.mp4
+//   2. (Optional) put a poster frame in /public/images/neapure-video-poster.jpg
+//   3. Update the two paths below.
+// ------------------------------------------------------------------
+const BRAND_VIDEO = {
+  src: "/videos/neapure-brand.mp4",
+  poster: "/images/family.png", // TODO: swap for the approved poster frame
+};
+
 export default function WhyChooseNeaPure() {
   const [currentChapter, setCurrentChapter] = useState(0);
-
-  const features = [
-    {
-      icon: Sparkles,
-      title: "THE NEAPURE GUARANTEE",
-      description:
-        "We promise safe water or full refund. Over 99% uptime with immediate technician response.",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Genuine Products",
-      description:
-        "100% original cartridges, food-grade pipes, certified RO membranes & parts.",
-    },
-    {
-      icon: Wrench,
-      title: "Free Installation",
-      description:
-        "Professional installation by certified technicians across Bangladesh.",
-    },
-    {
-      icon: FileText,
-      title: "Digital Warranty",
-      description:
-        "Paperless warranty registration with instant online verification.",
-    },
-    {
-      icon: Smartphone,
-      title: "Smart Care App",
-      description:
-        "Track filter life, service history and request maintenance anytime.",
-    },
-    {
-      icon: Headphones,
-      title: "24/7 Customer Support",
-      description:
-        "Live chat, WhatsApp and phone support whenever you need help.",
-    },
-  ];
-
-  const chapters = [
-    {
-      number: "01",
-      title: "Contaminated Water Sources",
-      thumbnail: "/images/chapter1.jpg",
-      duration: "0:45",
-    },
-    {
-      number: "02",
-      title: "Harmful Chemicals",
-      thumbnail: "/images/chapter2.jpg",
-      duration: "0:42",
-    },
-    {
-      number: "03",
-      title: "Suspended Particles",
-      thumbnail: "/images/chapter3.jpg",
-      duration: "0:38",
-    },
-    {
-      number: "04",
-      title: "Bacterial Contamination",
-      thumbnail: "/images/chapter4.jpg",
-      duration: "0:51",
-    },
-    {
-      number: "05",
-      title: "Heavy Metal Presence",
-      thumbnail: "/images/chapter5.jpg",
-      duration: "0:46",
-    },
-    {
-      number: "06",
-      title: "Bad Taste & Odor",
-      thumbnail: "/images/chapter6.jpg",
-      duration: "0:39",
-    },
-  ];
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <section className="bg-white py-20">
       <div className="mx-auto max-w-7xl px-4 lg:px-6">
-
         {/* ================= HEADER ================= */}
-
         <div className="mb-12 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-
           <div className="max-w-2xl">
-
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-blue-600">
               <Shield className="h-4 w-4" />
               WHY CHOOSE NEAPURE
@@ -115,9 +96,7 @@ export default function WhyChooseNeaPure() {
             <h2 className="mt-6 text-4xl font-bold leading-tight text-slate-900 lg:text-5xl">
               Why Thousands of Families
               <br />
-              <span className="text-blue-600">
-                Trust NeaPure
-              </span>
+              <span className="text-blue-600">Trust NeaPure</span>
             </h2>
 
             <p className="mt-6 max-w-xl text-gray-600 leading-8">
@@ -125,292 +104,218 @@ export default function WhyChooseNeaPure() {
               mind with safe drinking water, genuine products, expert service
               and lifetime customer support.
             </p>
-
           </div>
 
           {/* Trust Badge */}
-
           <div className="mx-auto lg:mx-0">
-
             <div className="flex h-40 w-40 flex-col items-center justify-center rounded-full border-2 border-blue-100 bg-white shadow-md">
-
               <Shield className="mb-3 h-9 w-9 text-blue-600" />
-
               <span className="text-[11px] uppercase tracking-widest text-gray-500">
                 Trusted By
               </span>
-
-              <span className="text-3xl font-bold text-blue-600">
-                10,000+
-              </span>
-
-              <span className="text-sm text-gray-500">
-                Families
-              </span>
-
+              <span className="text-3xl font-bold text-blue-600">10,000+</span>
+              <span className="text-sm text-gray-500">Families</span>
             </div>
-
           </div>
-
         </div>
 
         {/* ================= MAIN LAYOUT ================= */}
-
         <div className="grid gap-6 lg:grid-cols-12">
-
           {/* LEFT CONTENT */}
-
-          <div className="space-y-6 lg:col-span-8">
-
+          <div className="flex flex-col gap-6 lg:col-span-8">
             {/* VIDEO SECTION */}
             <div className="relative overflow-hidden rounded-3xl shadow-xl">
-
-            <Image
-                src="/images/family.png"
-                alt="NeaPure Family"
-                width={1200}
-                height={700}
-                className="aspect-video w-full object-cover"
-            />
-
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-            {/* Play Button */}
-            <button className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 backdrop-blur transition hover:scale-110">
-
-                <Play
-                fill="currentColor"
-                className="ml-1 h-8 w-8 text-blue-600"
+              {isPlaying ? (
+                // Real brand video (native controls once playing)
+                <video
+                  src={BRAND_VIDEO.src}
+                  poster={BRAND_VIDEO.poster}
+                  className="aspect-video w-full bg-black object-cover"
+                  controls
+                  autoPlay
+                  playsInline
+                  preload="metadata"
                 />
+              ) : (
+                <>
+                  <Image
+                    src={BRAND_VIDEO.poster}
+                    alt="NeaPure Family"
+                    width={1200}
+                    height={700}
+                    className="aspect-video w-full object-cover"
+                  />
 
-            </button>
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-            {/* Content */}
-
-            <div className="absolute bottom-16 left-8 max-w-xl">
-
-                <span className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white">
-                HEALTHY BANGLADESH HOMES
-                </span>
-
-                <h3 className="mt-5 text-3xl font-bold leading-tight text-white">
-
-                Over 10,000+ Families
-                <br />
-                Saved from Contaminated Water
-
-                </h3>
-
-                <p className="mt-4 text-sm leading-7 text-gray-200">
-
-                We proudly serve families across Bangladesh with
-                premium water purification systems and lifetime
-                after-sales support.
-
-                </p>
-
-            </div>
-
-            {/* Bottom Controls */}
-
-            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-black/60 px-6 py-4">
-
-                <div className="flex items-center gap-4">
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-
+                  {/* Play Button */}
+                  <button
+                    onClick={() => setIsPlaying(true)}
+                    aria-label="Play NeaPure brand video"
+                    className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 backdrop-blur transition hover:scale-110"
+                  >
                     <Play
-                    fill="currentColor"
-                    className="ml-0.5 h-4 w-4 text-white"
+                      fill="currentColor"
+                      className="ml-1 h-8 w-8 text-blue-600"
                     />
+                  </button>
 
-                </div>
+                  {/* Content */}
+                  <div className="absolute bottom-16 left-8 max-w-xl">
+                    <span className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white">
+                      HEALTHY BANGLADESH HOMES
+                    </span>
 
-                <span className="text-sm text-white">
-                    0:00 / 0:45
-                </span>
+                    <h3 className="mt-5 text-3xl font-bold leading-tight text-white">
+                      Over 10,000+ Families
+                      <br />
+                      Saved from Contaminated Water
+                    </h3>
 
-                </div>
+                    <p className="mt-4 text-sm leading-7 text-gray-200">
+                      We proudly serve families across Bangladesh with premium
+                      water purification systems and lifetime after-sales
+                      support.
+                    </p>
+                  </div>
 
-                <div className="h-1 flex-1 mx-8 rounded-full bg-white/20">
+                  {/* Bottom Controls (visual only until the video starts) */}
+                  <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-black/60 px-6 py-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                        <Play
+                          fill="currentColor"
+                          className="ml-0.5 h-4 w-4 text-white"
+                        />
+                      </div>
 
-                <div className="h-full w-1/3 rounded-full bg-blue-500" />
+                      <span className="text-sm text-white">0:00 / 0:45</span>
+                    </div>
 
-                </div>
+                    <div className="mx-8 h-1 flex-1 rounded-full bg-white/20">
+                      <div className="h-full w-1/3 rounded-full bg-blue-500" />
+                    </div>
 
-                <span className="text-xs text-white">
-                HD
-                </span>
-
-            </div>
-
+                    <span className="text-xs text-white">HD</span>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* CHAPTER SECTION */}
-            <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-
-            {/* Header */}
-
-            <div className="mb-6 flex items-center justify-between">
-
-                <div>
-
+            <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm lg:flex-1">
+              {/* Header */}
+              <div className="mb-6 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">
-                    Chapters / Step-by-Step Guide
+                  Chapters / Step-by-Step Guide
                 </p>
 
-                </div>
-
                 <div className="flex items-center gap-2">
-
-                <button
-                    onClick={() =>
-                    setCurrentChapter((prev) => Math.max(prev - 1, 0))
-                    }
+                  <button
+                    onClick={() => setCurrentChapter((prev) => Math.max(prev - 1, 0))}
                     className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 transition hover:bg-blue-600 hover:text-white"
-                >
+                  >
                     <ChevronLeft className="h-4 w-4" />
-                </button>
+                  </button>
 
-                <button
+                  <button
                     onClick={() =>
-                    setCurrentChapter((prev) =>
+                      setCurrentChapter((prev) =>
                         Math.min(prev + 1, chapters.length - 1)
-                    )
+                      )
                     }
                     className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 transition hover:bg-blue-600 hover:text-white"
-                >
+                  >
                     <ChevronRight className="h-4 w-4" />
-                </button>
-
+                  </button>
                 </div>
+              </div>
 
-            </div>
-
-            {/* Chapters */}
-
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-
+              {/* Chapters */}
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
                 {chapters.map((chapter, index) => (
-
-                <button
+                  <button
                     key={chapter.number}
                     onClick={() => setCurrentChapter(index)}
                     className="group text-left"
-                >
-
+                  >
                     <div
-                    className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${
+                      className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${
                         currentChapter === index
-                        ? "ring-2 ring-blue-600 shadow-xl"
-                        : "border border-gray-200 hover:shadow-lg"
-                    }`}
+                          ? "ring-2 ring-blue-600 shadow-xl"
+                          : "border border-gray-200 hover:shadow-lg"
+                      }`}
                     >
-
-                    <Image
+                      <Image
                         src="/images/family.png"
                         alt={chapter.title}
                         width={320}
                         height={180}
                         className="h-28 w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
+                      />
 
-                    {/* Overlay */}
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-black/20" />
 
-                    <div className="absolute inset-0 bg-black/20" />
-
-                    {/* Duration */}
-
-                    <span className="absolute left-3 top-3 rounded bg-black/70 px-2 py-1 text-[10px] text-white">
+                      {/* Duration */}
+                      <span className="absolute left-3 top-3 rounded bg-black/70 px-2 py-1 text-[10px] text-white">
                         {chapter.duration}
-                    </span>
+                      </span>
 
-                    {/* Play */}
-
-                    <div className="absolute inset-0 flex items-center justify-center">
-
+                      {/* Play */}
+                      <div className="absolute inset-0 flex items-center justify-center">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-xl transition group-hover:scale-110">
-
-                        <Play
+                          <Play
                             fill="currentColor"
                             className="ml-0.5 h-4 w-4 text-blue-600"
-                        />
-
+                          />
                         </div>
-
-                    </div>
-
+                      </div>
                     </div>
 
                     <h4 className="mt-3 text-center text-xs font-semibold leading-5 text-slate-700">
-
-                    {chapter.number}. {chapter.title}
-
+                      {chapter.number}. {chapter.title}
                     </h4>
-
-                </button>
-
+                  </button>
                 ))}
-
+              </div>
             </div>
-
-            </div>
-
           </div>
 
-          {/* RIGHT CONTENT */}
+          {/* RIGHT CONTENT
+              Compact cards. On lg+ the column is as tall as the left column
+              and the cards share that height equally, so top and bottom
+              edges line up with the video / chapters block. */}
+          <div className="flex flex-col gap-3 lg:col-span-4 lg:h-full">
+            {features.map((feature) => {
+              const Icon = feature.icon;
 
-          <div className="space-y-4 lg:col-span-4">
-
-            {/* FEATURES */}
-            {features.map((feature, index) => {
-
-            const Icon = feature.icon;
-
-            return (
-
+              return (
                 <div
-                key={index}
-                className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+                  key={feature.title}
+                  className="group flex items-center rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg sm:p-4 lg:flex-1"
                 >
-
-                <div className="flex gap-4">
-
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 transition group-hover:bg-blue-100">
-
-                    <Icon className="h-6 w-6 text-blue-600" />
-
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 transition group-hover:bg-blue-100">
+                      <Icon className="h-5 w-5 text-blue-600" />
                     </div>
 
-                    <div>
-
-                    <h4 className="text-base font-bold text-slate-900">
-
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold leading-tight text-slate-900">
                         {feature.title}
+                      </h4>
 
-                    </h4>
-
-                    <p className="mt-2 text-sm leading-6 text-gray-500">
-
+                      <p className="mt-1 text-xs leading-5 text-gray-500">
                         {feature.description}
-
-                    </p>
-
+                      </p>
                     </div>
-
+                  </div>
                 </div>
-
-                </div>
-
-            );
-
+              );
             })}
-
           </div>
-
         </div>
-
       </div>
     </section>
   );
