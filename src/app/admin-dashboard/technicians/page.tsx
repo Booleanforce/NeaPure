@@ -26,6 +26,10 @@ import DeleteTechnicianModal from "./components/DeleteTechnicianModal";
 import TechnicianModalView from "./components/technicianModalView/Modal";
 
 export default function TechnicianList() {
+  /* =========================================================
+     STATE
+  ========================================================= */
+
   const [technicians, setTechnicians] =
     useState<Technician[]>([]);
 
@@ -41,24 +45,44 @@ export default function TechnicianList() {
   const [totalPages, setTotalPages] =
     useState(1);
 
-  // ADD
+  /* =========================================================
+     ADD MODAL
+  ========================================================= */
+
   const [isAddModalOpen, setIsAddModalOpen] =
     useState(false);
 
-  // VIEW
+  /* =========================================================
+     VIEW MODAL
+  ========================================================= */
+
   const [isViewModalOpen, setIsViewModalOpen] =
     useState(false);
+
+  /* =========================================================
+     SELECTED TECHNICIAN
+  ========================================================= */
 
   const [selectedTechnicianId, setSelectedTechnicianId] =
     useState<string | null>(null);
 
-  // EDIT
+  /* =========================================================
+     EDIT MODAL
+  ========================================================= */
+
   const [isEditModalOpen, setIsEditModalOpen] =
     useState(false);
 
-  // DELETE
+  /* =========================================================
+     DELETE MODAL
+  ========================================================= */
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] =
     useState(false);
+
+  /* =========================================================
+     LOAD TECHNICIANS
+  ========================================================= */
 
   useEffect(() => {
     loadTechnicians();
@@ -79,13 +103,17 @@ export default function TechnicianList() {
         response
       );
 
+      /* =====================================================
+         PAGINATED RESPONSE
+      ===================================================== */
+
       if (
         response &&
         typeof response === "object" &&
         "results" in response
       ) {
         setTechnicians(
-          response.results
+          response.results || []
         );
 
         setTotalPages(
@@ -96,15 +124,26 @@ export default function TechnicianList() {
             )
           )
         );
-      } else if (
-        Array.isArray(response)
-      ) {
+
+        return;
+      }
+
+      /* =====================================================
+         ARRAY RESPONSE
+      ===================================================== */
+
+      if (Array.isArray(response)) {
         setTechnicians(response);
         setTotalPages(1);
-      } else {
-        setTechnicians([]);
-        setTotalPages(1);
+        return;
       }
+
+      /* =====================================================
+         INVALID RESPONSE
+      ===================================================== */
+
+      setTechnicians([]);
+      setTotalPages(1);
     } catch (error) {
       console.error(
         "Technician API Error:",
@@ -112,26 +151,33 @@ export default function TechnicianList() {
       );
 
       setTechnicians([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
 
+  /* =========================================================
+     STATISTICS
+  ========================================================= */
+
   const activeTechnicians =
     technicians.filter(
       (technician) =>
-        technician
-          .technician_profile
-          ?.status === "ACTIVE"
+        technician.technician_profile?.status ===
+        "ACTIVE"
     ).length;
 
   const blockedTechnicians =
     technicians.filter(
       (technician) =>
-        technician
-          .technician_profile
-          ?.status === "BLOCKED"
+        technician.technician_profile?.status ===
+        "BLOCKED"
     ).length;
+
+  /* =========================================================
+     SELECTED TECHNICIAN
+  ========================================================= */
 
   const selectedTechnician =
     technicians.find(
@@ -140,37 +186,100 @@ export default function TechnicianList() {
         selectedTechnicianId
     );
 
-  // VIEW
+  /* =========================================================
+     VIEW
+  ========================================================= */
+
   const handleView = (id: string) => {
     setSelectedTechnicianId(id);
     setIsViewModalOpen(true);
   };
 
-  // EDIT
+  /* =========================================================
+     EDIT
+  ========================================================= */
+
   const handleEdit = (id: string) => {
     setSelectedTechnicianId(id);
     setIsEditModalOpen(true);
   };
 
-  // DELETE
+  /* =========================================================
+     DELETE
+  ========================================================= */
+
   const handleDelete = (id: string) => {
     setSelectedTechnicianId(id);
     setIsDeleteModalOpen(true);
   };
 
-  // Close all modals
+  /* =========================================================
+     CLOSE MODALS
+  ========================================================= */
+
   const handleCloseModals = () => {
     setIsViewModalOpen(false);
     setIsEditModalOpen(false);
     setIsDeleteModalOpen(false);
+
     setSelectedTechnicianId(null);
   };
 
+  /* =========================================================
+     DELETE SUCCESS
+     
+     Remove immediately from frontend state,
+     then refresh from backend.
+  ========================================================= */
+
+  const handleTechnicianDeleted = async (
+    deletedId: string
+  ) => {
+    /* -------------------------------------------------------
+       Remove immediately from local state
+    ------------------------------------------------------- */
+
+    setTechnicians((current) =>
+      current.filter(
+        (technician) =>
+          technician.id !== deletedId
+      )
+    );
+
+    /* -------------------------------------------------------
+       Close delete modal / clear selected technician
+    ------------------------------------------------------- */
+
+    setIsDeleteModalOpen(false);
+    setSelectedTechnicianId(null);
+
+    /* -------------------------------------------------------
+       Refresh backend data
+    ------------------------------------------------------- */
+
+    try {
+      await loadTechnicians();
+    } catch (error) {
+      console.error(
+        "Failed to refresh technicians after delete:",
+        error
+      );
+    }
+  };
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <div className="space-y-6">
-      {/* HEADER */}
+
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-blue-950">
             Technicians
@@ -189,17 +298,23 @@ export default function TechnicianList() {
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-blue-700 hover:shadow-lg active:scale-95"
         >
           <Plus size={18} />
+
           Add Technician
         </button>
       </div>
 
-      {/* STATISTICS */}
+      {/* =====================================================
+          STATISTICS
+      ===================================================== */}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+
         {/* Total */}
 
         <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+
           <div className="flex items-center justify-between">
+
             <div>
               <p className="text-sm font-medium text-slate-500">
                 Total Technicians
@@ -213,13 +328,16 @@ export default function TechnicianList() {
             <div className="rounded-xl bg-blue-100 p-3 text-blue-600">
               <Users size={28} />
             </div>
+
           </div>
         </div>
 
         {/* Active */}
 
         <div className="group rounded-2xl border border-green-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+
           <div className="flex items-center justify-between">
+
             <div>
               <p className="text-sm font-medium text-green-600">
                 Active Technicians
@@ -233,13 +351,16 @@ export default function TechnicianList() {
             <div className="rounded-xl bg-green-100 p-3 text-green-600">
               <UserCheck size={28} />
             </div>
+
           </div>
         </div>
 
         {/* Blocked */}
 
         <div className="group rounded-2xl border border-red-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+
           <div className="flex items-center justify-between">
+
             <div>
               <p className="text-sm font-medium text-red-600">
                 Blocked Technicians
@@ -253,11 +374,15 @@ export default function TechnicianList() {
             <div className="rounded-xl bg-red-100 p-3 text-red-600">
               <UserX size={28} />
             </div>
+
           </div>
         </div>
+
       </div>
 
-      {/* SEARCH */}
+      {/* =====================================================
+          SEARCH
+      ===================================================== */}
 
       <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
         <TechnicianSearch
@@ -269,7 +394,9 @@ export default function TechnicianList() {
         />
       </div>
 
-      {/* TABLE */}
+      {/* =====================================================
+          TABLE
+      ===================================================== */}
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <TechnicianTable
@@ -281,7 +408,9 @@ export default function TechnicianList() {
         />
       </div>
 
-      {/* PAGINATION */}
+      {/* =====================================================
+          PAGINATION
+      ===================================================== */}
 
       <div className="flex justify-center">
         <TechnicianPagination
@@ -291,7 +420,9 @@ export default function TechnicianList() {
         />
       </div>
 
-      {/* ADD */}
+      {/* =====================================================
+          ADD
+      ===================================================== */}
 
       <AddTechnicianModal
         isOpen={isAddModalOpen}
@@ -300,41 +431,59 @@ export default function TechnicianList() {
         }
         onCreated={async () => {
           await loadTechnicians();
+
+          setIsAddModalOpen(false);
         }}
       />
 
-      {/* VIEW */}
+      {/* =====================================================
+          VIEW
+      ===================================================== */}
 
       <TechnicianModalView
         isOpen={isViewModalOpen}
-        technicianId={selectedTechnicianId}
+        technicianId={
+          selectedTechnicianId
+        }
         onClose={handleCloseModals}
       />
 
-      {/* EDIT */}
+      {/* =====================================================
+          EDIT
+      ===================================================== */}
 
       <EditTechnicianModal
         isOpen={isEditModalOpen}
-        technicianId={selectedTechnicianId}
+        technicianId={
+          selectedTechnicianId
+        }
         onClose={handleCloseModals}
         onUpdated={async () => {
           await loadTechnicians();
+
+          setIsEditModalOpen(false);
+          setSelectedTechnicianId(null);
         }}
       />
 
-      {/* DELETE */}
+      {/* =====================================================
+          DELETE
+      ===================================================== */}
 
       <DeleteTechnicianModal
         isOpen={isDeleteModalOpen}
-        technicianId={selectedTechnicianId}
+        technicianId={
+          selectedTechnicianId
+        }
         technicianName={
           selectedTechnician?.full_name
         }
         onClose={handleCloseModals}
-        onDeleted={async () => {
-          await loadTechnicians();
-        }}
+        onDeleted={
+          handleTechnicianDeleted
+        }
       />
+
     </div>
   );
 }

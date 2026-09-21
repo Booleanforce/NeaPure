@@ -12,7 +12,9 @@ export default function ProductCard({
   onViewDetails,
 }: Props) {
   const productImage =
-    product.primary_image || "/images/kit.png";
+    product.primary_image ||
+    product.images?.[0]?.image_url ||
+    "/images/kit.png";
 
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm">

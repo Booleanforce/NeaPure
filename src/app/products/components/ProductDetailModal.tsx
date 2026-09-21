@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -27,6 +28,7 @@ interface Props {
 /*                              Helper Functions                              */
 /* -------------------------------------------------------------------------- */
 
+<<<<<<< HEAD
 /**
  * Safely converts API values into something React can render.
  *
@@ -41,6 +43,24 @@ function renderValue(value: unknown): React.ReactNode {
   if (typeof value === "string" ||
       typeof value === "number" ||
       typeof value === "boolean") {
+=======
+function renderValue(
+  value: unknown
+): React.ReactNode {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return null;
+  }
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
     return String(value);
   }
 
@@ -49,7 +69,12 @@ function renderValue(value: unknown): React.ReactNode {
       <ul className="space-y-1">
         {value.map((item, index) => (
           <li key={index}>
+<<<<<<< HEAD
             {typeof item === "object" && item !== null
+=======
+            {typeof item === "object" &&
+            item !== null
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
               ? JSON.stringify(item)
               : String(item)}
           </li>
@@ -65,6 +90,19 @@ function renderValue(value: unknown): React.ReactNode {
   return String(value);
 }
 
+<<<<<<< HEAD
+=======
+function isRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 export default function ProductDetailModal({
   isOpen,
   slug,
@@ -84,7 +122,9 @@ export default function ProductDetailModal({
   /* -------------------------------------------------------------------------- */
 
   const loadProduct = useCallback(async () => {
-    if (!slug) return;
+    if (!slug) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -218,6 +258,25 @@ export default function ProductDetailModal({
     : [];
 
   /* -------------------------------------------------------------------------- */
+  /*                        Technical Specifications                             */
+  /* -------------------------------------------------------------------------- */
+
+  const technicalSpecs =
+    product?.technical_specs;
+
+  const technicalSpecsObject =
+    isRecord(technicalSpecs)
+      ? technicalSpecs
+      : null;
+
+  const technicalSpecEntries =
+    technicalSpecsObject
+      ? Object.entries(
+          technicalSpecsObject
+        )
+      : [];
+
+  /* -------------------------------------------------------------------------- */
   /*                                Render                                      */
   /* -------------------------------------------------------------------------- */
 
@@ -227,9 +286,15 @@ export default function ProductDetailModal({
       onClose={onClose}
       size="xl"
     >
+<<<<<<< HEAD
       {/* ====================================================================== */}
       {/* LOADING                                                                 */}
       {/* ====================================================================== */}
+=======
+      {/* ====================================================================== */
+      /* LOADING                                                                 */
+      /* ====================================================================== */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
       {loading ? (
         <div className="flex min-h-[500px] items-center justify-center">
@@ -264,6 +329,7 @@ export default function ProductDetailModal({
 
         <div className="p-6">
 
+<<<<<<< HEAD
           {/* ================================================================== */}
           {/* TOP: IMAGE + BASIC INFO                                            */}
           {/* ================================================================== */}
@@ -273,10 +339,22 @@ export default function ProductDetailModal({
             {/* ================================================================= */}
             {/* IMAGE GALLERY                                                      */}
             {/* ================================================================= */}
+=======
+          {/* ================================================================== */
+          /* TOP: IMAGE + BASIC INFO                                            */
+          /* ================================================================== */}
+
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+
+            {/* ================================================================= */
+            /* IMAGE GALLERY                                                      */
+            /* ================================================================= */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
             <div className="space-y-4">
 
               {/* Main Image */}
+
               <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-50">
 
                 {galleryImages.length > 0 ? (
@@ -304,6 +382,7 @@ export default function ProductDetailModal({
                 )}
 
                 {/* Navigation Arrows */}
+
                 {galleryImages.length > 1 && (
                   <>
                     {/* Previous */}
@@ -318,11 +397,15 @@ export default function ProductDetailModal({
                         )
                       }
                       className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md transition hover:bg-white"
+                      aria-label="Previous image"
                     >
                       <ChevronLeft className="h-5 w-5 text-gray-700" />
                     </button>
 
+<<<<<<< HEAD
                     {/* Next */}
+=======
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     <button
                       type="button"
                       onClick={() =>
@@ -335,6 +418,7 @@ export default function ProductDetailModal({
                         )
                       }
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md transition hover:bg-white"
+                      aria-label="Next image"
                     >
                       <ChevronRight className="h-5 w-5 text-gray-700" />
                     </button>
@@ -342,9 +426,13 @@ export default function ProductDetailModal({
                 )}
               </div>
 
+<<<<<<< HEAD
               {/* ================================================================= */}
               {/* THUMBNAILS                                                        */}
               {/* ================================================================= */}
+=======
+              {/* Thumbnails */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
               {galleryImages.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-1">
@@ -381,13 +469,20 @@ export default function ProductDetailModal({
               )}
             </div>
 
+<<<<<<< HEAD
             {/* ================================================================= */}
             {/* PRODUCT INFORMATION                                                */}
             {/* ================================================================= */}
+=======
+            {/* ================================================================= */
+            /* PRODUCT INFORMATION                                                */
+            /* ================================================================= */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
             <div className="space-y-6">
 
               {/* Category */}
+
               {product.category?.name && (
                 <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
                   {product.category.name}
@@ -395,16 +490,22 @@ export default function ProductDetailModal({
               )}
 
               {/* Product Name */}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
               <h2 className="text-2xl font-bold text-gray-900 lg:text-3xl">
                 {product.name}
               </h2>
 
               {/* Price */}
+
               <div className="text-3xl font-bold text-blue-600">
                 ৳ {product.price}
               </div>
 
               {/* Short Description */}
+
               {product.short_description && (
                 <p className="leading-relaxed text-gray-600">
                   {renderValue(
@@ -414,6 +515,7 @@ export default function ProductDetailModal({
               )}
 
               {/* Perfect For */}
+
               {product.perfect_for && (
                 <div>
                   <h4 className="mb-1 text-sm font-semibold text-gray-900">
@@ -429,6 +531,7 @@ export default function ProductDetailModal({
               )}
 
               {/* Warranty */}
+
               {product.warranty_duration_months !==
                 undefined && (
                 <div className="flex items-center gap-2 text-sm text-gray-700">
@@ -443,7 +546,8 @@ export default function ProductDetailModal({
                 </div>
               )}
 
-              {/* Featured Badge */}
+              {/* Featured */}
+
               {product.is_featured && (
                 <span className="inline-block rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
                   Featured
@@ -452,6 +556,7 @@ export default function ProductDetailModal({
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* ================================================================== */}
           {/* BOTTOM: DETAILS                                                     */}
           {/* ================================================================== */}
@@ -461,6 +566,15 @@ export default function ProductDetailModal({
             {/* ================================================================= */}
             {/* KEY FEATURES                                                       */}
             {/* ================================================================= */}
+=======
+          {/* ================================================================== */
+          /* BOTTOM: DETAILS                                                     */
+          /* ================================================================== */}
+
+          <div className="mt-10 space-y-6">
+
+            {/* KEY FEATURES */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
             {product.key_features && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
@@ -478,9 +592,13 @@ export default function ProductDetailModal({
               </div>
             )}
 
+<<<<<<< HEAD
             {/* ================================================================= */}
             {/* TECHNICAL SPECIFICATIONS                                           */}
             {/* ================================================================= */}
+=======
+            {/* TECHNICAL SPECIFICATIONS */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
             {product.technical_specs && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
@@ -489,6 +607,7 @@ export default function ProductDetailModal({
                   Technical Specifications
                 </h3>
 
+<<<<<<< HEAD
                 {typeof product.technical_specs ===
                 "object" &&
                 product.technical_specs !== null &&
@@ -503,17 +622,26 @@ export default function ProductDetailModal({
                         unknown
                       >
                     ).map(
+=======
+                {technicalSpecsObject ? (
+                  <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                    {technicalSpecEntries.map(
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                       ([key, value], index) => (
                         <div
                           key={key}
                           className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
                             index !==
+<<<<<<< HEAD
                             Object.keys(
                               product.technical_specs as Record<
                                 string,
                                 unknown
                               >
                             ).length - 1
+=======
+                            technicalSpecEntries.length - 1
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                               ? "border-b border-gray-200"
                               : ""
                           }`}
@@ -539,9 +667,13 @@ export default function ProductDetailModal({
               </div>
             )}
 
+<<<<<<< HEAD
             {/* ================================================================= */}
             {/* PACKAGE INCLUDES                                                   */}
             {/* ================================================================= */}
+=======
+            {/* PACKAGE INCLUDES */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
             {product.package_includes && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
@@ -560,20 +692,27 @@ export default function ProductDetailModal({
               </div>
             )}
 
+<<<<<<< HEAD
             {/* ================================================================= */}
             {/* REPLACEMENT INFO                                                   */}
             {/* ================================================================= */}
+=======
+            {/* REPLACEMENT INFO */}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
             {product.recommended_replacement_months !=
               null &&
-              product.recommended_replacement_months !=
+              product.recommended_replacement_months !==
                 undefined && (
                 <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
 
                   <p className="text-sm text-blue-700">
                     Recommended filter replacement
                     every{" "}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     <strong>
                       {
                         product.recommended_replacement_months

@@ -18,12 +18,22 @@ const API_BASE_URL =
 const PUBLIC_GET_ENDPOINTS = [
   "/api/products/products/",
   "/api/products/categories/",
+<<<<<<< HEAD
 ];
 
 const PUBLIC_POST_ENDPOINTS = [
   "/api/auth/login/",
 ];
 
+=======
+];
+
+const PUBLIC_POST_ENDPOINTS = [
+  "/api/auth/login/",
+  "/api/ai/chat/",
+];
+
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 /* ============================================================================
    CHECK PUBLIC ENDPOINT
 ============================================================================ */

@@ -1,44 +1,31 @@
 /* eslint-disable react-hooks/immutability */
 "use client";
 
-import { useEffect, useState } from "react";
-
-
-import {
-  productService,
-  Category,
-  Product,
-} from "@/services/product.service";
+import { useState } from "react";
 import Hero from "./components/Hero";
 import CategoryTabs from "./components/CategoryTabs";
 import ProductSection from "./components/ProductSection";
 import ProductDetailModal from "./components/ProductDetailModal";
 import SmartCareSection from "./components/ecoSystemSection";
+<<<<<<< HEAD
+=======
+import { useGetCategoriesQuery, useGetProductsQuery } from "@/features/products/api/productsApi";
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
 export default function ProductsPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
   const [active, setActive] = useState("all");
-  const [loading, setLoading] = useState(true);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 
-  useEffect(() => {
-    load();
-  }, []);
+  const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery();
+  const { data: productsData, isLoading: productsLoading } = useGetProductsQuery();
 
-  async function load() {
-    const cats = await productService.getCategories();
-    const prods = await productService.getProducts();
+  const loading = categoriesLoading || productsLoading;
 
-    setCategories(
-      Array.isArray(cats)
-        ? cats
-        : cats.results
-    );
-
-    setProducts(prods.results);
-    setLoading(false);
-  }
+  const categories = categoriesData
+    ? (Array.isArray(categoriesData) ? categoriesData : categoriesData.results)
+    : [];
+    
+  const products = productsData?.results || [];
 
   const filtered =
     active === "all"
@@ -81,7 +68,11 @@ export default function ProductsPage() {
         onClose={() => setSelectedSlug(null)}
       />
 
+<<<<<<< HEAD
       <SmartCareSection />
+=======
+            <SmartCareSection />
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
     </main>
   );

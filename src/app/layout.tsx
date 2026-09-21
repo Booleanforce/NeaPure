@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "./provider/LayoutWrapper";
+import ReduxProvider from "./provider/ReduxProvider";
 import { ToastContainer, Bounce  } from "react-toastify";
 
 import SupportWidget from "@/components/support-widget/SupportWidget";
@@ -36,11 +37,21 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col"
       >
+<<<<<<< HEAD
         <LayoutWrapper>
           {children}
           <SupportWidget />
           <ToastContainer position="top-right" transition={Bounce} theme="dark" autoClose={3000} />
         </LayoutWrapper>
+=======
+        <ReduxProvider>
+          <LayoutWrapper>
+            {children}
+            <SupportWidget />
+            <ToastContainer position="top-right" transition={Bounce} theme="dark" autoClose={3000} />
+          </LayoutWrapper>
+        </ReduxProvider>
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
       </body>
     </html>
   );

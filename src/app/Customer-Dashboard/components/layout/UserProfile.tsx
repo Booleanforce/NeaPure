@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 
 /**
@@ -23,6 +25,7 @@ export default function UserProfile({
           className="h-full w-full object-cover"
         />
       </div>
+
       <p className="hidden text-xs font-semibold text-slate-700 sm:block">
         {name}
       </p>

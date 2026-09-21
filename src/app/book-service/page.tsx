@@ -5,7 +5,14 @@ import Link from "next/link";
 import { ChevronLeft, Upload, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "react-toastify";
 import Image from "next/image";
+<<<<<<< HEAD
 import { serviceBookingService } from "@/services/serviceBooking.service";
+=======
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useCreateBookingMutation } from "@/features/service_bookings/api/serviceBookingsApi";
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
 const SERVICE_TYPES = [
   { label: "Installation", value: "INSTALLATION" },
@@ -16,6 +23,7 @@ const SERVICE_TYPES = [
   { label: "General Service", value: "GENERAL_SERVICE" },
 ];
 
+<<<<<<< HEAD
 export default function BookServicePage() {
   const [saving, setSaving] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
@@ -39,11 +47,66 @@ export default function BookServicePage() {
   const [attachment, setAttachment] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+=======
+const bookingSchema = z.object({
+  customer_name: z.string().min(1, "Customer name is required."),
+  phone_number: z.string().min(1, "Phone number is required."),
+  email: z.string().email("Invalid email").or(z.literal("")).optional(),
+  product_category: z.string().optional(),
+  product_model_text: z.string().min(1, "Product model is required."),
+  service_type: z.string().min(1, "Service type is required."),
+  division: z.string().min(1, "Division is required."),
+  district: z.string().min(1, "District is required."),
+  full_address: z.string().min(1, "Full address is required."),
+  preferred_date: z.string().min(1, "Preferred date is required."),
+  preferred_time: z.string().min(1, "Preferred time is required."),
+  issue_description: z.string().optional(),
+});
+
+type BookingFormValues = z.infer<typeof bookingSchema>;
+
+export default function BookServicePage() {
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [bookingId, setBookingId] = useState("");
+  
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<BookingFormValues>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      customer_name: "",
+      phone_number: "",
+      email: "",
+      product_category: "",
+      product_model_text: "",
+      service_type: "",
+      division: "",
+      district: "",
+      full_address: "",
+      preferred_date: "",
+      preferred_time: "",
+      issue_description: "",
+    },
+    mode: "onTouched",
+  });
+
+  const [createBookingApi] = useCreateBookingMutation();
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
   useEffect(() => {
     if (attachment) {
       const objectUrl = URL.createObjectURL(attachment);
+<<<<<<< HEAD
       // eslint-disable-next-line react-hooks/set-state-in-effect
+=======
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
       setPreview(objectUrl);
       return () => URL.revokeObjectURL(objectUrl);
     } else {
@@ -51,6 +114,7 @@ export default function BookServicePage() {
     }
   }, [attachment]);
 
+<<<<<<< HEAD
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -92,15 +156,37 @@ export default function BookServicePage() {
       };
 
       const response = await serviceBookingService.createBooking(payload);
+=======
+  const onSubmit = async (data: BookingFormValues) => {
+    try {
+      setSubmitStatus("idle");
+
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+      if (attachment) {
+        formData.append("attachment", attachment);
+      }
+
+      const response = await createBookingApi(formData).unwrap();
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
       
       setBookingId(response.booking_id || "REF-UNKNOWN");
       setSubmitStatus("success");
       toast.success(`Booking created successfully! Ref: ${response.booking_id || 'N/A'}`);
+<<<<<<< HEAD
     } catch (error: unknown) {
       console.error("Booking Error:", error);
       setSubmitStatus("error");
     } finally {
       setSaving(false);
+=======
+    } catch (error: any) {
+      console.error("Booking Error:", error);
+      setSubmitStatus("error");
+      toast.error(error.data?.detail || "Failed to create booking.");
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
     }
   };
 
@@ -165,7 +251,11 @@ export default function BookServicePage() {
             </div>
           )}
 
+<<<<<<< HEAD
           <form onSubmit={handleSubmit} className="p-8">
+=======
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="p-8">
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
             <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
               {/* Customer Name */}
               <div className="sm:col-span-2">
@@ -176,15 +266,23 @@ export default function BookServicePage() {
                   <input
                     type="text"
                     id="customer_name"
+<<<<<<< HEAD
                     name="customer_name"
                     value={form.customer_name}
                     onChange={handleChange}
+=======
+                    {...register("customer_name")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.customer_name ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                     placeholder="John Doe"
                   />
+<<<<<<< HEAD
                   {errors.customer_name && <p className="mt-1 text-xs text-red-500">{errors.customer_name}</p>}
+=======
+                  {errors.customer_name && <p className="mt-1 text-xs text-red-500">{errors.customer_name?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -197,15 +295,23 @@ export default function BookServicePage() {
                   <input
                     type="text"
                     id="phone_number"
+<<<<<<< HEAD
                     name="phone_number"
                     value={form.phone_number}
                     onChange={handleChange}
+=======
+                    {...register("phone_number")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.phone_number ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                     placeholder="e.g. 01xxxxxxxxx"
                   />
+<<<<<<< HEAD
                   {errors.phone_number && <p className="mt-1 text-xs text-red-500">{errors.phone_number}</p>}
+=======
+                  {errors.phone_number && <p className="mt-1 text-xs text-red-500">{errors.phone_number?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -218,9 +324,13 @@ export default function BookServicePage() {
                   <input
                     type="email"
                     id="email"
+<<<<<<< HEAD
                     name="email"
                     value={form.email}
                     onChange={handleChange}
+=======
+                    {...register("email")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm focus:border-brand-blue focus:ring-brand-blue sm:text-sm"
                     placeholder="john@example.com"
                   />
@@ -236,9 +346,13 @@ export default function BookServicePage() {
                   <input
                     type="text"
                     id="product_category"
+<<<<<<< HEAD
                     name="product_category"
                     value={form.product_category}
                     onChange={handleChange}
+=======
+                    {...register("product_category")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm focus:border-brand-blue focus:ring-brand-blue sm:text-sm"
                     placeholder="e.g. Water Purifier"
                   />
@@ -254,15 +368,23 @@ export default function BookServicePage() {
                   <input
                     type="text"
                     id="product_model_text"
+<<<<<<< HEAD
                     name="product_model_text"
                     value={form.product_model_text}
                     onChange={handleChange}
+=======
+                    {...register("product_model_text")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.product_model_text ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                     placeholder="e.g. NeaPure Pro"
                   />
+<<<<<<< HEAD
                   {errors.product_model_text && <p className="mt-1 text-xs text-red-500">{errors.product_model_text}</p>}
+=======
+                  {errors.product_model_text && <p className="mt-1 text-xs text-red-500">{errors.product_model_text?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -274,9 +396,13 @@ export default function BookServicePage() {
                 <div className="mt-1">
                   <select
                     id="service_type"
+<<<<<<< HEAD
                     name="service_type"
                     value={form.service_type}
                     onChange={handleChange}
+=======
+                    {...register("service_type")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.service_type ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm bg-white`}
@@ -286,7 +412,11 @@ export default function BookServicePage() {
                       <option key={type.value} value={type.value}>{type.label}</option>
                     ))}
                   </select>
+<<<<<<< HEAD
                   {errors.service_type && <p className="mt-1 text-xs text-red-500">{errors.service_type}</p>}
+=======
+                  {errors.service_type && <p className="mt-1 text-xs text-red-500">{errors.service_type?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -303,15 +433,23 @@ export default function BookServicePage() {
                   <input
                     type="text"
                     id="division"
+<<<<<<< HEAD
                     name="division"
                     value={form.division}
                     onChange={handleChange}
+=======
+                    {...register("division")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.division ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                     placeholder="e.g. Dhaka"
                   />
+<<<<<<< HEAD
                   {errors.division && <p className="mt-1 text-xs text-red-500">{errors.division}</p>}
+=======
+                  {errors.division && <p className="mt-1 text-xs text-red-500">{errors.division?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -324,15 +462,23 @@ export default function BookServicePage() {
                   <input
                     type="text"
                     id="district"
+<<<<<<< HEAD
                     name="district"
                     value={form.district}
                     onChange={handleChange}
+=======
+                    {...register("district")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.district ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                     placeholder="e.g. Gazipur"
                   />
+<<<<<<< HEAD
                   {errors.district && <p className="mt-1 text-xs text-red-500">{errors.district}</p>}
+=======
+                  {errors.district && <p className="mt-1 text-xs text-red-500">{errors.district?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -344,16 +490,25 @@ export default function BookServicePage() {
                 <div className="mt-1">
                   <textarea
                     id="full_address"
+<<<<<<< HEAD
                     name="full_address"
                     rows={3}
                     value={form.full_address}
                     onChange={handleChange}
+=======
+                    rows={3}
+                    {...register("full_address")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.full_address ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                     placeholder="Enter your complete address"
                   />
+<<<<<<< HEAD
                   {errors.full_address && <p className="mt-1 text-xs text-red-500">{errors.full_address}</p>}
+=======
+                  {errors.full_address && <p className="mt-1 text-xs text-red-500">{errors.full_address?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -370,14 +525,22 @@ export default function BookServicePage() {
                   <input
                     type="date"
                     id="preferred_date"
+<<<<<<< HEAD
                     name="preferred_date"
                     value={form.preferred_date}
                     onChange={handleChange}
+=======
+                    {...register("preferred_date")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.preferred_date ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                   />
+<<<<<<< HEAD
                   {errors.preferred_date && <p className="mt-1 text-xs text-red-500">{errors.preferred_date}</p>}
+=======
+                  {errors.preferred_date && <p className="mt-1 text-xs text-red-500">{errors.preferred_date?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -390,15 +553,23 @@ export default function BookServicePage() {
                   <input
                     type="text"
                     id="preferred_time"
+<<<<<<< HEAD
                     name="preferred_time"
                     value={form.preferred_time}
                     onChange={handleChange}
+=======
+                    {...register("preferred_time")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className={`block w-full rounded-lg border ${
                       errors.preferred_time ? "border-red-300 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-brand-blue focus:ring-brand-blue"
                     } px-4 py-2.5 shadow-sm sm:text-sm`}
                     placeholder="e.g. 10:00 AM"
                   />
+<<<<<<< HEAD
                   {errors.preferred_time && <p className="mt-1 text-xs text-red-500">{errors.preferred_time}</p>}
+=======
+                  {errors.preferred_time && <p className="mt-1 text-xs text-red-500">{errors.preferred_time?.message as string}</p>}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                 </div>
               </div>
 
@@ -410,10 +581,15 @@ export default function BookServicePage() {
                 <div className="mt-1">
                   <textarea
                     id="issue_description"
+<<<<<<< HEAD
                     name="issue_description"
                     rows={4}
                     value={form.issue_description}
                     onChange={handleChange}
+=======
+                    rows={4}
+                    {...register("issue_description")}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
                     className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm focus:border-brand-blue focus:ring-brand-blue sm:text-sm"
                     placeholder="Please describe the issue or service required..."
                   />
@@ -475,10 +651,17 @@ export default function BookServicePage() {
             <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-end">
               <button
                 type="submit"
+<<<<<<< HEAD
                 disabled={saving}
                 className="w-full sm:w-auto inline-flex justify-center rounded-xl bg-brand-blue px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {saving ? "Submitting..." : "Submit Request"}
+=======
+                disabled={isSubmitting}
+                className="w-full sm:w-auto inline-flex justify-center rounded-xl bg-brand-blue px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Request"}
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
               </button>
             </div>
           </form>

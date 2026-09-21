@@ -24,10 +24,8 @@ export default function LayoutWrapper({
   return (
     <>
       <Navbar />
-      <main>
-        {children}
-      </main>
-      <Footer/>
+      <main className="pt-[25px]">{children}</main>
+      <Footer />
     </>
   );
 }

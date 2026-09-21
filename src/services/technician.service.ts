@@ -31,7 +31,7 @@ export interface Technician {
 }
 
 /* =========================================================
-   PAGINATED TECHNICIAN RESPONSE
+   PAGINATED RESPONSE
 ========================================================= */
 
 export interface TechniciansResponse {
@@ -97,7 +97,7 @@ export interface TechnicianPerformance {
 }
 
 /* =========================================================
-   CREATE TECHNICIAN PAYLOAD
+   CREATE PAYLOAD
 ========================================================= */
 
 export interface CreateTechnicianPayload {
@@ -114,7 +114,7 @@ export interface CreateTechnicianPayload {
 }
 
 /* =========================================================
-   UPDATE TECHNICIAN PAYLOAD
+   UPDATE PAYLOAD
 ========================================================= */
 
 export interface UpdateTechnicianPayload {
@@ -136,16 +136,16 @@ export interface UpdateTechnicianPayload {
 export const technicianService = {
   /* =======================================================
      GET ALL TECHNICIANS
-
-     GET
-     /api/technicians/admin/technicians/
   ======================================================= */
 
   async getTechnicians(
     search = "",
     page = 1
-  ): Promise<TechniciansResponse | Technician[]> {
-    const params = new URLSearchParams();
+  ): Promise<
+    TechniciansResponse | Technician[]
+  > {
+    const params =
+      new URLSearchParams();
 
     if (search.trim()) {
       params.append(
@@ -168,9 +168,6 @@ export const technicianService = {
 
   /* =======================================================
      GET SINGLE TECHNICIAN
-
-     GET
-     /api/technicians/admin/technicians/{id}/
   ======================================================= */
 
   async getTechnician(
@@ -183,13 +180,6 @@ export const technicianService = {
 
   /* =======================================================
      CREATE TECHNICIAN
-
-     POST
-     /api/technicians/admin/technicians/
-
-     Supports:
-     - JSON
-     - FormData
   ======================================================= */
 
   async createTechnician(
@@ -205,14 +195,6 @@ export const technicianService = {
 
   /* =======================================================
      UPDATE TECHNICIAN
-
-     PATCH
-     /api/technicians/admin/technicians/{id}/
-
-     Supports:
-     - JSON
-     - FormData
-     - Profile photo upload
   ======================================================= */
 
   async updateTechnician(
@@ -228,10 +210,7 @@ export const technicianService = {
   },
 
   /* =======================================================
-     PARTIAL UPDATE TECHNICIAN
-
-     PATCH
-     /api/technicians/admin/technicians/{id}/
+     PARTIAL UPDATE
   ======================================================= */
 
   async patchTechnician(
@@ -248,14 +227,17 @@ export const technicianService = {
 
   /* =======================================================
      DELETE TECHNICIAN
-
-     DELETE
-     /api/technicians/admin/technicians/{id}/
   ======================================================= */
 
   async deleteTechnician(
     id: string
   ): Promise<void> {
+    if (!id) {
+      throw new Error(
+        "Technician ID is required."
+      );
+    }
+
     await apiClient.delete(
       `/api/technicians/admin/technicians/${id}/`
     );
@@ -263,9 +245,6 @@ export const technicianService = {
 
   /* =======================================================
      GET TECHNICIAN JOBS
-
-     GET
-     /api/technicians/operations/jobs/?technician={id}
   ======================================================= */
 
   async getTechnicianJobs(
@@ -287,9 +266,6 @@ export const technicianService = {
 
   /* =======================================================
      GET TECHNICIAN PERFORMANCE
-
-     GET
-     /api/technicians/operations/technicians/{id}/
   ======================================================= */
 
   async getTechnicianPerformance(
@@ -302,9 +278,6 @@ export const technicianService = {
 
   /* =======================================================
      GET CURRENT TECHNICIAN PROFILE
-
-     GET
-     /api/technicians/dashboard/my-profile/me/
   ======================================================= */
 
   async getMyProfile(): Promise<Technician> {
@@ -314,15 +287,7 @@ export const technicianService = {
   },
 
   /* =======================================================
-     UPDATE CURRENT TECHNICIAN PROFILE
-
-     PATCH
-     /api/technicians/dashboard/my-profile/me/
-
-     Supports:
-     - JSON
-     - FormData
-     - Profile photo upload
+     UPDATE CURRENT PROFILE
   ======================================================= */
 
   async updateMyProfile(
@@ -338,9 +303,6 @@ export const technicianService = {
 
   /* =======================================================
      GET MY JOBS
-
-     GET
-     /api/technicians/dashboard/my-jobs/
   ======================================================= */
 
   async getMyJobs(
@@ -348,7 +310,8 @@ export const technicianService = {
   ): Promise<
     TechnicianJobsResponse | TechnicianJob[]
   > {
-    const params = new URLSearchParams();
+    const params =
+      new URLSearchParams();
 
     params.append(
       "page",
@@ -364,9 +327,6 @@ export const technicianService = {
 
   /* =======================================================
      GET MY PERFORMANCE
-
-     GET
-     /api/technicians/dashboard/my-performance/me/
   ======================================================= */
 
   async getMyPerformance(): Promise<TechnicianPerformance> {

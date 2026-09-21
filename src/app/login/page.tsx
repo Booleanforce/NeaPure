@@ -4,130 +4,78 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useLoginMutation } from "@/features/auth/api/authApi";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/features/auth/slices/authSlice";
 
+<<<<<<< HEAD
 import { login } from "@/services/auth.service";
 import { toast, Bounce } from "react-toastify";
+=======
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional(),
+});
+
+type LoginSchemaType = z.infer<typeof loginSchema>;
+>>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
 export default function LoginPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  /* =========================================================
-     STATE
-  ========================================================= */
+  const [showPassword, setShowPassword] = useState(false);
+  const [globalError, setGlobalError] = useState("");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginSchemaType>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+    mode: "onTouched",
+  });
 
-  const [rememberMe, setRememberMe] =
-    useState(false);
-
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
+  const [loginApi] = useLoginMutation();
 
   /* =========================================================
      LOGIN
   ========================================================= */
 
-  const handleLogin = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
-    if (loading) {
-      return;
-    }
-
-    setLoading(true);
-    setError("");
+  const onSubmit = async (data: LoginSchemaType) => {
+    setGlobalError("");
 
     try {
-      /* -----------------------------------------------------
-         LOGIN API
-      ----------------------------------------------------- */
+      // NOTE: Using unwrap() to extract payload or catch the error
+      const response = await loginApi({ email: data.email, password: data.password }).unwrap();
 
-      const data = await login(
-        email.trim(),
-        password
-      );
+      console.log("Login response:", response);
 
-      console.log(
-        "Login response:",
-        data
-      );
+      // Save to Redux store
+      dispatch(setCredentials({ user: response.user, token: response.access_token || response.token }));
 
-      /* -----------------------------------------------------
-         GET USER ROLE
+      const role = response.user?.role;
+      console.log("Logged-in role:", role);
 
-         Expected:
-
-         {
-           access: "...",
-           refresh: "...",
-           user: {
-             id: "...",
-             email: "...",
-             role: "CUSTOMER"
-           }
-         }
-      ----------------------------------------------------- */
-
-      const role =
-        data.user?.role;
-
-      console.log(
-        "Logged-in role:",
-        role
-      );
-
-      /* -----------------------------------------------------
-         CUSTOMER
-      ----------------------------------------------------- */
-
-      if (role === "CUSTOMER") {
-        router.replace(
-          "/Customer-Dashboard"
-        );
-
-        return;
-      }
-
-      /* -----------------------------------------------------
-         ADMIN / SUPER ADMIN / OTHER
-      ----------------------------------------------------- */
-
-      router.replace(
-        "/admin-dashboard"
-      );
-    } catch (err: unknown) {
-      console.error(
-        "Login error:",
-        err
-      );
-
-      if (err instanceof Error) {
-        setError(err.message);
+      if (role === "CUSTOMER" || role === "customer") {
+        router.replace("/Customer-Dashboard");
       } else {
-        setError(
-          "Invalid email or password."
-        );
+        router.replace("/admin-dashboard");
       }
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setGlobalError(err.data?.detail || err.message || "Invalid email or password.");
     }
   };
-
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <main className="relative min-h-screen overflow-hidden">
@@ -164,28 +112,19 @@ export default function LoginPage() {
 
       <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-10 sm:px-8">
 
-        {/* ===================================================
-            LOGIN CARD
-        =================================================== */}
-
         <div className="w-full max-w-md">
 
           <div className="overflow-hidden rounded-3xl border border-white/15 bg-slate-950/55 shadow-2xl shadow-black/30 backdrop-blur-2xl">
 
-            {/* =================================================
-                CARD TOP ACCENT
-            ================================================= */}
+            {/* TOP ACCENT */}
 
             <div className="h-1 w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-300" />
 
             <div className="p-7 sm:p-9">
 
-              {/* ===============================================
-                  LOGO / BRAND
-              =============================================== */}
+              {/* LOGO */}
 
               <div className="mb-7 flex justify-center">
-
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 shadow-lg shadow-cyan-500/10">
 
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-blue-600">
@@ -197,23 +136,17 @@ export default function LoginPage() {
                   </div>
 
                 </div>
-
               </div>
 
-              {/* ===============================================
-                  TITLE
-              =============================================== */}
+              {/* TITLE */}
 
               <div className="text-center">
 
                 <h1 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-
                   Welcome to{" "}
-
                   <span className="text-cyan-300">
                     Neapure
                   </span>
-
                 </h1>
 
                 <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-white/55">
@@ -223,18 +156,15 @@ export default function LoginPage() {
 
               </div>
 
-              {/* ===============================================
-                  FORM
-              =============================================== */}
+              {/* FORM */}
 
               <form
                 className="mt-8 space-y-5"
-                onSubmit={handleLogin}
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
               >
 
-                {/* ===========================================
-                    EMAIL
-                =========================================== */}
+                {/* EMAIL */}
 
                 <label className="block">
 
@@ -248,27 +178,24 @@ export default function LoginPage() {
 
                     <input
                       type="email"
-                      name="email"
                       placeholder="Enter your email"
                       autoComplete="email"
-                      value={email}
-                      onChange={(e) =>
-                        setEmail(
-                          e.target.value
-                        )
-                      }
-                      required
-                      disabled={loading}
+                      {...register("email")}
+                      disabled={isSubmitting}
+                      aria-invalid={!!errors.email}
                       className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-50"
                     />
 
                   </div>
+                  {errors.email && (
+                    <span className="mt-1 block text-xs text-red-400" role="alert">
+                      {errors.email.message}
+                    </span>
+                  )}
 
                 </label>
 
-                {/* ===========================================
-                    PASSWORD
-                =========================================== */}
+                {/* PASSWORD */}
 
                 <label className="block">
 
@@ -281,40 +208,21 @@ export default function LoginPage() {
                     <LockIcon className="h-5 w-5 shrink-0 text-white/35 transition group-focus-within:text-cyan-300" />
 
                     <input
-                      type={
-                        showPassword
-                          ? "text"
-                          : "password"
-                      }
-                      name="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       autoComplete="current-password"
-                      value={password}
-                      onChange={(e) =>
-                        setPassword(
-                          e.target.value
-                        )
-                      }
-                      required
-                      disabled={loading}
+                      {...register("password")}
+                      disabled={isSubmitting}
+                      aria-invalid={!!errors.password}
                       className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-50"
                     />
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword(
-                          (value) =>
-                            !value
-                        )
-                      }
-                      disabled={loading}
+                      onClick={() => setShowPassword((value) => !value)}
+                      disabled={isSubmitting}
                       className="shrink-0 text-white/35 transition hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
-                      aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
-                      }
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? (
                         <EyeOffIcon className="h-5 w-5" />
@@ -324,25 +232,26 @@ export default function LoginPage() {
                     </button>
 
                   </div>
+                  {errors.password && (
+                    <span className="mt-1 block text-xs text-red-400" role="alert">
+                      {errors.password.message}
+                    </span>
+                  )}
 
                 </label>
 
-                {/* ===========================================
-                    ERROR
-                =========================================== */}
+                {/* ERROR */}
 
-                {error && (
+                {globalError && (
                   <div
                     role="alert"
                     className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-300"
                   >
-                    {error}
+                    {globalError}
                   </div>
                 )}
 
-                {/* ===========================================
-                    REMEMBER / FORGOT
-                =========================================== */}
+                {/* REMEMBER / FORGOT */}
 
                 <div className="flex items-center justify-between gap-4">
 
@@ -350,15 +259,8 @@ export default function LoginPage() {
 
                     <input
                       type="checkbox"
-                      checked={
-                        rememberMe
-                      }
-                      onChange={(e) =>
-                        setRememberMe(
-                          e.target.checked
-                        )
-                      }
-                      disabled={loading}
+                      {...register("rememberMe")}
+                      disabled={isSubmitting}
                       className="h-4 w-4 cursor-pointer accent-cyan-400"
                     />
 
@@ -370,7 +272,7 @@ export default function LoginPage() {
 
                   <button
                     type="button"
-                    disabled={loading}
+                    disabled={isSubmitting}
                     className="text-sm font-medium text-cyan-300 transition hover:text-white disabled:opacity-50"
                   >
                     Forgot Password?
@@ -378,31 +280,23 @@ export default function LoginPage() {
 
                 </div>
 
-                {/* ===========================================
-                    LOGIN BUTTON
-                =========================================== */}
+                {/* LOGIN BUTTON */}
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitting}
                   className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/10 transition-all duration-300 hover:from-cyan-300 hover:to-blue-500 hover:shadow-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-
                   <span className="relative z-10">
-
-                    {loading
+                    {isSubmitting
                       ? "Signing In..."
                       : "SIGN IN"}
-
                   </span>
-
                 </button>
 
               </form>
 
-              {/* ===============================================
-                  CREATE ACCOUNT
-              =============================================== */}
+              {/* CREATE ACCOUNT */}
 
               <p className="mt-7 text-center text-sm text-white/45">
 
@@ -418,11 +312,10 @@ export default function LoginPage() {
               </p>
 
             </div>
+
           </div>
 
-          {/* ===============================================
-              FOOTER
-          =============================================== */}
+          {/* FOOTER */}
 
           <p className="mt-5 text-center text-xs text-white/30">
             © {new Date().getFullYear()} Neapure.
@@ -430,6 +323,7 @@ export default function LoginPage() {
           </p>
 
         </div>
+
       </section>
     </main>
   );
