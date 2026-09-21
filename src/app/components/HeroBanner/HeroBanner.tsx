@@ -1,13 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
 
-const HIGHLIGHTS = [
+import { useGetHeroContentQuery } from "../../../store/heroApi";
+
+// Fallback data shown instantly while the query loads (and if it errors),
+// so the hero never renders empty. Keeps the same content as before.
+const FALLBACK_HIGHLIGHTS = [
   "7+ Advanced Filtration Stages",
   "Removes 99.99% Harmful Contaminants",
   "Smart & Energy Efficient Technology",
 ];
 
-const STATS = [
+const FALLBACK_STATS = [
   { value: "7+", label: "Filtration Stages" },
   { value: "100%", label: "Eco-Friendly" },
   { value: "0%", label: "Chemicals Used" },
@@ -16,21 +22,27 @@ const STATS = [
 function PurificationCard({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`rounded-2xl border border-sky-500/20 bg-[#0b1730]/30 p-5 shadow-2xl backdrop-blur-xl ${className}`}
+      className={`rounded-3xl border border-sky-400/20 bg-gradient-to-br from-[#0f2847]/80 via-[#0b1d38]/50 to-[#0a1730]/10 p-4 shadow-xl backdrop-blur-xl ${className}`}
     >
-      <p className="text-xs uppercase tracking-widest text-sky-300">
+      <p className="text-sm font-bold uppercase tracking-[0.1em] text-sky-300">
         Purification Rate
       </p>
-      <p className="mt-2 text-3xl font-bold text-white sm:text-4xl">99.99%</p>
-      <p className="mt-2 text-sm text-slate-300">
+      <p className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+        99.99%
+      </p>
+      <p className="mt-3 text-base text-slate-200">
         Bacteria &amp; Viruses Removed
       </p>
-      <svg viewBox="0 0 100 24" className="mt-4 h-6 w-full text-sky-400">
+      <svg
+        viewBox="0 0 200 40"
+        className="mt-5 h-7 w-full text-sky-400"
+        preserveAspectRatio="none"
+      >
         <polyline
-          points="0,18 15,14 30,20 45,8 60,12 75,4 90,10 100,2"
+          points="0,32 20,20 35,28 55,10 70,22 90,6 110,18 130,8 150,24 170,4 200,14"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -38,62 +50,60 @@ function PurificationCard({ className = "" }: { className?: string }) {
     </div>
   );
 }
-
-// Wave now lives in Hero, pinned to its true bottom edge —
-// height, curve, and glow are all independent of content height.
 function HeroWave() {
+  // one path reused for fill and edge line so they always line up
+  const crest =
+    "M0,90 C150,50 300,30 480,45 C700,65 850,115 1050,112 C1250,108 1350,70 1440,62";
+
   return (
-    <div className="absolute inset-x-0 -bottom-px z-10 h-16 sm:h-24 lg:h-32">
+    <div className="pointer-events-none absolute inset-x-0 -bottom-px z-10 h-12 sm:h-16 lg:h-24">
       <svg
         className="absolute inset-0 h-full w-full"
-        viewBox="0 0 1440 160"
+        viewBox="0 0 1440 200"
         preserveAspectRatio="none"
         aria-hidden="true"
       >
         <defs>
-          <linearGradient id="waveGlow" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.55" />
-            <stop offset="50%" stopColor="#0ea5e9" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#2563eb" stopOpacity="0.55" />
-          </linearGradient>
-
-          {/* Shade for the fill — lighter near the crest, deepening downward */}
+          {/* lighter at the crest, deepening downward; base matches section below */}
           <linearGradient id="waveShade" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#e8f6ff" />
             <stop offset="35%" stopColor="#cceaf9" />
             <stop offset="100%" stopColor="#BCE3F7" />
           </linearGradient>
-
-          <filter id="waveBlur" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="10" />
-          </filter>
         </defs>
 
-        {/* Soft glow sitting just above the fill */}
-        <path
-          d="M0,70 C240,130 480,10 720,45 C960,80 1200,20 1440,60 L1440,90 L0,90 Z"
-          fill="url(#waveGlow)"
-          filter="url(#waveBlur)"
-        />
+        {/* single fill */}
+        <path d={`${crest} L1440,200 L0,200 Z`} fill="url(#waveShade)" />
 
-        {/* Shaded fill instead of flat color — matches section below at the base */}
+        {/* thin soft edge on the crest */}
         <path
-          fill="url(#waveShade)"
-          d="M0,80 C240,140 480,20 720,55 C960,90 1200,30 1440,70 L1440,160 L0,160 Z"
-        />
-
-        <path
-          d="M0,80 C240,140 480,20 720,55 C960,90 1200,30 1440,70"
+          d={crest}
           fill="none"
-          stroke="#7dd3fc"
+          stroke="#ffffff"
           strokeWidth="2"
-          strokeOpacity="0.6"
+          strokeOpacity="0.7"
         />
       </svg>
     </div>
   );
 }
+
 export default function HeroBanner() {
+  // Data-fetching now goes through RTK Query instead of hardcoded
+  // module-level constants. `data` is undefined until the fetch
+  // resolves, so we fall back to static content in the meantime —
+  // this keeps the hero from ever flashing empty on first paint.
+  const { data, isError } = useGetHeroContentQuery();
+
+  const highlights = data?.highlights ?? FALLBACK_HIGHLIGHTS;
+  const stats = data?.stats ?? FALLBACK_STATS;
+
+  if (isError) {
+    // Non-fatal: we already fell back to static content above,
+    // this is just a hook point if you want to log/report it.
+    console.error("Failed to fetch hero content, using fallback data.");
+  }
+
   return (
     <section className="relative flex min-h-[640px] flex-col overflow-hidden bg-[#050b18] sm:min-h-[760px] lg:min-h-[880px]">
       {/* Background photo */}
@@ -107,18 +117,23 @@ export default function HeroBanner() {
           quality={100}
           className="object-cover object-center"
         />
-       
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-5 sm:px-8 lg:px-12 xl:px-16">
-        <div className="grid flex-1 items-center gap-6 pb-10 pt-20 sm:pb-14 sm:pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:pb-20 lg:pt-28">
-          {/* LEFT CONTENT */}
-          <div className="order-2 max-w-[560px] lg:order-1">
-            <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-4 py-2 text-xs font-semibold tracking-wider text-sky-300">
-              <span className="h-2 w-2 rounded-full bg-sky-400" />
-              NEXT GENERATION PURIFICATION
-            </span>
+      {/* Left-side scrim — keeps the headline/body copy readable
+    regardless of how bright or busy the photo is behind it */}
+<div
+  className="absolute inset-0 z-[1] bg-gradient-to-r from-black/75 via-black/40 to-black/0"
+  aria-hidden="true"
+/>
 
+<div className="relative z-[2] mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-5 sm:px-8 lg:px-12 xl:px-16">
+  <div className="grid flex-1 items-center gap-6 pb-10 pt-20 sm:pb-14 sm:pt-24 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:pb-20 lg:pt-28">
+    {/* LEFT CONTENT */}
+    <div className="order-2 max-w-[560px] lg:order-1">
+      <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-4 py-2 text-xs font-semibold tracking-wider text-sky-300">
+        <span className="h-2 w-2 rounded-full bg-sky-400" />
+        NEXT GENERATION PURIFICATION
+      </span>
             <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
               Pure Water.
               <span className="block bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent">
@@ -126,7 +141,7 @@ export default function HeroBanner() {
               </span>
             </h1>
 
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-white sm:text-lg">
               Protect your family with advanced water purification technology
               designed for modern homes in Bangladesh. NeaPure removes harmful
               contaminants while preserving essential minerals for healthier,
@@ -134,7 +149,7 @@ export default function HeroBanner() {
             </p>
 
             <ul className="mt-5 space-y-3 text-white">
-              {HIGHLIGHTS.map((item) => (
+              {highlights.map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <span className="h-2 w-2 shrink-0 rounded-full bg-sky-400" />
                   <span>{item}</span>
@@ -159,7 +174,7 @@ export default function HeroBanner() {
 
             {/* Stats */}
             <div className="mt-7 grid max-w-xl grid-cols-3 gap-8 border-t border-white/10 pt-5">
-              {STATS.map(({ value, label }) => (
+              {stats.map(({ value, label }) => (
                 <div key={label}>
                   <h3 className="text-3xl font-bold text-white">{value}</h3>
                   <p className="mt-2 text-sm text-slate-400">{label}</p>
@@ -177,7 +192,7 @@ export default function HeroBanner() {
       </div>
 
       {/* Floating card, desktop only — sits above the wave with clearance */}
-      <PurificationCard className="absolute bottom-16 right-6 z-20 hidden w-72 lg:right-10 lg:bottom-24 lg:block xl:right-14" />
+      <PurificationCard className="absolute bottom-16 right-6 z-20 hidden w-70 lg:right-10 lg:bottom-24 lg:block xl:right-14" />
 
       <HeroWave />
     </section>

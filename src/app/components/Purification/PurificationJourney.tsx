@@ -8,7 +8,7 @@ import { stages } from "../Purification/stageData";
 
 export default function PurificationJourney() {
   return (
-    <section className="relative overflow-hidden bg-[#eaf6ff] min-h-[1300px] md:min-h-[500px] xl:min-h-[500px] -mt-30">
+    <section className="relative z-0 overflow-hidden bg-[#eaf6ff] min-h-[1300px] md:min-h-[500px] xl:min-h-[500px] -mt-30">
 
       {/* Background Image */}
       <BackgroundGlow />
