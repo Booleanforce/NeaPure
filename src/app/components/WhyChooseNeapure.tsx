@@ -14,73 +14,55 @@ import {
   Play,
   ChevronLeft,
   ChevronRight,
+  type LucideIcon,
 } from "lucide-react";
+import {
+  useGetWhyChooseUsQuery,
+  type WhyChooseFeature,
+} from "../../features/home/api/whychoose/Whychooseapi";
 
-// Static content (no API call, no store)
-const features = [
-  {
-    icon: Sparkles,
-    title: "THE NEAPURE GUARANTEE",
-    description:
-      "We promise safe water or full refund. Over 99% uptime with immediate technician response.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Genuine Products",
-    description:
-      "100% original cartridges, food-grade pipes, certified RO membranes & parts.",
-  },
-  {
-    icon: Wrench,
-    title: "Free Installation",
-    description:
-      "Professional installation by certified technicians across Bangladesh.",
-  },
-  {
-    icon: FileText,
-    title: "Digital Warranty",
-    description:
-      "Paperless warranty registration with instant online verification.",
-  },
-  {
-    icon: Smartphone,
-    title: "Smart Care App",
-    description:
-      "Track filter life, service history and request maintenance anytime.",
-  },
-  {
-    icon: Headphones,
-    title: "24/7 Customer Support",
-    description:
-      "Live chat, WhatsApp and phone support whenever you need help.",
-  },
-];
-
-const chapters = [
-  { number: "01", title: "Contaminated Water Sources", thumbnail: "/images/chapter1.jpg", duration: "0:45" },
-  { number: "02", title: "Harmful Chemicals", thumbnail: "/images/chapter2.jpg", duration: "0:42" },
-  { number: "03", title: "Suspended Particles", thumbnail: "/images/chapter3.jpg", duration: "0:38" },
-  { number: "04", title: "Bacterial Contamination", thumbnail: "/images/chapter4.jpg", duration: "0:51" },
-  { number: "05", title: "Heavy Metal Presence", thumbnail: "/images/chapter5.jpg", duration: "0:46" },
-  { number: "06", title: "Bad Taste & Odor", thumbnail: "/images/chapter6.jpg", duration: "0:39" },
-];
-
-// ------------------------------------------------------------------
-// BRAND VIDEO
-// TODO (before go-live): replace the placeholder with the final,
-// approved NeaPure brand video.
-//   1. Put the approved file in  /public/videos/neapure-brand.mp4
-//   2. (Optional) put a poster frame in /public/images/neapure-video-poster.jpg
-//   3. Update the two paths below.
-// ------------------------------------------------------------------
-const BRAND_VIDEO = {
-  src: "/videos/neapure-brand.mp4",
-  poster: "/images/family.png", // TODO: swap for the approved poster frame
+// Backend sends an icon *key* (string) per feature; map it to the
+// actual lucide-react component here on the client.
+const ICON_MAP: Record<string, LucideIcon> = {
+  guarantee: Sparkles,
+  genuine: ShieldCheck,
+  installation: Wrench,
+  warranty: FileText,
+  app: Smartphone,
+  support: Headphones,
 };
 
 export default function WhyChooseNeaPure() {
+  const { data, isLoading, isFetching, isError, refetch } =
+    useGetWhyChooseUsQuery();
+
   const [currentChapter, setCurrentChapter] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  if (isLoading) {
+    return <WhyChooseSkeleton />;
+  }
+
+  if (isError || !data) {
+    return (
+      <section className="bg-white py-20">
+        <div className="mx-auto max-w-7xl px-4 text-center lg:px-6">
+          <p className="text-sm text-gray-500">
+            Could not load this section right now.
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="mt-4 rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  const { video, trustBadge, features, chapters } = data;
+  const activeChapter = chapters[currentChapter];
 
   return (
     <section className="bg-white py-20">
@@ -113,8 +95,10 @@ export default function WhyChooseNeaPure() {
               <span className="text-[11px] uppercase tracking-widest text-gray-500">
                 Trusted By
               </span>
-              <span className="text-3xl font-bold text-blue-600">10,000+</span>
-              <span className="text-sm text-gray-500">Families</span>
+              <span className="text-3xl font-bold text-blue-600">
+                {trustBadge.count}
+              </span>
+              <span className="text-sm text-gray-500">{trustBadge.label}</span>
             </div>
           </div>
         </div>
@@ -126,10 +110,9 @@ export default function WhyChooseNeaPure() {
             {/* VIDEO SECTION */}
             <div className="relative overflow-hidden rounded-3xl shadow-xl">
               {isPlaying ? (
-                // Real brand video (native controls once playing)
                 <video
-                  src={BRAND_VIDEO.src}
-                  poster={BRAND_VIDEO.poster}
+                  src={video.src}
+                  poster={video.poster}
                   className="aspect-video w-full bg-black object-cover"
                   controls
                   autoPlay
@@ -139,36 +122,30 @@ export default function WhyChooseNeaPure() {
               ) : (
                 <>
                   <Image
-                    src={BRAND_VIDEO.poster}
+                    src={video.poster}
                     alt="NeaPure Family"
                     width={1200}
                     height={700}
                     className="aspect-video w-full object-cover"
                   />
 
-                  {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                  {/* Play Button */}
                   <button
                     onClick={() => setIsPlaying(true)}
                     aria-label="Play NeaPure brand video"
                     className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 backdrop-blur transition hover:scale-110"
                   >
-                    <Play
-                      fill="currentColor"
-                      className="ml-1 h-8 w-8 text-blue-600"
-                    />
+                    <Play fill="currentColor" className="ml-1 h-8 w-8 text-blue-600" />
                   </button>
 
-                  {/* Content */}
                   <div className="absolute bottom-16 left-8 max-w-xl">
                     <span className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white">
                       HEALTHY BANGLADESH HOMES
                     </span>
 
                     <h3 className="mt-5 text-3xl font-bold leading-tight text-white">
-                      Over 10,000+ Families
+                      Over {trustBadge.count} Families
                       <br />
                       Saved from Contaminated Water
                     </h3>
@@ -180,17 +157,14 @@ export default function WhyChooseNeaPure() {
                     </p>
                   </div>
 
-                  {/* Bottom Controls (visual only until the video starts) */}
                   <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-black/60 px-6 py-4">
                     <div className="flex items-center gap-4">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                        <Play
-                          fill="currentColor"
-                          className="ml-0.5 h-4 w-4 text-white"
-                        />
+                        <Play fill="currentColor" className="ml-0.5 h-4 w-4 text-white" />
                       </div>
-
-                      <span className="text-sm text-white">0:00 / 0:45</span>
+                      <span className="text-sm text-white">
+                        0:00 / {activeChapter?.duration ?? "0:00"}
+                      </span>
                     </div>
 
                     <div className="mx-8 h-1 flex-1 rounded-full bg-white/20">
@@ -201,11 +175,16 @@ export default function WhyChooseNeaPure() {
                   </div>
                 </>
               )}
+
+              {isFetching && (
+                <div className="absolute right-3 top-3 rounded-full bg-black/50 px-3 py-1 text-[10px] text-white">
+                  Refreshing...
+                </div>
+              )}
             </div>
 
             {/* CHAPTER SECTION */}
             <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm lg:flex-1">
-              {/* Header */}
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">
                   Chapters / Step-by-Step Guide
@@ -221,9 +200,7 @@ export default function WhyChooseNeaPure() {
 
                   <button
                     onClick={() =>
-                      setCurrentChapter((prev) =>
-                        Math.min(prev + 1, chapters.length - 1)
-                      )
+                      setCurrentChapter((prev) => Math.min(prev + 1, chapters.length - 1))
                     }
                     className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 transition hover:bg-blue-600 hover:text-white"
                   >
@@ -232,7 +209,6 @@ export default function WhyChooseNeaPure() {
                 </div>
               </div>
 
-              {/* Chapters */}
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
                 {chapters.map((chapter, index) => (
                   <button
@@ -248,28 +224,22 @@ export default function WhyChooseNeaPure() {
                       }`}
                     >
                       <Image
-                        src="/images/family.png"
+                        src={chapter.thumbnail}
                         alt={chapter.title}
                         width={320}
                         height={180}
                         className="h-28 w-full object-cover transition duration-500 group-hover:scale-105"
                       />
 
-                      {/* Overlay */}
                       <div className="absolute inset-0 bg-black/20" />
 
-                      {/* Duration */}
                       <span className="absolute left-3 top-3 rounded bg-black/70 px-2 py-1 text-[10px] text-white">
                         {chapter.duration}
                       </span>
 
-                      {/* Play */}
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-xl transition group-hover:scale-110">
-                          <Play
-                            fill="currentColor"
-                            className="ml-0.5 h-4 w-4 text-blue-600"
-                          />
+                          <Play fill="currentColor" className="ml-0.5 h-4 w-4 text-blue-600" />
                         </div>
                       </div>
                     </div>
@@ -283,13 +253,10 @@ export default function WhyChooseNeaPure() {
             </div>
           </div>
 
-          {/* RIGHT CONTENT
-              Compact cards. On lg+ the column is as tall as the left column
-              and the cards share that height equally, so top and bottom
-              edges line up with the video / chapters block. */}
+          {/* RIGHT CONTENT */}
           <div className="flex flex-col gap-3 lg:col-span-4 lg:h-full">
-            {features.map((feature) => {
-              const Icon = feature.icon;
+            {features.map((feature: WhyChooseFeature) => {
+              const Icon = ICON_MAP[feature.icon] ?? Sparkles;
 
               return (
                 <div
@@ -314,6 +281,37 @@ export default function WhyChooseNeaPure() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---- Loading skeleton -------------------------------------------------
+
+function WhyChooseSkeleton() {
+  return (
+    <section className="bg-white py-20">
+      <div className="mx-auto max-w-7xl animate-pulse px-4 lg:px-6">
+        <div className="mb-12 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl space-y-4">
+            <div className="h-6 w-56 rounded-full bg-gray-200" />
+            <div className="h-10 w-96 max-w-full rounded bg-gray-200" />
+            <div className="h-4 w-80 max-w-full rounded bg-gray-200" />
+          </div>
+          <div className="mx-auto h-40 w-40 rounded-full bg-gray-200 lg:mx-0" />
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="flex flex-col gap-6 lg:col-span-8">
+            <div className="aspect-video w-full rounded-3xl bg-gray-200" />
+            <div className="h-40 w-full rounded-3xl bg-gray-200" />
+          </div>
+          <div className="flex flex-col gap-3 lg:col-span-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-16 w-full rounded-xl bg-gray-200" />
+            ))}
           </div>
         </div>
       </div>
