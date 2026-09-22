@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React from "react";
 import {
   Shield,
   Wrench,
@@ -15,45 +15,34 @@ import {
   Sparkles,
   Check,
   ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+  ChevronRight,
+  type LucideIcon,
+} from "lucide-react";
+import {
+  useGetSmartCareQuery,
+  type TopFeature,
+  type AppFeature,
+} from "../../../features/home/api/smartCareApi";
+
+// Backend sends an icon *key* (string) per feature; map it to the
+// actual lucide-react component here on the client.
+const ICON_MAP: Record<string, LucideIcon> = {
+  shield: Shield,
+  wrench: Wrench,
+  headphones: Headphones,
+  shieldCheck: ShieldCheck,
+  truck: Truck,
+  droplet: Droplet,
+  droplets: Droplets,
+  calendar: Calendar,
+  bell: Bell,
+};
 
 export default function SmartCareSection() {
-  const topFeatures = [
-    {
-      icon: Shield,
-      title: '100% Genuine Products',
-      description: 'Original & certified components'
-    },
-    {
-      icon: Wrench,
-      title: 'Professional Installation',
-      description: 'Trained experts for perfect setup'
-    },
-    {
-      icon: Headphones,
-      title: 'Dedicated After Sales Support',
-      description: 'We are with you, always'
-    },
-    {
-      icon: ShieldCheck,
-      title: '1 Year Warranty',
-      description: 'Peace of mind with our warranty'
-    },
-    {
-      icon: Truck,
-      title: 'Fast & Safe Delivery',
-      description: 'Quick delivery to your doorstep'
-    }
-  ];
+  const { data, isLoading, isError, refetch } = useGetSmartCareQuery();
 
-  const appFeatures = [
-    { icon: Droplet, title: 'Filter Life Monitoring' },
-    { icon: Calendar, title: 'Service Booking' },
-    { icon: Droplets, title: 'Water Quality Updates' },
-    { icon: Shield, title: 'Warranty Management' },
-    { icon: Bell, title: 'Smart Notifications' }
-  ];
+  const topFeatures = data?.topFeatures ?? [];
+  const appFeatures = data?.appFeatures ?? [];
 
   return (
     <div className="w-full">
@@ -70,21 +59,46 @@ export default function SmartCareSection() {
         </div>
 
         <div className="container mx-auto px-6 py-8 max-w-7xl relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {topFeatures.map((feature, idx) => (
-              <div key={idx} className="flex items-start space-x-2">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/20">
-                    <feature.icon className="w-4 h-4 text-white" />
+          {isLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-white/10" />
+              ))}
+            </div>
+          )}
+
+          {isError && (
+            <div className="text-center py-4">
+              <p className="text-sm text-blue-200">Could not load this section right now.</p>
+              <button
+                onClick={() => refetch()}
+                className="mt-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs font-semibold text-white hover:bg-white/20"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {!isLoading && !isError && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+              {topFeatures.map((feature: TopFeature, idx) => {
+                const Icon = ICON_MAP[feature.icon] ?? Shield;
+                return (
+                  <div key={idx} className="flex items-start space-x-2">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/20">
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white text-xs mb-0.5">{feature.title}</h3>
+                      <p className="text-[10px] text-blue-200 leading-relaxed">{feature.description}</p>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <h3 className="font-bold text-white text-xs mb-0.5">{feature.title}</h3>
-                  <p className="text-[10px] text-blue-200 leading-relaxed">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Decorative Water Splash on Right */}
@@ -100,7 +114,7 @@ export default function SmartCareSection() {
       <div className="bg-white py-12 md:py-16">
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-10">
-            {/* Left Side - Phone Mockup & Text */}
+            {/* Left Side - Phone Mockup & Text (static, unchanged) */}
             <div className="w-full lg:w-[300px] lg:flex-shrink-0 flex flex-col items-center lg:items-start text-center lg:text-left">
               <div className="text-blue-600 text-xs font-bold tracking-wider mb-3">
                 SMART WATER CARE ECOSYSTEM
@@ -137,16 +151,12 @@ export default function SmartCareSection() {
 
               {/* Phone Mockup — extra small, IntelliMate-style card layout */}
               <div className="relative w-full max-w-[170px] mx-auto lg:mx-0">
-                {/* Soft glow behind the device */}
                 <div className="absolute -inset-2 bg-gradient-to-br from-blue-200/50 via-cyan-100/40 to-transparent rounded-[2rem] blur-2xl -z-10"></div>
 
-                {/* Device frame */}
                 <div className="relative bg-black rounded-[1.5rem] p-1 shadow-2xl border border-gray-800">
-                  {/* Notch */}
                   <div className="absolute top-1 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black rounded-b-md z-10"></div>
 
                   <div className="bg-white rounded-[1.2rem] overflow-hidden px-3 pt-4 pb-3">
-                    {/* Logo row */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-1">
                         <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center">
@@ -157,24 +167,20 @@ export default function SmartCareSection() {
                       <span className="text-[7px] text-gray-400 font-medium">1 of 1</span>
                     </div>
 
-                    {/* Headline */}
                     <h3 className="text-xs font-bold text-gray-900 leading-snug mb-3">
                       The smart way to care for your water
                     </h3>
 
-                    {/* Feature Card */}
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-2 border border-blue-100/60">
                       <div className="text-[7px] font-bold text-blue-600 tracking-wider mb-1.5">
                         SMART MONITORING
                       </div>
 
-                      {/* blurred preview bars */}
                       <div className="space-y-1 mb-1.5 opacity-50">
                         <div className="h-1 bg-blue-200 rounded-full w-3/4"></div>
                         <div className="h-1 bg-blue-100 rounded-full w-1/2"></div>
                       </div>
 
-                      {/* checklist row */}
                       <div className="bg-white rounded-md p-1.5 flex items-center gap-1 shadow-sm mb-1.5">
                         <div className="w-3.5 h-3.5 bg-gray-100 rounded flex-shrink-0"></div>
                         <div className="flex-1 space-y-0.5">
@@ -186,21 +192,18 @@ export default function SmartCareSection() {
                         </div>
                       </div>
 
-                      {/* refresh icon */}
                       <div className="flex justify-center mb-1.5">
                         <div className="w-4.5 h-4.5 rounded-full bg-white shadow border border-gray-100 flex items-center justify-center">
                           <RefreshCw className="w-2.5 h-2.5 text-gray-500" />
                         </div>
                       </div>
 
-                      {/* CTA pill */}
                       <button className="w-full bg-gray-900 text-white text-[8px] font-semibold rounded-full py-1.5 flex items-center justify-center gap-1">
                         Sync with App
                         <Sparkles className="w-2 h-2" />
                       </button>
                     </div>
 
-                    {/* Title + description */}
                     <div className="mt-3">
                       <h4 className="font-bold text-gray-900 text-[10px] mb-1">
                         Real-Time Water Monitoring
@@ -210,7 +213,6 @@ export default function SmartCareSection() {
                       </p>
                     </div>
 
-                    {/* Bottom nav */}
                     <div className="flex items-center justify-between mt-3">
                       <ChevronLeft className="w-3 h-3 text-gray-300" />
                       <div className="flex gap-1">
@@ -227,16 +229,32 @@ export default function SmartCareSection() {
 
             {/* Right Side - App Features */}
             <div className="w-full lg:flex-1">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-                {appFeatures.map((feature, idx) => (
-                  <div key={idx} className="text-center group">
-                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition-colors border border-blue-100">
-                      <feature.icon className="w-7 h-7 text-blue-600" />
+              {isLoading && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-full bg-gray-100 animate-pulse" />
+                      <div className="h-3 w-16 rounded bg-gray-100 animate-pulse" />
                     </div>
-                    <h3 className="font-semibold text-gray-900 text-sm leading-tight">{feature.title}</h3>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+
+              {!isLoading && !isError && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                  {appFeatures.map((feature: AppFeature, idx) => {
+                    const Icon = ICON_MAP[feature.icon] ?? Droplet;
+                    return (
+                      <div key={idx} className="text-center group">
+                        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition-colors border border-blue-100">
+                          <Icon className="w-7 h-7 text-blue-600" />
+                        </div>
+                        <h3 className="font-semibold text-gray-900 text-sm leading-tight">{feature.title}</h3>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
