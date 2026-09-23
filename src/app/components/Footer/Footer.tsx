@@ -1,7 +1,22 @@
+"use client";
+
+import { useState, type FormEvent, type ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Send } from "lucide-react";
 
+/* =====================================================================
+ * FOOTER CONFIG
+ * All links live here so they are easy to review / change.
+ * TODO: confirm every URL below with the client before go-live.
+ *  - Internal routes (e.g. "/about") must exist as pages, otherwise the
+ *    link will open a 404.
+ *  - Social URLs are placeholders for the official NeaPure accounts.
+ * ===================================================================== */
 
+// "Book Service Now" button. Uses the phone number shown in the site header.
+// TODO: swap for a booking page (e.g. "/book-service") when it exists.
+const BOOK_SERVICE_HREF = "tel:09613123123";
 
 const FEATURES = [
   {
@@ -26,21 +41,32 @@ const FEATURES = [
 const FOOTER_COLUMNS = [
   {
     title: "Company",
-    links: ["About", "Careers", "Customers", "Blog", "Brand", "Research"],
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Careers", href: "/careers" },
+      { label: "Customers", href: "/customers" },
+      { label: "Blog", href: "/blog" },
+      { label: "Brand", href: "/brand" },
+      { label: "Research", href: "/research" },
+    ],
   },
   {
     title: "Support",
     links: [
-      "Help Center",
-      "Contact Us",
-      "Installation Guide",
-      "Warranty",
-      "Shipping",
+      { label: "Help Center", href: "/help-center" },
+      { label: "Contact Us", href: "/contact" },
+      { label: "Installation Guide", href: "/installation-guide" },
+      { label: "Warranty", href: "/warranty" },
+      { label: "Shipping", href: "/shipping" },
     ],
   },
   {
     title: "Legal",
-    links: ["Terms of Service", "Privacy Policy", "Returns"],
+    links: [
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Returns", href: "/returns" },
+    ],
   },
 ];
 
@@ -75,11 +101,13 @@ const SocialChatIcon = () => (
   </svg>
 );
 
+// Labels match the icon artwork (Facebook / Instagram / X / Discord).
+// TODO: replace with the official NeaPure profile URLs.
 const SOCIALS = [
-  { label: "Instagram", Icon: SocialGalleryIcon },
-  { label: "Camera", Icon: SocialCameraIcon },
-  { label: "X", Icon: SocialXIcon },
-  { label: "Chat", Icon: SocialChatIcon },
+  { label: "Facebook", Icon: SocialGalleryIcon, href: "https://www.facebook.com/neapure" },
+  { label: "Instagram", Icon: SocialCameraIcon, href: "https://www.instagram.com/neapure" },
+  { label: "X", Icon: SocialXIcon, href: "https://x.com/neapure" },
+  { label: "Discord", Icon: SocialChatIcon, href: "https://discord.gg/neapure" },
 ];
 
 /* ---------- Verified/Certified badge icon (from Figma export) ---------- */
@@ -108,9 +136,138 @@ const VerifiedBadgeIcon = ({ className = "" }: { className?: string }) => (
   </svg>
 );
 
+/* ---------- Link helper: internal -> next/link, external -> <a> ---------- */
+function FooterLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (/^https?:/.test(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {children}
+      </a>
+    );
+  }
+  if (/^(mailto:|tel:)/.test(href)) {
+    return (
+      <a href={href} className={className}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+/* ---------- Newsletter form (validation + loading / success / error) ---------- */
+type Status = "idle" | "loading" | "success" | "error";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// TODO: connect to the real newsletter backend (API route, Mailchimp, etc.).
+// Right now this only simulates a successful request; nothing is stored.
+async function subscribeToNewsletter(email: string): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  void email;
+}
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (status === "loading") return;
+
+    const value = email.trim();
+    if (!EMAIL_RE.test(value)) {
+      setStatus("error");
+      setMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setStatus("loading");
+    setMessage("");
+    try {
+      await subscribeToNewsletter(value);
+      setStatus("success");
+      setMessage("Thanks for subscribing! Please check your inbox.");
+      setEmail("");
+    } catch {
+      setStatus("error");
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="flex w-full flex-col gap-2">
+      <div className="flex w-full items-center overflow-hidden rounded-full border border-white/20 bg-white/5 pr-1.5 transition focus-within:border-sky-300 focus-within:ring-2 focus-within:ring-sky-300/30">
+        <label htmlFor="footer-newsletter-email" className="sr-only">
+          Email address
+        </label>
+        <input
+          id="footer-newsletter-email"
+          type="email"
+          name="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (status === "error" || status === "success") {
+              setStatus("idle");
+              setMessage("");
+            }
+          }}
+          placeholder="Your email"
+          autoComplete="email"
+          inputMode="email"
+          disabled={status === "loading"}
+          aria-invalid={status === "error"}
+          aria-describedby="footer-newsletter-message"
+          className="w-full min-w-0 bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/50 focus:outline-none disabled:opacity-60"
+        />
+        <button
+          type="submit"
+          aria-label="Subscribe to newsletter"
+          disabled={status === "loading"}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#1454e0] transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {status === "loading" ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#1454e0]/30 border-t-[#1454e0]" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+
+      <p
+        id="footer-newsletter-message"
+        role={status === "error" ? "alert" : "status"}
+        aria-live="polite"
+        className={`min-h-[1rem] px-2 text-xs ${
+          status === "error" ? "text-red-300" : "text-emerald-300"
+        }`}
+      >
+        {message}
+      </p>
+    </form>
+  );
+}
+
 export default function Footer() {
   return (
-    <section className="relative z-0 flex w-full flex-col items-start gap-[10px] overflow-hidden bg-[#040f2a] pt-10 pb-16 sm:pt-[60px] sm:pb-[100px]">
+    <footer
+      aria-label="Site footer"
+      className="relative z-0 flex w-full flex-col items-start gap-[10px] overflow-hidden bg-[#040f2a] pt-10 pb-16 sm:pt-[60px] sm:pb-[100px]"
+    >
       {/* ---------- image background ---------- */}
       <Image
         src="/images/image19.jpg"
@@ -136,7 +293,7 @@ export default function Footer() {
             />
           </div>
 
-          <div className="flex flex-1 flex-col gap-6 sm:gap-8">
+          <div className="flex min-w-0 flex-1 flex-col gap-6 sm:gap-8">
             <div className="mx-auto max-w-md text-center lg:mx-0 lg:text-left">
               <h2 className="text-xl font-semibold leading-tight text-white sm:text-2xl sm:leading-tight md:text-3xl">
                 We are always
@@ -150,9 +307,10 @@ export default function Footer() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-6 sm:gap-y-8 sm:grid-cols-4">
-              {FEATURES.map((feature, i) => (
-                <div key={i} className="flex items-start gap-3">
+            {/* 1 col (phones) -> 2 cols (tablet / small laptop) -> 4 cols (xl) */}
+            <div className="grid grid-cols-1 gap-x-6 gap-y-6 min-[480px]:grid-cols-2 sm:gap-y-8 xl:grid-cols-4">
+              {FEATURES.map((feature) => (
+                <div key={feature.title} className="flex items-start gap-3">
                   <span
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
                       feature.active
@@ -178,19 +336,19 @@ export default function Footer() {
 
         {/* ---------- CTA Banner ---------- */}
         <div
-          className="relative flex w-full flex-col items-stretch overflow-hidden rounded-2xl border border-white/10 sm:flex-row sm:items-center"
+          className="relative flex w-full flex-col items-stretch overflow-hidden rounded-2xl border border-white/10 md:flex-row md:items-center"
           style={{
             background:
               "linear-gradient(90deg,#0B62E9 62.98%,rgba(102,102,102,0) 100%)",
           }}
         >
-          <div className="relative z-10 flex w-full flex-col gap-6 px-5 py-6 sm:flex-row sm:items-center sm:gap-8 sm:py-5 sm:pl-8 sm:pr-0 lg:gap-[45px] lg:pl-[110px]">
+          <div className="relative z-10 flex w-full flex-col gap-6 px-5 py-6 md:flex-row md:items-center md:gap-8 md:py-5 md:pl-28 md:pr-6 lg:gap-[45px] lg:pl-[110px] lg:pr-0">
             <Image
               src="/images/image23.png"
               alt="Technician"
               width={95}
               height={90}
-              className="hidden object-contain sm:absolute sm:bottom-0 sm:left-0 sm:block"
+              className="hidden object-contain md:absolute md:bottom-0 md:left-0 md:block"
               style={{ height: "auto" }}
             />
 
@@ -204,15 +362,18 @@ export default function Footer() {
               </p>
             </div>
 
-            <button className="flex w-full shrink-0 items-center justify-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0B62E9] transition hover:bg-white/90 sm:w-auto">
+            <FooterLink
+              href={BOOK_SERVICE_HREF}
+              className="flex w-full shrink-0 items-center justify-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0B62E9] transition hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 md:w-auto"
+            >
               Book Service Now
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0B62E9] text-white">
                 <ArrowRight className="h-4 w-4" />
               </span>
-            </button>
+            </FooterLink>
           </div>
 
-          <div className="absolute inset-y-0 right-0 z-0 hidden w-[98%] overflow-hidden lg:block">
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-[98%] overflow-hidden lg:block">
             <Image
               src="/images/image24.png"
               alt="Delivery route map with van and location pin"
@@ -226,9 +387,11 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* ---------- footer strip ---------- */}
-        <div className="relative flex flex-col gap-10 pt-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
+        {/* ---------- footer strip ----------
+            < xl : stacked (brand, link columns, newsletter)
+            >= xl: one row */}
+        <div className="relative flex flex-col gap-10 pt-4 xl:flex-row xl:items-start xl:justify-between">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 xl:block">
             {[420, 320, 220, 120].map((size) => (
               <span
                 key={size}
@@ -239,78 +402,79 @@ export default function Footer() {
             <span className="absolute left-[38%] top-[70%] h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/70 bg-sky-400" />
           </div>
 
-          <div className="flex max-w-xs flex-col gap-4">
-            <div className="flex w-fit items-center gap-2 rounded-lg border border-white/15 px-3 py-2">
+          {/* Brand + socials */}
+          <div className="relative flex max-w-xs flex-col gap-4">
+            <Link
+              href="/"
+              aria-label="NeaPure home"
+              className="flex w-fit items-center gap-2 rounded-lg border border-white/15 px-3 py-2 transition hover:border-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+            >
               <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
               <span className="text-base font-semibold text-white">
                 Nea <span className="text-sky-400">Pure</span>
               </span>
-            </div>
+            </Link>
             <p className="text-sm leading-relaxed text-white">
               Clean water, always on tap — smart purification for every home.
             </p>
 
-            {/* ---------- Social icons: real SVGs, not placeholders ---------- */}
-            <div className="flex gap-2.5">
-              {SOCIALS.map(({ label, Icon }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-white/20 hover:text-white"
-                >
-                  <Icon />
-                </a>
+            {/* ---------- Social icons (open in a new tab) ---------- */}
+            <ul className="flex gap-2.5">
+              {SOCIALS.map(({ label, Icon, href }) => (
+                <li key={label}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`NeaPure on ${label}`}
+                    title={label}
+                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-sky-500/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+                  >
+                    <Icon />
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-8 lg:gap-14">
+          {/* Link columns */}
+          <nav
+            aria-label="Footer"
+            className="relative grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 sm:gap-x-8 xl:gap-x-14"
+          >
             {FOOTER_COLUMNS.map((col) => (
               <div key={col.title} className="flex flex-col gap-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-white">
                   {col.title}
                 </p>
-                <ul className="flex flex-col gap-2.5">
+                <ul className="flex flex-col gap-1">
                   {col.links.map((link, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <span className="text-white">
+                    <li key={link.href} className="flex items-center gap-2">
+                      <span aria-hidden="true" className="text-white/60">
                         {i === col.links.length - 1 ? "└" : "├"}
                       </span>
-                      <a
-                        href="#"
-                        className="text-sm text-white transition hover:text-white"
+                      <FooterLink
+                        href={link.href}
+                        className="inline-block py-1 text-sm text-white/85 transition hover:text-sky-300 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
                       >
-                        {link}
-                      </a>
+                        {link.label}
+                      </FooterLink>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
-          </div>
+          </nav>
 
-          <div className="flex w-full max-w-xs flex-col gap-3">
+          {/* Newsletter */}
+          <div className="relative flex w-full max-w-md flex-col gap-3 xl:max-w-xs">
             <p className="text-xs font-semibold uppercase tracking-wider text-white">
               Join our newsletter
             </p>
-            <form className="flex w-full items-center overflow-hidden rounded-full border border-white/20 bg-white/5 pr-1.5">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="w-full min-w-0 bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-white focus:outline-none"
-              />
-              <button
-                type="submit"
-                aria-label="Subscribe"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#1454e0] transition hover:bg-white/90"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
       </div>
-    </section>
+    </footer>
   );
 }

@@ -1,89 +1,78 @@
 "use client";
 
-import React, { useState } from 'react';
-import { 
-  Search, 
-  Star, 
-  MessageCircle, 
-  MessageSquare, 
-  Clock, 
-  ChevronDown, 
+import { useState } from "react";
+import Image from "next/image";
+import {
+  Search,
+  Star,
+  MessageCircle,
+  MessageSquare,
+  Clock,
+  ChevronDown,
   ChevronUp,
   HelpCircle,
   Truck,
   CreditCard,
   Shield,
   Wrench,
-  Package
-} from 'lucide-react';
-
-interface FAQItem {
-  question: string;
-  answer: string;
-  category: string;
-  hasImage?: boolean;
-}
-
-const faqData: FAQItem[] = [
-  {
-    question: "How often should filters be replaced?",
-    answer: "It depends on usage and water quality. Typically, sediment and carbon filters last 6 months, while RO membrane lasts 12-18 months. Our app reminds you before it's due.",
-    category: "Most Asked",
-    hasImage: true
-  },
-  {
-    question: "Is installation really free?",
-    answer: "Yes! We provide free professional installation for all our water purifiers. Our trained technicians will set up your system at no extra cost.",
-    category: "Most Asked"
-  },
-  {
-    question: "Do all products include a warranty?",
-    answer: "Yes, all our products come with manufacturer warranty. Standard warranty is 1 year, with extended warranty options available for purchase.",
-    category: "Most Asked"
-  },
-  {
-    question: "Do you provide installation?",
-    answer: "Absolutely! We provide free professional installation by certified technicians. They will also show you how to use and maintain your system.",
-    category: "Installation"
-  },
-  {
-    question: "Can I order replacement filters online?",
-    answer: "Yes! You can easily order replacement filters through our website or mobile app. We also offer subscription plans for automatic deliveries.",
-    category: "Most Asked"
-  },
-  {
-    question: "Do you deliver outside Dhaka?",
-    answer: "Yes, we deliver nationwide across Bangladesh. Delivery times vary by location - Dhaka: 1-2 days, Outside Dhaka: 3-5 business days.",
-    category: "Most Asked"
-  },
-  {
-    question: "Do you service all cities?",
-    answer: "We provide installation and after-sales service in all major cities across Bangladesh. Check our service coverage page for details.",
-    category: "Most Asked"
-  }
-];
+  Package,
+} from "lucide-react";
+import { useGetFaqsQuery } from "@/features/faq/api/faqApi";
 
 const categories = [
-  { name: 'Most Asked', icon: Star },
-  { name: 'Installation', icon: Wrench },
-  { name: 'Maintenance', icon: Package },
-  { name: 'Warranty', icon: Shield },
-  { name: 'Delivery & Order', icon: Truck },
-  { name: 'Payment & Other', icon: CreditCard }
+  { name: "Most Asked", icon: Star },
+  { name: "Installation", icon: Wrench },
+  { name: "Maintenance", icon: Package },
+  { name: "Warranty", icon: Shield },
+  { name: "Delivery & Order", icon: Truck },
+  { name: "Payment & Other", icon: CreditCard },
 ];
 
-export default function AskQuestion() {
-  const [activeCategory, setActiveCategory] = useState('Most Asked');
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const [searchQuery, setSearchQuery] = useState('');
+// Water filter image shown inside an open FAQ answer.
+// If the file is missing or fails to load, a neutral placeholder is shown
+// instead of a broken image icon.
+function FaqImage({ src, alt }: { src?: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
 
-  const filteredFAQs = faqData.filter((faq) => {
-    const matchesCategory = activeCategory === 'Most Asked' 
-      ? faq.category === 'Most Asked' 
-      : faq.category === activeCategory || faq.category === 'Most Asked';
-    const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && (searchQuery === '' || matchesSearch);
+  return (
+    <div className="hidden h-28 w-52 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-white sm:flex">
+      {src && !failed ? (
+        <Image
+          src={src}
+          alt={alt}
+          width={208}
+          height={112}
+          className="h-full w-full object-contain"
+          unoptimized={src.endsWith(".svg")}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <div className="flex gap-2" aria-hidden="true">
+          <div className="h-16 w-8 rounded bg-blue-200" />
+          <div className="h-16 w-8 rounded bg-blue-300" />
+          <div className="h-16 w-8 rounded bg-blue-200" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AskQuestion() {
+  const { data: faqData, isLoading, isError, refetch } = useGetFaqsQuery();
+
+  const [activeCategory, setActiveCategory] = useState("Most Asked");
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredFAQs = (faqData ?? []).filter((faq) => {
+    const matchesCategory =
+      activeCategory === "Most Asked"
+        ? faq.category === "Most Asked"
+        : faq.category === activeCategory || faq.category === "Most Asked";
+    const matchesSearch =
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && (searchQuery === "" || matchesSearch);
   });
 
   return (
@@ -113,20 +102,23 @@ export default function AskQuestion() {
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {categories.map((category) => (
-              <button
-                key={category.name}
-                onClick={() => setActiveCategory(category.name)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                  activeCategory === category.name
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                    : 'bg-white text-gray-500 hover:text-gray-900 hover:bg-gray-100 border border-gray-200'
-                }`}
-              >
-                <category.icon className="w-4 h-4" />
-                {category.name}
-              </button>
-            ))}
+            {categories.map((category) => {
+              const CategoryIconComp = category.icon;
+              return (
+                <button
+                  key={category.name}
+                  onClick={() => setActiveCategory(category.name)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                    activeCategory === category.name
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                      : "bg-white text-gray-500 hover:text-gray-900 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  <CategoryIconComp className="w-4 h-4" />
+                  {category.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -138,8 +130,7 @@ export default function AskQuestion() {
                 <h3 className="text-base font-bold">Most Asked Questions</h3>
                 <p className="text-xs text-gray-400 mt-1">Top questions from our customers.</p>
               </div>
-              
-              {/* Customer Care Agent */}
+
               <div className="relative mb-4">
                 <img
                   src="/customer-care.svg"
@@ -148,7 +139,6 @@ export default function AskQuestion() {
                 />
               </div>
 
-              {/* Live Chat Button */}
               <button className="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl p-3 mb-2 flex items-center gap-3 transition-colors duration-200">
                 <div className="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center">
                   <MessageCircle className="w-4 h-4" />
@@ -159,7 +149,6 @@ export default function AskQuestion() {
                 </div>
               </button>
 
-              {/* WhatsApp Button */}
               <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl p-3 mb-4 flex items-center gap-3 transition-colors duration-200">
                 <div className="w-8 h-8 bg-white/15 rounded-lg flex items-center justify-center">
                   <MessageSquare className="w-4 h-4" />
@@ -170,7 +159,6 @@ export default function AskQuestion() {
                 </div>
               </button>
 
-              {/* Support Info */}
               <div className="border-t border-gray-700 pt-4">
                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Still need help?</p>
                 <p className="text-sm text-gray-400 mb-3">Our support team is available 24/7</p>
@@ -184,75 +172,95 @@ export default function AskQuestion() {
 
           {/* Main Content */}
           <div className="lg:col-span-9 space-y-3">
-            {filteredFAQs.map((faq, index) => {
-              const isOpen = openIndex === index;
-              return (
-                <div
-                  key={index}
-                  className={`bg-white rounded-xl overflow-hidden transition-all duration-200 ${
-                    isOpen
-                      ? 'ring-2 ring-blue-600/20 shadow-lg shadow-blue-600/5'
-                      : 'border border-gray-200 hover:border-gray-300'
-                  }`}
+            {isLoading && (
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="h-16 w-full animate-pulse rounded-xl bg-gray-200" />
+                ))}
+              </div>
+            )}
+
+            {isError && (
+              <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+                <p className="text-sm text-gray-500">Could not load FAQs right now.</p>
+                <button
+                  onClick={() => refetch()}
+                  className="mt-4 rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                 >
-                  <button
-                    onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="w-full px-6 py-5 flex items-center justify-between text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      {faq.category === 'Most Asked' && (
-                        <Star className="w-4 h-4 text-blue-600 fill-blue-600 flex-shrink-0" />
-                      )}
-                      <span className={`font-medium ${isOpen ? 'text-blue-600' : 'text-gray-900'}`}>
-                        {faq.question}
-                      </span>
-                    </div>
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ml-4 transition-colors duration-200 ${
-                      isOpen ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'
-                    }`}>
-                      {isOpen ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </div>
-                  </button>
-                  
-                  {isOpen && (
-                    <div className="px-6 pb-5 pt-0">
-                      <div className="border-t border-gray-100 pt-4">
-                        <div className="flex items-start gap-6">
-                          <div className="flex-1">
-                            <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-                            {faq.category === 'Most Asked' && faq.hasImage && (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium mt-3">
-                                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-1.5"></span>
-                                Verified Solution
-                              </span>
-                            )}
-                          </div>
-                          {faq.hasImage && (
-                            <div className="hidden sm:block w-48 h-24 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center">
-                              <div className="flex gap-2">
-                                <div className="w-8 h-16 bg-blue-200 rounded"></div>
-                                <div className="w-8 h-16 bg-blue-300 rounded"></div>
-                                <div className="w-8 h-16 bg-blue-200 rounded"></div>
-                              </div>
-                            </div>
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {!isLoading && !isError && (
+              <>
+                {filteredFAQs.map((faq, index) => {
+                  const isOpen = openIndex === index;
+                  return (
+                    <div
+                      key={faq.question}
+                      className={`bg-white rounded-xl overflow-hidden transition-all duration-200 ${
+                        isOpen
+                          ? "ring-2 ring-blue-600/20 shadow-lg shadow-blue-600/5"
+                          : "border border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <button
+                        onClick={() => setOpenIndex(isOpen ? null : index)}
+                        className="w-full px-6 py-5 flex items-center justify-between text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          {faq.category === "Most Asked" && (
+                            <Star className="w-4 h-4 text-blue-600 fill-blue-600 flex-shrink-0" />
+                          )}
+                          <span className={`font-medium ${isOpen ? "text-blue-600" : "text-gray-900"}`}>
+                            {faq.question}
+                          </span>
+                        </div>
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ml-4 transition-colors duration-200 ${
+                            isOpen ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"
+                          }`}
+                        >
+                          {isOpen ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
                           )}
                         </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                      </button>
 
-            {filteredFAQs.length === 0 && (
-              <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-                <HelpCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No FAQs found matching your search.</p>
-              </div>
+                      {isOpen && (
+                        <div className="px-6 pb-5 pt-0">
+                          <div className="border-t border-gray-100 pt-4">
+                            <div className="flex items-start gap-6">
+                              <div className="flex-1">
+                                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                                {faq.category === "Most Asked" && faq.hasImage && (
+                                  <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium mt-3">
+                                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-1.5"></span>
+                                    Verified Solution
+                                  </span>
+                                )}
+                              </div>
+                              {faq.hasImage && (
+                                <FaqImage src={faq.image} alt="NeaPure water filter" />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {filteredFAQs.length === 0 && (
+                  <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+                    <HelpCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">No FAQs found matching your search.</p>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Submit Question */}
