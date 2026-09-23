@@ -87,7 +87,7 @@ export default function ProblemSection() {
             <p className="mt-3 max-w-md text-sm leading-[1.6] text-slate-600 md:max-w-lg md:text-base xl:mt-2 xl:max-w-[320px] xl:text-xs">
               Tap water may look clean, but it can contain harmful
               impurities, dissolved metals, and microscopic pathogens
-              that affect your family's health and well-being.
+              that affect your family&apos;s health and well-being.
             </p>
             <button
               className="

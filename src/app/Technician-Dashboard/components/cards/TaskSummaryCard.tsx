@@ -6,7 +6,7 @@ import { Calendar, CheckCircle, Clock, XCircle } from 'lucide-react';
 export default function TaskSummaryCard() {
   return (
     <div className="bg-white rounded-xl p-5 border border-gray-100">
-      <h3 className="font-bold text-gray-900 mb-1">Today's Task Summary</h3>
+      <h3 className="font-bold text-gray-900 mb-1">Today&apos;s Task Summary</h3>
       <div className="text-xs text-gray-500 mb-4">Updated just now</div>
       <div className="space-y-3">
         <div className="flex items-center justify-between">

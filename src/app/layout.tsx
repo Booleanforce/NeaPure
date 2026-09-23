@@ -37,13 +37,6 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col"
       >
-<<<<<<< HEAD
-        <LayoutWrapper>
-          {children}
-          <SupportWidget />
-          <ToastContainer position="top-right" transition={Bounce} theme="dark" autoClose={3000} />
-        </LayoutWrapper>
-=======
         <ReduxProvider>
           <LayoutWrapper>
             {children}
@@ -51,7 +44,6 @@ export default function RootLayout({
             <ToastContainer position="top-right" transition={Bounce} theme="dark" autoClose={3000} />
           </LayoutWrapper>
         </ReduxProvider>
->>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
       </body>
     </html>
   );

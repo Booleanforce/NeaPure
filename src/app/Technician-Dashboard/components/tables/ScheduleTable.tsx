@@ -15,7 +15,7 @@ export default function ScheduleTable() {
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 className="font-bold text-gray-900">Today's Schedule</h3>
+         <h3 className="font-bold text-gray-900">Today&apos;s Schedule</h3>
         <button className="text-xs text-blue-600 font-semibold hover:underline flex items-center">
           View All <ChevronRight className="w-3 h-3 ml-1" />
         </button>

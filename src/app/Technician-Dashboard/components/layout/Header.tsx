@@ -14,7 +14,7 @@ export default function Header() {
         </button>
         <div>
           <h1 className="text-lg font-bold text-gray-900">Good Morning, Jahid Hasan 👋</h1>
-          <p className="text-sm text-gray-500">Here's your work overview for today.</p>
+          <p className="text-sm text-gray-500">Here&apos;s your work overview for today.</p>
         </div>
       </div>
 

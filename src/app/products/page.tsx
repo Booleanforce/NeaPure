@@ -7,10 +7,7 @@ import CategoryTabs from "./components/CategoryTabs";
 import ProductSection from "./components/ProductSection";
 import ProductDetailModal from "./components/ProductDetailModal";
 import SmartCareSection from "./components/ecoSystemSection";
-<<<<<<< HEAD
-=======
 import { useGetCategoriesQuery, useGetProductsQuery } from "@/features/products/api/productsApi";
->>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
 export default function ProductsPage() {
   const [active, setActive] = useState("all");
@@ -68,11 +65,7 @@ export default function ProductsPage() {
         onClose={() => setSelectedSlug(null)}
       />
 
-<<<<<<< HEAD
       <SmartCareSection />
-=======
-            <SmartCareSection />
->>>>>>> 02ec055c2225ae4c379ee496ee3cdecace9fe8a1
 
     </main>
   );
