@@ -1,5 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
-
 "use client";
 
 import { useState } from "react";
@@ -50,12 +48,10 @@ export default function LoginPage() {
     setGlobalError("");
 
     try {
-      // NOTE: Using unwrap() to extract payload or catch the error
       const response = await loginApi({ email: data.email, password: data.password }).unwrap();
 
       console.log("Login response:", response);
 
-      // Save to Redux store
       dispatch(setCredentials({ user: response.user, token: response.access_token || response.token }));
 
       const role = response.user?.role;
@@ -295,7 +291,7 @@ export default function LoginPage() {
 
               <p className="mt-7 text-center text-sm text-white/45">
 
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
 
                 <button
                   type="button"
@@ -313,7 +309,7 @@ export default function LoginPage() {
           {/* FOOTER */}
 
           <p className="mt-5 text-center text-xs text-white/30">
-            © {new Date().getFullYear()} Neapure.
+            &copy; {new Date().getFullYear()} Neapure.
             All rights reserved.
           </p>
 
@@ -326,7 +322,7 @@ export default function LoginPage() {
 
 /* =========================================================
    MAIL ICON
-========================================================= */
+======================================================== */
 
 function MailIcon({
   className,
@@ -359,7 +355,7 @@ function MailIcon({
 
 /* =========================================================
    LOCK ICON
-========================================================= */
+======================================================== */
 
 function LockIcon({
   className,
@@ -392,7 +388,7 @@ function LockIcon({
 
 /* =========================================================
    EYE ICON
-========================================================= */
+======================================================== */
 
 function EyeIcon({
   className,
@@ -423,7 +419,7 @@ function EyeIcon({
 
 /* =========================================================
    EYE OFF ICON
-========================================================= */
+======================================================== */
 
 function EyeOffIcon({
   className,

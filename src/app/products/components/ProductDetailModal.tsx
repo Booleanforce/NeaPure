@@ -169,6 +169,10 @@ export default function ProductDetailModal({
         }
       }
 
+      /* ---------------------------------------------------------------------- */
+      /* Set Product                                                            */
+      /* ---------------------------------------------------------------------- */
+
       setProduct({
         ...data,
         images: normalizedImages,
@@ -258,9 +262,9 @@ export default function ProductDetailModal({
       onClose={onClose}
       size="xl"
     >
-      {/* ====================================================================== */
-      /* LOADING                                                                 */
-      /* ====================================================================== */}
+      {/* ====================================================================== */}
+      {/* LOADING                                                                 */}
+      {/* ====================================================================== */}
 
       {loading ? (
         <div className="flex min-h-[500px] items-center justify-center">
@@ -295,21 +299,22 @@ export default function ProductDetailModal({
 
         <div className="p-6">
 
-          {/* ================================================================== */
-          /* TOP: IMAGE + BASIC INFO                                            */
-          /* ================================================================== */}
+          {/* ================================================================== */}
+          {/* TOP: IMAGE + BASIC INFO                                            */}
+          {/* ================================================================== */}
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
 
-            {/* ================================================================= */
-            /* IMAGE GALLERY                                                      */
-            /* ================================================================= */}
+            {/* ================================================================= */}
+            {/* IMAGE GALLERY                                                      */}
+            {/* ================================================================= */}
 
             <div className="space-y-4">
 
               {/* Main Image */}
 
               <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-50">
+
                 {galleryImages.length > 0 ? (
                   <Image
                     src={
@@ -338,6 +343,7 @@ export default function ProductDetailModal({
 
                 {galleryImages.length > 1 && (
                   <>
+                    {/* Previous */}
                     <button
                       type="button"
                       onClick={() =>
@@ -354,6 +360,7 @@ export default function ProductDetailModal({
                       <ChevronLeft className="h-5 w-5 text-gray-700" />
                     </button>
 
+                    {/* Next */}
                     <button
                       type="button"
                       onClick={() =>
@@ -374,7 +381,9 @@ export default function ProductDetailModal({
                 )}
               </div>
 
-              {/* Thumbnails */}
+              {/* ================================================================= */}
+              {/* THUMBNAILS                                                        */}
+              {/* ================================================================= */}
 
               {galleryImages.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-1">
@@ -411,9 +420,9 @@ export default function ProductDetailModal({
               )}
             </div>
 
-            {/* ================================================================= */
-            /* PRODUCT INFORMATION                                                */
-            /* ================================================================= */}
+            {/* ================================================================= */}
+            {/* PRODUCT INFORMATION                                                */}
+            {/* ================================================================= */}
 
             <div className="space-y-6">
 
@@ -489,9 +498,9 @@ export default function ProductDetailModal({
             </div>
           </div>
 
-          {/* ================================================================== */
-          /* BOTTOM: DETAILS                                                     */
-          /* ================================================================== */}
+          {/* ================================================================== */}
+          {/* BOTTOM: DETAILS                                                     */}
+          {/* ================================================================== */}
 
           <div className="mt-10 space-y-6">
 
@@ -499,6 +508,7 @@ export default function ProductDetailModal({
 
             {product.key_features && (
               <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+
                 <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900">
                   <CheckCircle className="h-5 w-5 text-blue-500" />
                   Key Features
@@ -529,7 +539,7 @@ export default function ProductDetailModal({
                           key={key}
                           className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
                             index !==
-                            technicalSpecEntries.length - 1
+                              technicalSpecEntries.length - 1
                               ? "border-b border-gray-200"
                               : ""
                           }`}
@@ -562,6 +572,7 @@ export default function ProductDetailModal({
 
                 <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-gray-900">
                   <Package className="h-5 w-5 text-blue-500" />
+
                   What&apos;s in the Box
                 </h3>
 
@@ -580,6 +591,7 @@ export default function ProductDetailModal({
               product.recommended_replacement_months !==
                 undefined && (
                 <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
+
                   <p className="text-sm text-blue-700">
                     Recommended filter replacement
                     every{" "}
@@ -589,6 +601,7 @@ export default function ProductDetailModal({
                       }{" "}
                       months
                     </strong>{" "}
+
                     for optimal performance.
                   </p>
                 </div>

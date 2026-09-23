@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Upload, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "react-toastify";
@@ -46,8 +46,6 @@ export default function BookServicePage() {
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema),
@@ -70,16 +68,6 @@ export default function BookServicePage() {
 
   const [createBookingApi] = useCreateBookingMutation();
 
-  useEffect(() => {
-    if (attachment) {
-      const objectUrl = URL.createObjectURL(attachment);
-      setPreview(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
-    } else {
-      setPreview(null);
-    }
-  }, [attachment]);
-
   const onSubmit = async (data: BookingFormValues) => {
     try {
       setSubmitStatus("idle");
@@ -96,7 +84,7 @@ export default function BookServicePage() {
       
       setBookingId(response.booking_id || "REF-UNKNOWN");
       setSubmitStatus("success");
-      toast.success(`Booking created successfully! Ref: ${response.booking_id || 'N/A'}`);
+      toast.success(`Booking created successfully! Ref: ${response.booking_id || "N/A"}`);
     } catch (error: any) {
       console.error("Booking Error:", error);
       setSubmitStatus("error");
@@ -435,7 +423,12 @@ export default function BookServicePage() {
                               type="file"
                               className="sr-only"
                               accept="image/*"
-                              onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                setAttachment(file);
+                                if (preview) URL.revokeObjectURL(preview);
+                                setPreview(file ? URL.createObjectURL(file) : null);
+                              }}
                             />
                           </label>
                           <p className="pl-1">or drag and drop</p>

@@ -11,6 +11,7 @@
 
 import { useEffect } from "react";
 import { Droplet } from "lucide-react";
+import Link from "next/link";
 
 export default function Error({
   error,
@@ -101,12 +102,12 @@ export default function Error({
           >
             Try again
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center rounded-xl border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-slate-800"
           >
             Go to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

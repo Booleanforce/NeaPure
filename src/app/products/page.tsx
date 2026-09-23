@@ -65,7 +65,7 @@ export default function ProductsPage() {
         onClose={() => setSelectedSlug(null)}
       />
 
-            <SmartCareSection />
+      <SmartCareSection />
 
     </main>
   );

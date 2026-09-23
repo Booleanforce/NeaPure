@@ -69,27 +69,27 @@ const initialForm: EditProductFormState = {
   slug: "",
   sku: "",
 
-  category_id: "",
+    category_id: "",
 
-  product_type: "FILTER",
+    product_type: "FILTER",
 
-  price: "",
+    price: "",
 
-  perfect_for: "",
+    perfect_for: "",
 
-  short_description: "",
+    short_description: "",
 
-  key_features: "",
+    key_features: "",
 
-  technical_specs: "",
+    technical_specs: "",
 
-  package_includes: "",
+    package_includes: "",
 
-  warranty_duration_months: "12",
+    warranty_duration_months: "12",
 
-  recommended_replacement_months: "6",
+    recommended_replacement_months: "6",
 
-  status: "ACTIVE",
+    status: "ACTIVE",
 
   is_featured: false,
 
@@ -606,9 +606,7 @@ export default function EditProductModal({
                 }
                 className="rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving
-                  ? "Saving..."
-                  : "Save Changes"}
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </>
