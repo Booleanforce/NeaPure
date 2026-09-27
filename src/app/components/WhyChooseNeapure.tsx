@@ -112,7 +112,7 @@ export default function WhyChooseNeaPure() {
               {isPlaying ? (
                 <video
                   src={video.src}
-                  poster={video.poster}
+                  poster="/images/family-image.png"
                   className="aspect-video w-full bg-black object-cover"
                   controls
                   autoPlay
@@ -122,7 +122,7 @@ export default function WhyChooseNeaPure() {
               ) : (
                 <>
                   <Image
-                    src={video.poster}
+                    src="/images/family.png"
                     alt="NeaPure Family"
                     width={1200}
                     height={700}
@@ -224,7 +224,7 @@ export default function WhyChooseNeaPure() {
                       }`}
                     >
                       <Image
-                        src={chapter.thumbnail}
+                        src="/images/family-image.png"
                         alt={chapter.title}
                         width={320}
                         height={180}
