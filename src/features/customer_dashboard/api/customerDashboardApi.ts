@@ -47,7 +47,7 @@ function apiUserToProfile(u: ApiUser): CustomerProfile {
 export const customerDashboardApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getProfile: builder.query<CustomerProfile, void>({
-      query: () => "auth/me/",
+      query: () => "auth/me",
       transformResponse: (response: ApiUser) => apiUserToProfile(response),
       providesTags: ["User"],
     }),
@@ -60,7 +60,7 @@ export const customerDashboardApi = api.injectEndpoints({
         if (updates.language !== undefined) payload.language = updates.language === "Bangla" ? "bn" : "en";
 
         return {
-          url: "auth/me/",
+          url: "auth/me",
           method: "PATCH",
           body: payload,
         };
@@ -74,7 +74,7 @@ export const customerDashboardApi = api.injectEndpoints({
         formData.append("photo", file);
 
         return {
-          url: "auth/avatar/",
+          url: "auth/avatar",
           method: "POST",
           body: formData,
         };
