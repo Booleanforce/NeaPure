@@ -12,7 +12,7 @@ import "swiper/css/navigation";
 
 /* ---------- Small building blocks ---------- */
 
-function CheckIcon({ className = "" }) {
+function CheckIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 20 20" fill="none" className={className}>
       <circle cx="10" cy="10" r="10" fill="#2f6fed" />
@@ -28,7 +28,7 @@ function CheckIcon({ className = "" }) {
 }
 
 // Stylised dispenser illustration — used only as a fallback if p.image is missing.
-function Dispenser({ tone = "dark" }) {
+function Dispenser({ tone = "dark" }: { tone?: string }) {
   const isDark = tone === "dark";
   const body = isDark ? "#171c25" : "#f6f8f9";
   const bodyEdge = isDark ? "#2a3140" : "#e4e8eb";
@@ -102,7 +102,7 @@ const products = [
   },
 ];
 
-function DetailsButton({ variant = "filled" }) {
+function DetailsButton({ variant = "filled" }: { variant?: string }) {
   if (variant === "outline") {
     return (
       <button
@@ -123,7 +123,7 @@ function DetailsButton({ variant = "filled" }) {
   );
 }
 
-function ProductCard({ p }) {
+function ProductCard({ p }: { p: any }) {
   return (
     <div className="relative h-full overflow-hidden rounded-[20px]" style={{ minHeight: 420 }}>
       {/* background photo — fills the whole card */}
@@ -154,7 +154,7 @@ function ProductCard({ p }) {
             <p className={`mt-1 text-sm ${p.subtitleClass}`}>{p.subtitle}</p>
           </div>
           <ul className="flex flex-col gap-2.5">
-            {p.features.map((f) => (
+            {p.features?.map((f: string) => (
               <li key={f} className="flex items-center gap-2 text-sm">
                 <CheckIcon className="h-4 w-4 shrink-0" />
                 <span>{f}</span>
