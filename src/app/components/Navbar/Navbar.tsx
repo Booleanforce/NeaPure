@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState,useEffect } from "react";
-import { Phone, ShoppingCart, Droplet, Menu, X, LogIn} from "lucide-react";
-
+import { useState, useEffect } from "react";
+import { Phone, ShoppingCart, Droplet, Menu, X, LogIn } from "lucide-react";
+import { useSelector } from "react-redux";
+import { selectCartCount } from "@/features/cart/slices/cartSlice";
+import type { RootState } from "@/store/store";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -18,7 +20,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const cartCount = 2;
+  const cartCount = useSelector((state: RootState) => selectCartCount(state));
   useEffect(() => {
   const handleScroll = () => {
     const currentScrollY = window.scrollY;

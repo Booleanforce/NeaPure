@@ -2,6 +2,9 @@
 
 import React from "react";
 import Image from "next/image";
+import { useDispatch } from "react-redux";
+import { ShoppingCart } from "lucide-react";
+import { addToCart } from "@/features/cart/slices/cartSlice";
 
 /* ---------- Small building blocks ---------- */
 
@@ -95,30 +98,53 @@ const products = [
   },
 ];
 
-function DetailsButton({ variant = "filled" }) {
-  if (variant === "outline") {
-    return (
+function DetailsButton({ variant = "filled", onAddToCart }: { variant?: string; onAddToCart?: () => void }) {
+  const base =
+    "inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors";
+  const outline =
+    "border border-white/70 text-white hover:bg-white/10";
+  const filled =
+    "bg-[#2f6fed] text-white hover:bg-[#255ed1]";
+
+  return (
+    <>
       <button
         type="button"
-        className="rounded-full border border-white/70 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        className={`${base} ${variant === "outline" ? outline : filled}`}
       >
         View Details
       </button>
-    );
-  }
-  return (
-    <button
-      type="button"
-      className="rounded-full bg-[#2f6fed] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#255ed1]"
-    >
-      View Details
-    </button>
+      {onAddToCart && (
+        <button
+          type="button"
+          onClick={onAddToCart}
+          className={`${base} ${variant === "outline" ? outline : filled}`}
+        >
+          <ShoppingCart className="h-4 w-4" />
+          Add to Cart
+        </button>
+      )}
+    </>
   );
 }
 
 /* ---------- Main section ---------- */
 
 export default function OurProduct() {
+  const dispatch = useDispatch();
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    dispatch(
+      addToCart({
+        productId: product.key,
+        name: product.name,
+        price: Number(product.price.replace(/[^0-9]/g, "")),
+        image: product.image || "/images/kit.png",
+        quantity: 1,
+      })
+    );
+  };
+
   return (
     <div className="w-full bg-white px-4 py-12 md:px-10 md:py-16">
       <section
@@ -185,7 +211,10 @@ export default function OurProduct() {
 
                 <div className="flex flex-col items-start gap-3">
                   <p className="text-3xl font-bold">{p.price}</p>
-                  <DetailsButton variant={p.buttonVariant} />
+                  <DetailsButton
+                    variant={p.buttonVariant}
+                    onAddToCart={() => handleAddToCart(p)}
+                  />
                 </div>
               </div>
             </div>

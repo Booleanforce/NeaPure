@@ -58,12 +58,12 @@ export default function HomePage() {
               SMART WATER CARE
             </div>
             
-            <h1 className="text-5xl font-bold leading-tight">
+            <h1 className="text-5xl font-bold leading-tight text-gray-900">
               Complete Care for <br />
               <span className="text-blue-600">Pure & Healthy Water</span>
             </h1>
             
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-800 leading-relaxed">
               Advanced purification technology that removes 99.99% of impurities and delivers healthy, safe and great tasting water for your home.
             </p>
             
@@ -122,8 +122,8 @@ export default function HomePage() {
               <div key={index} className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">{feature.title}</h3>
-                  <p className="text-gray-500 text-xs">{feature.description}</p>
+                   <h3 className="font-semibold text-gray-900 text-sm">{feature.title}</h3>
+                   <p className="text-gray-700 text-xs">{feature.description}</p>
                 </div>
               </div>
             ))}
@@ -144,7 +144,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-bold text-gray-900 text-sm">{product.title}</h3>
               </div>
-              <p className="text-gray-500 text-xs mb-4 leading-relaxed">{product.description}</p>
+               <p className="text-gray-700 text-xs mb-4 leading-relaxed">{product.description}</p>
               <img
                 src="/filter.svg"
                 alt="Water Filter"
@@ -167,7 +167,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold text-gray-900">
               See How Our <span className="text-blue-600">Service Works</span>
             </h2>
-            <p className="text-gray-500 text-sm mt-1">Expert service for your water purification needs</p>
+            <p className="text-gray-700 text-sm mt-1">Expert service for your water purification needs</p>
           </div>
           <button className="flex items-center px-6 py-2 border-2 border-gray-300 rounded-full text-gray-700 font-semibold hover:border-blue-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
             View All Videos
@@ -193,10 +193,10 @@ export default function HomePage() {
                 <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {index + 1}
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 text-sm">{video.title}</h3>
-                  <p className="text-gray-500 text-xs">{video.description}</p>
-                </div>
+                 <div>
+                   <h3 className="font-bold text-gray-900 text-sm">{video.title}</h3>
+                   <p className="text-gray-700 text-xs">{video.description}</p>
+                 </div>
               </div>
             </div>
           ))}
