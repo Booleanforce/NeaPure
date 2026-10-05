@@ -20,6 +20,7 @@
     "react-redux": "^9.3.0",
     "react-toastify": "^11.1.0",
     "slugify": "^1.6.9",
+    "swiper": "^14.2.0",
     "toastify": "^2.0.1",
     "zod": "^3.25.76"
   },

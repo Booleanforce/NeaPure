@@ -8,7 +8,7 @@ import { addToCart } from "@/features/cart/slices/cartSlice";
 
 /* ---------- Small building blocks ---------- */
 
-function CheckIcon({ className = "" }) {
+function CheckIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 20 20" fill="none" className={className}>
       <circle cx="10" cy="10" r="10" fill="#2f6fed" />
@@ -24,7 +24,7 @@ function CheckIcon({ className = "" }) {
 }
 
 // Stylised dispenser illustration — used only as a fallback if p.image is missing.
-function Dispenser({ tone = "dark" }) {
+function Dispenser({ tone = "dark" }: { tone?: string }) {
   const isDark = tone === "dark";
   const body = isDark ? "#171c25" : "#f6f8f9";
   const bodyEdge = isDark ? "#2a3140" : "#e4e8eb";
@@ -128,6 +128,55 @@ function DetailsButton({ variant = "filled", onAddToCart }: { variant?: string; 
   );
 }
 
+function ProductCard({ p }: { p: any }) {
+  return (
+    <div className="relative h-full overflow-hidden rounded-[20px]" style={{ minHeight: 420 }}>
+      {/* background photo — fills the whole card */}
+      {p.image ? (
+        <Image
+          src={p.image}
+          alt={p.name}
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 33vw"
+        />
+      ) : (
+        <div className="absolute inset-0">
+          <Dispenser tone={p.tone} />
+        </div>
+      )}
+
+      {/* readability scrim so text sits legibly over the photo */}
+      <div className={`pointer-events-none absolute inset-0 ${p.overlayClass}`} />
+
+      {/* text overlay */}
+      <div
+        className={`relative z-10 flex h-full min-h-[420px] flex-col justify-between p-6 ${p.textClass}`}
+      >
+        <div className="flex flex-col items-start gap-3">
+          <div>
+            <h3 className="text-2xl font-bold leading-tight">{p.name}</h3>
+            <p className={`mt-1 text-sm ${p.subtitleClass}`}>{p.subtitle}</p>
+          </div>
+          <ul className="flex flex-col gap-2.5">
+            {p.features?.map((f: string) => (
+              <li key={f} className="flex items-center gap-2 text-sm">
+                <CheckIcon className="h-4 w-4 shrink-0" />
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex flex-col items-start gap-3">
+          <p className="text-3xl font-bold">{p.price}</p>
+          <DetailsButton variant={p.buttonVariant} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Main section ---------- */
 
 export default function OurProduct() {
@@ -221,6 +270,37 @@ export default function OurProduct() {
           ))}
         </div>
       </section>
+
+      {/* Swiper theme overrides to match the brand color + keep controls visible on all devices */}
+      <style jsx global>{`
+        .product-swiper .swiper-button-next,
+        .product-swiper .swiper-button-prev {
+          color: #2f6fed;
+          background: rgba(255, 255, 255, 0.9);
+          width: 36px;
+          height: 36px;
+          border-radius: 9999px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+        .product-swiper .swiper-button-next::after,
+        .product-swiper .swiper-button-prev::after {
+          font-size: 14px;
+          font-weight: 700;
+        }
+        @media (max-width: 640px) {
+          .product-swiper .swiper-button-next,
+          .product-swiper .swiper-button-prev {
+            display: none; /* mobile-এ শুধু swipe/dots দিয়ে চালানো হবে */
+          }
+        }
+        .product-swiper .swiper-pagination-bullet {
+          background: #2f6fed;
+          opacity: 0.35;
+        }
+        .product-swiper .swiper-pagination-bullet-active {
+          opacity: 1;
+        }
+      `}</style>
     </div>
   );
 }
