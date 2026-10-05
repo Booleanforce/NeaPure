@@ -2,13 +2,9 @@
 
 import React from "react";
 import Image from "next/image";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Navigation, A11y } from "swiper/modules";
-
-// Swiper core + module CSS — must be imported once (e.g. in this file or globally)
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
+import { useDispatch } from "react-redux";
+import { ShoppingCart } from "lucide-react";
+import { addToCart } from "@/features/cart/slices/cartSlice";
 
 /* ---------- Small building blocks ---------- */
 
@@ -102,24 +98,33 @@ const products = [
   },
 ];
 
-function DetailsButton({ variant = "filled" }: { variant?: string }) {
-  if (variant === "outline") {
-    return (
+function DetailsButton({ variant = "filled", onAddToCart }: { variant?: string; onAddToCart?: () => void }) {
+  const base =
+    "inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors";
+  const outline =
+    "border border-white/70 text-white hover:bg-white/10";
+  const filled =
+    "bg-[#2f6fed] text-white hover:bg-[#255ed1]";
+
+  return (
+    <>
       <button
         type="button"
-        className="rounded-full border border-white/70 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+        className={`${base} ${variant === "outline" ? outline : filled}`}
       >
         View Details
       </button>
-    );
-  }
-  return (
-    <button
-      type="button"
-      className="rounded-full bg-[#2f6fed] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#255ed1]"
-    >
-      View Details
-    </button>
+      {onAddToCart && (
+        <button
+          type="button"
+          onClick={onAddToCart}
+          className={`${base} ${variant === "outline" ? outline : filled}`}
+        >
+          <ShoppingCart className="h-4 w-4" />
+          Add to Cart
+        </button>
+      )}
+    </>
   );
 }
 
@@ -175,6 +180,20 @@ function ProductCard({ p }: { p: any }) {
 /* ---------- Main section ---------- */
 
 export default function OurProduct() {
+  const dispatch = useDispatch();
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    dispatch(
+      addToCart({
+        productId: product.key,
+        name: product.name,
+        price: Number(product.price.replace(/[^0-9]/g, "")),
+        image: product.image || "/images/kit.png",
+        quantity: 1,
+      })
+    );
+  };
+
   return (
     <div className="w-full bg-white px-4 py-12 md:px-10 md:py-16">
       <section
@@ -194,29 +213,61 @@ export default function OurProduct() {
           </h2>
         </div>
 
-        {/* Slider — 1 slide on mobile, 2 on tablet, 3 on desktop */}
-        <div className="product-swiper w-full">
-          <Swiper
-            modules={[Pagination, Navigation, A11y]}
-            spaceBetween={20}
-            slidesPerView={1.05}
-            centeredSlides={false}
-            navigation
-            pagination={{ clickable: true }}
-            breakpoints={{
-              480: { slidesPerView: 1.15, spaceBetween: 16 },
-              640: { slidesPerView: 1.4, spaceBetween: 18 },
-              768: { slidesPerView: 2, spaceBetween: 20 },
-              1024: { slidesPerView: 3, spaceBetween: 24 },
-            }}
-            className="!pb-12"
-          >
-            {products.map((p) => (
-              <SwiperSlide key={p.key} className="!h-auto">
-                <ProductCard p={p} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+        {/* Cards */}
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
+          {products.map((p) => (
+            <div
+              key={p.key}
+              className="relative overflow-hidden rounded-[20px]"
+              style={{ minHeight: 420 }}
+            >
+              {/* background photo — fills the whole card */}
+              {p.image ? (
+                <Image
+                  src={p.image}
+                  alt={p.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              ) : (
+                <div className="absolute inset-0">
+                  <Dispenser tone={p.tone} />
+                </div>
+              )}
+
+              {/* readability scrim so text sits legibly over the photo */}
+              <div className={`pointer-events-none absolute inset-0 ${p.overlayClass}`} />
+
+              {/* text overlay */}
+              <div
+                className={`relative z-10 flex h-full min-h-[420px] flex-col justify-between p-6 ${p.textClass}`}
+              >
+                <div className="flex flex-col items-start gap-3">
+                  <div>
+                    <h3 className="text-2xl font-bold leading-tight">{p.name}</h3>
+                    <p className={`mt-1 text-sm ${p.subtitleClass}`}>{p.subtitle}</p>
+                  </div>
+                  <ul className="flex flex-col gap-2.5">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2 text-sm">
+                        <CheckIcon className="h-4 w-4 shrink-0" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="flex flex-col items-start gap-3">
+                  <p className="text-3xl font-bold">{p.price}</p>
+                  <DetailsButton
+                    variant={p.buttonVariant}
+                    onAddToCart={() => handleAddToCart(p)}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

@@ -159,7 +159,7 @@ export default function ServiceJourney() {
   return (
         <section className="w-full bg-white py-20">
         <div className="max-w-7xl mx-auto px-8">
-            <h2 className="mb-16 text-center text-4xl font-bold">
+            <h2 className="mb-16 text-center text-4xl font-bold text-gray-900">
             Your Neapure{" "}
             <span className="text-[#155DFC]">Service Journey</span>
             </h2>
@@ -170,7 +170,7 @@ export default function ServiceJourney() {
                 <div className="flex flex-col items-center">
                     <step.Icon />
 
-                    <p className="mt-4 whitespace-pre-line text-center text-[15px] font-bold leading-6">
+                    <p className="mt-4 whitespace-pre-line text-center text-[15px] font-bold leading-6 text-gray-900">
                     {step.label}
                     </p>
                 </div>
