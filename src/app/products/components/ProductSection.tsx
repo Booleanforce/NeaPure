@@ -6,8 +6,6 @@ import { Product } from "@/services/product.service";
 
 /* -------------------------------------------------------------------------- */
 /*  NoData (reusable empty state)                                             */
-/*  Chaile eta alada file e (components/NoData.tsx) move kore export korte    */
-/*  paro, onno page e reuse korar jonno.                                      */
 /* -------------------------------------------------------------------------- */
 
 interface NoDataProps {
@@ -60,7 +58,7 @@ export function NoData({
         <button
           type="button"
           onClick={onAction}
-          className="mt-6 rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium transition hover:bg-gray-100"
+          className="mt-6 rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-gray-100"
         >
           {actionLabel}
         </button>
@@ -82,36 +80,64 @@ export default function ProductSection({ products, onViewDetails }: Props) {
   const hasProducts = Array.isArray(products) && products.length > 0;
 
   return (
-    <section className="container mx-auto py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Water Purifiers</h2>
-          <p className="text-gray-500">Advanced purification technology.</p>
+    <section className="w-full bg-white text-gray-900">
+      <div className="container mx-auto px-4 py-10">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="flex items-center gap-2 text-3xl font-bold text-gray-900">
+              <svg
+                className="h-6 w-6 text-blue-600"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M12 2.5s6 6.2 6 11a6 6 0 11-12 0c0-4.8 6-11 6-11z" />
+              </svg>
+              Water Purifiers
+            </h2>
+            <p className="mt-1 text-gray-500">
+              Advanced technology. Elegant design. Complete protection.
+            </p>
+          </div>
+
+          {hasProducts && (
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-full border border-blue-600 px-5 py-3 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+            >
+              <span aria-hidden="true">↔</span> Compare Models
+            </button>
+          )}
         </div>
 
-        {hasProducts && (
-          <button className="rounded-full border px-5 py-3">
-            Compare Models
-          </button>
+        {hasProducts ? (
+          <>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onViewDetails={onViewDetails}
+                />
+              ))}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                className="rounded-full border border-blue-600 px-6 py-2.5 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+              >
+                View All Water Purifiers →
+              </button>
+            </div>
+          </>
+        ) : (
+          <NoData
+            title="No products available"
+            description="We couldn't find any water purifiers right now. Please check back later."
+          />
         )}
       </div>
-
-      {hasProducts ? (
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onViewDetails={onViewDetails}
-            />
-          ))}
-        </div>
-      ) : (
-        <NoData
-          title="No products available"
-          description="We couldn't find any water purifiers right now. Please check back later."
-        />
-      )}
     </section>
   );
 }

@@ -16,8 +16,8 @@ const API_BASE_URL =
 ============================================================================ */
 
 const PUBLIC_GET_ENDPOINTS = [
-  "/api/products/products/",
-  "/api/products/categories/",
+  "/api/products",
+  "/api/products/categories",
 ];
 
 const PUBLIC_POST_ENDPOINTS = [
@@ -276,10 +276,10 @@ async function request<T = unknown>(
    *
    * Therefore:
    *
-   * GET  /api/products/products/   -> public
-   * POST /api/products/products/   -> protected
-   * PATCH /api/products/products/ -> protected
-   * DELETE /api/products/products/ -> protected
+   * GET  /api/products/   -> public
+   * POST /api/products/   -> protected
+   * PATCH /api/products/ -> protected
+   * DELETE /api/products/ -> protected
    */
 
   if (
@@ -354,7 +354,7 @@ async function request<T = unknown>(
        * Only public requests should be treated
        * as unauthenticated public requests.
        *
-       * POST /api/products/products/
+       * POST /api/products/
        * is NOT public anymore.
        */
 

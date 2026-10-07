@@ -63,7 +63,7 @@ export default async function ProductDetails({
       />
 
       <RelatedProducts
-        products={related.results.filter(
+       products={(Array.isArray(related) ? related : related.results).filter(
           (item) =>
             item.slug !== product.slug
         )}

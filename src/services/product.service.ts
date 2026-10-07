@@ -246,7 +246,7 @@ export const productService = {
    * Get paginated products.
    *
    * GET
-   * /api/products/products/
+   * /api/products/
    */
   async getProducts(
     search = "",
@@ -267,7 +267,7 @@ export const productService = {
     );
 
     return apiClient.get<ProductListResponse>(
-      `/api/products/products/?${params.toString()}`
+      `/api/products?${params.toString()}`
     );
   },
 
@@ -275,13 +275,13 @@ export const productService = {
    * Get a single product by slug.
    *
    * GET
-   * /api/products/products/{slug}/
+   * /api/products/{slug}/
    */
   async getProduct(
     slug: string
   ): Promise<Product> {
     return apiClient.get<Product>(
-      `/api/products/products/${slug}/`
+      `/api/products/${slug}`
     );
   },
 
@@ -289,13 +289,13 @@ export const productService = {
    * Create product.
    *
    * POST
-   * /api/products/products/
+   * /api/products/
    */
   async createProduct(
     data: CreateProductPayload
   ): Promise<Product> {
     return apiClient.post<Product>(
-      "/api/products/products/",
+      "/api/products",
       data
     );
   },
@@ -304,14 +304,14 @@ export const productService = {
    * Update product.
    *
    * PATCH
-   * /api/products/products/{slug}/
+   * /api/products/{slug}/
    */
   async updateProduct(
     slug: string,
     data: UpdateProductPayload
   ): Promise<Product> {
     return apiClient.patch<Product>(
-      `/api/products/products/${slug}/`,
+      `/api/products/${slug}`,
       data
     );
   },
@@ -320,13 +320,13 @@ export const productService = {
    * Delete product.
    *
    * DELETE
-   * /api/products/products/{slug}/
+   * /api/products/{slug}/
    */
   async deleteProduct(
     slug: string
   ): Promise<void> {
     await apiClient.delete(
-      `/api/products/products/${slug}/`
+      `/api/products/${slug}`
     );
   },
 
@@ -343,7 +343,7 @@ export const productService = {
     return apiClient.get<
       Category[] | CategoryListResponse
     >(
-      "/api/products/categories/"
+      "/api/products/categories"
     );
   },
 
@@ -354,7 +354,7 @@ export const productService = {
     slug: string
   ): Promise<Category> {
     return apiClient.get<Category>(
-      `/api/products/categories/${slug}/`
+      `/api/products/categories/${slug}`
     );
   },
 
@@ -365,7 +365,7 @@ export const productService = {
     data: Pick<Category, "name" | "description">
   ): Promise<Category> {
     return apiClient.post<Category>(
-      "/api/products/categories/",
+      "/api/products/categories",
       data
     );
   },
@@ -380,7 +380,7 @@ export const productService = {
     >
   ): Promise<Category> {
     return apiClient.patch<Category>(
-      `/api/products/categories/${slug}/`,
+      `/api/products/categories/${slug}`,
       data
     );
   },
@@ -392,7 +392,7 @@ export const productService = {
     slug: string
   ): Promise<void> {
     await apiClient.delete(
-      `/api/products/categories/${slug}/`
+      `/api/products/categories/${slug}`
     );
   },
 
@@ -404,7 +404,7 @@ export const productService = {
    * Upload a product image.
    *
    * POST
-   * /api/products/products/{slug}/upload_image/
+   * /api/products/{slug}/upload_image/
    */
   async uploadImage(
     slug: string,
@@ -430,7 +430,7 @@ export const productService = {
     );
 
     return apiClient.post<Product>(
-      `/api/products/products/${slug}/upload_image/`,
+      `/api/products/${slug}/upload_image`,
       formData
     );
   },
@@ -443,7 +443,7 @@ export const productService = {
    * Get featured products.
    *
    * GET
-   * /api/products/products/featured/
+   * /api/products/featured/
    */
   async getFeaturedProducts(): Promise<
     Product[] | ProductListResponse
@@ -451,7 +451,7 @@ export const productService = {
     return apiClient.get<
       Product[] | ProductListResponse
     >(
-      "/api/products/products/featured/"
+      "/api/products/featured"
     );
   },
 };
