@@ -12,11 +12,12 @@ import {
   ArrowRight,
   Clock3,
   ShieldCheck,
-  History as HistoryIcon,
+  Headset,
   BadgeCheck,
+  Droplets,
 } from "lucide-react";
 
-import { customerJourney, } from "./customerExperienceData";
+import { customerJourney } from "./customerExperienceData";
 
 const icons = {
   ShoppingCart,
@@ -29,187 +30,175 @@ const icons = {
   Package,
   Smile,
 };
+
+/* Each step gets its own colour, same order as the reference design */
+const palette = [
+  { badge: "bg-blue-500", tile: "from-blue-600 to-sky-500", line: "bg-blue-500" },
+  { badge: "bg-cyan-500", tile: "from-cyan-500 to-sky-400", line: "bg-cyan-400" },
+  { badge: "bg-indigo-500", tile: "from-indigo-500 to-violet-500", line: "bg-indigo-500" },
+  { badge: "bg-emerald-500", tile: "from-emerald-500 to-teal-400", line: "bg-emerald-500" },
+  { badge: "bg-blue-600", tile: "from-blue-600 to-blue-500", line: "bg-blue-600" },
+  { badge: "bg-purple-500", tile: "from-purple-600 to-fuchsia-500", line: "bg-purple-500" },
+  { badge: "bg-emerald-600", tile: "from-emerald-600 to-green-500", line: "bg-emerald-500" },
+  { badge: "bg-blue-500", tile: "from-blue-600 to-sky-500", line: "bg-blue-500" },
+  { badge: "bg-fuchsia-500", tile: "from-fuchsia-500 to-pink-500", line: "bg-fuchsia-500" },
+];
+
+const FEATURED_INDEX = 4; // step 05 – Warranty Activated
+
 const kpiData = [
-  {
-    title: "24 Hours",
-    subtitle: "Installation Support",
-    icon: Clock3,
-    color: "from-sky-500 to-cyan-400",
-  },
-  {
-    title: "100%",
-    subtitle: "Digital Warranty",
-    icon: ShieldCheck,
-    color: "from-blue-600 to-indigo-500",
-  },
-  {
-    title: "Lifetime",
-    subtitle: "Service Record",
-    icon: HistoryIcon,
-    color: "from-cyan-500 to-blue-500",
-  },
-  {
-    title: "Original",
-    subtitle: "Genuine Parts",
-    icon: BadgeCheck,
-    color: "from-emerald-500 to-teal-500",
-  },
+  { title: "24 Hours", subtitle: "Installation Support", icon: Clock3, color: "from-blue-600 to-sky-500" },
+  { title: "100%", subtitle: "Digital Warranty", icon: ShieldCheck, color: "from-indigo-500 to-violet-500" },
+  { title: "Lifetime", subtitle: "Service Record", icon: Headset, color: "from-teal-500 to-cyan-500" },
+  { title: "Original", subtitle: "Genuine Parts", icon: BadgeCheck, color: "from-emerald-500 to-green-500" },
 ];
 
 export default function CustomerExperience() {
   return (
-    <section className="bg-sky-50 py-12 sm:py-16 xl:py-18">
-      <div className="container mx-auto max-w-[1600px] px-4 sm:px-6">
+    <section className="relative overflow-hidden bg-gradient-to-b from-sky-50 via-white to-sky-50 py-12 sm:py-16 xl:py-20">
+      {/* Pop-up animation for the featured step */}
+      <style>{`
+        @keyframes pop-up {
+          0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 6px 14px rgba(37,99,235,0.18)); }
+          50% { transform: translateY(-12px) scale(1.07); filter: drop-shadow(0 22px 28px rgba(37,99,235,0.35)); }
+        }
+        .animate-pop-up { animation: pop-up 2.2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-pop-up { animation: none; transform: scale(1.04); }
+        }
+      `}</style>
 
+      {/* Soft background blobs */}
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-sky-200/50 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 -top-16 h-72 w-72 rounded-full bg-cyan-200/50 blur-3xl" />
+
+      <div className="container relative mx-auto max-w-[1600px] px-4 sm:px-6">
         {/* Heading */}
-        <div className="mb-10 sm:mb-16 text-center">
+        <div className="mb-12 text-center sm:mb-16">
+          <div className="flex items-center justify-center gap-3 sm:gap-4">
+            <span className="h-px w-10 bg-blue-500 sm:w-20" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-600 sm:text-xs sm:tracking-[0.35em]">
+              Your Journey with NeaPure
+            </span>
+            <span className="h-px w-10 bg-blue-500 sm:w-20" />
+          </div>
 
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-blue-600">
-            HOW NEAPURE WORKS
-          </span>
-
-          <h2 className="mt-3 text-2xl sm:text-3xl font-black text-slate-900 xl:text-5xl">
-            Customer Experience
+          <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl xl:text-6xl">
+            Customer <span className="text-blue-600">Experience</span>
           </h2>
 
-          <p className="mx-auto mt-3 sm:mt-4 max-w-3xl text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600 px-2">
+          <p className="mx-auto mt-3 max-w-3xl px-2 text-xs leading-6 text-slate-600 sm:mt-4 sm:text-base">
             A seamless journey from product purchase to lifetime after-sales
             support with NeaPure.
           </p>
-
         </div>
 
         {/* Timeline */}
-        <div className="grid grid-cols-3 gap-x-3 gap-y-8 sm:gap-y-10 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-9 xl:gap-x-5">
-
+        <ol className="grid grid-cols-2 gap-x-3 gap-y-9 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-5 xl:grid-cols-9 xl:gap-x-5">
           {customerJourney.map((step, index) => {
-
-            const Icon =
-              icons[step.icon as keyof typeof icons];
+            const Icon = icons[step.icon as keyof typeof icons];
+            const c = palette[index % palette.length];
+            const featured = index === FEATURED_INDEX;
 
             return (
-              <div
+              <li
                 key={step.id}
-                className="relative flex flex-col items-center text-center px-1"
+                className={`relative pt-5 ${featured ? "animate-pop-up z-10" : ""}`}
               >
+                {/* Sparkle rays on featured step */}
+                {featured && (
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 48 20"
+                    className="absolute -top-4 left-1/2 h-5 w-12 -translate-x-1/2 text-blue-500"
+                  >
+                    <path
+                      d="M6 16 L10 8 M24 14 V4 M42 16 L38 8"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  </svg>
+                )}
 
-                {/* Number */}
+                {/* Number badge */}
                 <div
-                  className="
-                    mb-2 sm:mb-4
-                    flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center
-                    rounded-lg sm:rounded-xl
-                    shadow-md
-                    text-xs sm:text-sm font-bold
-                    bg-white text-slate-600 border border-slate-200
-                  "
+                  className={`absolute left-1/2 top-0 z-10 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg ring-4 ring-white sm:h-11 sm:w-11 ${c.badge}`}
                 >
                   {step.id}
                 </div>
 
-                {/* Icon */}
-                <Icon
-                  size={28}
-                  strokeWidth={1.8}
-                  className="mb-2 sm:mb-3 text-blue-600 sm:hidden"
-                />
-                <Icon
-                  size={40}
-                  strokeWidth={1.8}
-                  className="mb-3 text-blue-600 hidden sm:block"
-                />
-
-                {/* Title */}
-                <h3 className="max-w-[120px] sm:max-w-[150px] text-xs sm:text-base font-semibold leading-5 sm:leading-7 text-slate-900">
-                  {step.title}
-                </h3>
-
-                {/* Description */}
-                <p className="mt-1 sm:mt-2 max-w-[120px] sm:max-w-[150px] text-[10px] sm:text-xs leading-4 sm:leading-6 text-slate-500">
-                  {step.description}
-                </p>
-
-                {/* Arrow */}
-                {index !== customerJourney.length - 1 && (
-                  <ArrowRight
-                    size={18}
-                    className="absolute right-[-22px] top-[58px] hidden text-blue-500 xl:block"
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-  
-        {/* KPI Section */}
-        <div className="mt-10 sm:mt-16 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-
-          {kpiData.map((item, index) => {
-
-            const Icon = item.icon;
-
-            return (
-              <div
-                key={index}
-                className="
-                  group
-                  rounded-xl sm:rounded-2xl
-                  border border-blue-100
-                  bg-white/80
-                  backdrop-blur-md
-                  p-3 sm:p-5
-                  shadow-md
-                  transition-all
-                  duration-300
-                  hover:-translate-y-1
-                  hover:shadow-xl
-                "
-              >
-                {/* Icon */}
+                {/* Card */}
                 <div
-                  className={`
-                    mb-3 sm:mb-4
-                    flex
-                    h-9 w-9 sm:h-12 sm:w-12
-                    items-center
-                    justify-center
-                    rounded-lg sm:rounded-xl
-                    bg-gradient-to-br
-                    ${item.color}
-                    text-white
-                    shadow-md
-                  `}
+                  className={`flex h-full flex-col items-center rounded-3xl border px-2 pb-3 pt-8 text-center backdrop-blur-sm transition-shadow duration-300 hover:shadow-xl ${
+                    featured
+                      ? "border-blue-200 bg-gradient-to-b from-sky-50 to-white"
+                      : "border-white bg-white/80 shadow-[0_8px_24px_-10px_rgba(30,64,175,0.25)]"
+                  }`}
                 >
-                  <Icon size={18} className="sm:hidden" />
-                  <Icon size={22} className="hidden sm:block" />
+                  <div
+                    className={`mb-2 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md ${c.tile}`}
+                  >
+                    <Icon size={22} strokeWidth={1.8} />
+                  </div>
+
+                  <h3 className="text-sm font-bold leading-[18px] text-slate-900">
+                    {step.title}
+                  </h3>
+
+                  <p className="mt-1.5 text-[11px] leading-[15px] text-slate-500">
+                    {step.description}
+                  </p>
+
+                  <div className="mt-auto pt-3">
+                    <span className={`block h-[3px] w-10 rounded-full ${c.line}`} />
+                  </div>
                 </div>
 
-                {/* Value */}
-                <h3 className="text-xl sm:text-3xl font-extrabold text-slate-900">
-                  {item.title}
-                </h3>
-
-                {/* Subtitle */}
-                <p className="mt-1 text-xs sm:text-sm text-slate-600">
-                  {item.subtitle}
-                </p>
-
-                {/* Accent Line */}
-                <div
-                  className={`
-                    mt-3 sm:mt-4
-                    h-1
-                    w-10 sm:w-12
-                    rounded-full
-                    bg-gradient-to-r
-                    ${item.color}
-                  `}
-                />
-              </div>
+                {/* Arrow between cards (desktop only) */}
+                {index !== customerJourney.length - 1 && (
+                  <span className="absolute right-[-24px] top-[78px] z-20 hidden h-7 w-7 items-center justify-center rounded-full border border-blue-100 bg-white text-blue-600 shadow-md xl:flex">
+                    <ArrowRight size={15} strokeWidth={2.5} />
+                  </span>
+                )}
+              </li>
             );
           })}
+        </ol>
 
+        {/* KPI strip */}
+        <div className="relative mt-12 overflow-hidden rounded-[2rem] border border-sky-100 bg-gradient-to-r from-sky-100/80 via-white to-white shadow-[0_12px_40px_-12px_rgba(30,64,175,0.25)] sm:mt-16">
+          <Droplets
+            aria-hidden
+            size={110}
+            strokeWidth={1.2}
+            className="pointer-events-none absolute -bottom-4 -left-2 hidden text-sky-300/50 lg:block"
+          />
+
+          <div className="relative grid grid-cols-2 gap-3 p-3 sm:gap-5 sm:p-5 lg:grid-cols-4">
+            {kpiData.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="flex flex-col items-center rounded-2xl border border-sky-100/70 bg-white px-3 py-5 text-center shadow-[0_0_22px_rgba(37,99,235,0.14)] transition-shadow duration-300 hover:shadow-[0_0_30px_rgba(37,99,235,0.28)] sm:py-7"
+                >
+                  <div
+                    className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md sm:h-14 sm:w-14 sm:rounded-2xl ${item.color}`}
+                  >
+                    <Icon size={24} />
+                  </div>
+                  <h3 className="text-xl font-extrabold text-slate-900 sm:text-3xl">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-600 sm:text-sm">
+                    {item.subtitle}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

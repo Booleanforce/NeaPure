@@ -22,7 +22,9 @@ export default function ProductsPage() {
     ? (Array.isArray(categoriesData) ? categoriesData : categoriesData.results)
     : [];
     
-  const products = productsData?.results || [];
+const products = Array.isArray(productsData)
+  ? productsData
+  : productsData?.results || [];
 
   const filtered =
     active === "all"
