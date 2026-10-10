@@ -11,6 +11,44 @@ interface Props {
   onViewDetails: (slug: string) => void;
 }
 
+/**
+ * key_features string ba array jai ashuk, shobshomoy string[] return kore.
+ * - Array hole: shoja map kore nei
+ * - JSON string hole ('["a","b"]'): parse kori
+ * - Normal string hole: new line diye alada kori
+ */
+function parseFeatures(value: unknown): string[] {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v).trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    const text = value.trim();
+    if (!text) return [];
+
+    if (text.startsWith("[")) {
+      try {
+        const parsed: unknown = JSON.parse(text);
+        if (Array.isArray(parsed)) {
+          return parsed.map((v) => String(v).trim()).filter(Boolean);
+        }
+      } catch {
+        // JSON na hole niche normal string hishabe handle hobe
+      }
+    }
+
+    // Jodi comma diye alada thake tahole "\n" er jaygay "," dao
+    return text
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
 export default function ProductCard({ product, onViewDetails }: Props) {
   const dispatch = useDispatch();
 
@@ -19,7 +57,7 @@ export default function ProductCard({ product, onViewDetails }: Props) {
     product.images?.[0]?.image_url ||
     "/images/kit.png";
 
-  const features = (product.key_features ?? []).slice(0, 5);
+  const features: string[] = parseFeatures(product.key_features).slice(0, 5);
 
   const handleAddToCart = () => {
     dispatch(
